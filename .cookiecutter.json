@@ -1,0 +1,15 @@
+{
+    "_copy_without_render": [
+        "*.github"
+    ],
+    "_template": "https://github.com/MartinBernstorff/swift-python-cookiecutter",
+    "author": "Kenneth Enevoldsen",
+    "copyright_year": "2023",
+    "email": "kennethcenevoldsen@gmail.com",
+    "friendly_name": "SNP Transformer",
+    "github_user": "KennethEnevoldsen",
+    "license": "MIT",
+    "package_name": "snp_transformer",
+    "project_name": "snp-transformer",
+    "version": "0.0.0"
+}
