@@ -1,4 +1,4 @@
-<a href="https://github.com/KennethEnevoldsen/snp-transformer"><img src="https://github.com/KennethEnevoldsen/snp-transformer/blob/main/docs/_static/icon.png?raw=true" width="100" align="right"/></a>
+<a href="https://github.com/KennethEnevoldsen/snp-transformer"><img src="https://github.com/KennethEnevoldsen/snp-transformer/blob/main/docs/_static/icon.png?raw=true" width="300" align="right"/></a>
 
 # SNP Transformer
 
