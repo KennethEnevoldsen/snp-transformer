@@ -3,6 +3,8 @@ requires = ["setuptools>=61.0.0", "wheel", "setuptools_scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
+
+
 name = "snp-transformer"
 version = "0.0.0"
 authors = [
@@ -132,10 +134,9 @@ max-complexity = 10
 
 [tool.semantic_release]
 branch = "main"
-version_variable = ["pyproject.toml:version"]
-upload_to_pypi = false
-upload_to_release = false
+version_toml = ["pyproject.toml:project.version"]
 build_command = "python -m pip install build; python -m build"
+
 
 [tool.setuptools]
 include-package-data = true
