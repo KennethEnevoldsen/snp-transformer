@@ -2,6 +2,17 @@
 
 
 
+## v0.0.2 (2023-08-13)
+
+### Fix
+
+* fix: Added some initial structure to the project ([`195bfc9`](https://github.com/KennethEnevoldsen/snp-transformer/commit/195bfc99b8e27c56f5489fa3588664522fe0ffc1))
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/KennethEnevoldsen/snp-transformer ([`76c3580`](https://github.com/KennethEnevoldsen/snp-transformer/commit/76c3580c49b944d0a4d0ae5e036d43a911d8bb2a))
+
+
 ## v0.0.1 (2023-08-13)
 
 ### Build
