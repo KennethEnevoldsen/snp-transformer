@@ -19,7 +19,12 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
 ]
 requires-python = ">=3.9"
-dependencies = ["pydantic>=2.0.0", "torch>=2.0.0"]
+dependencies = [
+  "pydantic>=2.1.1", 
+  "torch>=2.0.1", 
+  "confection>=0.1.1", 
+  "wandb>=0.15.8",
+]
 
 [project.license]
 file = "LICENSE"
