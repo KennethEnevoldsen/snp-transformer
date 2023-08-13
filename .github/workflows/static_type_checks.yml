@@ -23,6 +23,8 @@ jobs:
         python-version: ["3.9"]
     steps:
       - uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.PAT }}
 
       - name: Cache tox
         uses: actions/cache@v3.2.6
