@@ -4,7 +4,6 @@
 
 [![PyPI](https://img.shields.io/pypi/v/snp-transformer.svg)][pypi status]
 [![Python Version](https://img.shields.io/pypi/pyversions/snp-transformer)][pypi status]
-[![documentation](https://github.com/KennethEnevoldsen/snp-transformer/actions/workflows/documentation.yml/badge.svg)][documentation]
 [![Tests](https://github.com/KennethEnevoldsen/snp-transformer/actions/workflows/tests.yml/badge.svg)][tests]
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)][black]
 
