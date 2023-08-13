@@ -42,8 +42,8 @@ class SNPEmbedding(nn.Module):
         """
         x = self.snp_embedding(snp.values)
         x = x + self.chromosome_embedding(snp.chromosomes)
-        x = x + self.positional_encoding(snp.positions)
+        x = x + self.positional_encoding(snp.positions) # type: ignore
 
-        x = self.dropout(x)
-        x = self.layer_norm(x)
+        x = self.dropout(x) # type: ignore
+        x = self.layer_norm(x) # type: ignore
         return x
