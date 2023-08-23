@@ -16,7 +16,6 @@
 <!-- start short-description -->
 
 Transformer encoders for genetic SNPs
-    
 
 <!-- end short-description -->
 
