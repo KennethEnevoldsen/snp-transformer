@@ -8,7 +8,6 @@
 
 # Introduction
 
-<!-- 
 - Multiple application seeks to represent the genetic predisposition of an individual 
 - It is common to construct a polygenic risk score (PRS) from a set of genetic variants
   - A single value that represents the genetic predisposition of an individual
@@ -27,13 +26,14 @@
     - These models are notably intended for tasks such as regulatory element classification or chromatin profiling which does not require whole genome context
     - However, the genetic predisposition of an individual is a whole genome context problem 
 - Our Solution:
-  - We propose a transformer model that can represent the genetic predisposition of an individual using only genetic variants
+  - We propose a transformer model that can represent the genetic predisposition of an individual using only minor alleles
     - In classical GWAS it is common to use SNPs as a proxy for the genetic predisposition of an individual, where you don't represent the whole genome, but only the SNPs
     - However these classical methods require a consistent input length and this the individual x SNP matrix is often sparsely populated (majority of SNP is only a variant for a small subset of the population)
     - This has limited classical methods to mainly linear model (although deep learning approaches exist (Arnor's paper))
     - Transformers are able to handle variable length input and thus can remove the sparse input problem by only representing the variants that are relevant for the given individual
     - This reduction allow for more complex modelling and thus a more complex representation of the genetic predisposition
- -->
+  - For example, exome data contains approximately 20M SNPs, and so conventional methods would have to deal with matrices containing n x 20M elements, where n is the number of individuals. By contrast, a sparse encoding considers only elements with non-zero value. As the average frequence of exome SNPs is less than 5%, sparse encodes need only consider matrices with fewer than n x 1M elements.
+
 
 
 # Methods
