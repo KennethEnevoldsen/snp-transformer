@@ -17,4 +17,3 @@ def train(
     """
     The main training function
     """
-    pass
