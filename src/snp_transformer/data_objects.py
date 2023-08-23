@@ -1,4 +1,3 @@
-
 from pydantic import BaseModel, Field
 
 
@@ -9,10 +8,12 @@ class SNPs(BaseModel):
 
     values: list[int] = Field(..., description="List of SNPs")
     chromosomes: list[str] = Field(
-        ..., description="List of chromosome ids corresponding to the SNPs",
+        ...,
+        description="List of chromosome ids corresponding to the SNPs",
     )
     positions: list[int] = Field(
-        ..., description="List of positions corresponding to the SNPs",
+        ...,
+        description="List of positions corresponding to the SNPs",
     )
     gene: list[str] = Field(..., description="List of genes corresponding to the SNPs")
 
@@ -24,5 +25,6 @@ class Individual:
 
     genotype: SNPs = Field(..., description="Genotype of the individual")
     phenotype: dict[str, float] = Field(
-        ..., description="Phenotype of the individual and their value",
+        ...,
+        description="Phenotype of the individual and their value",
     )
