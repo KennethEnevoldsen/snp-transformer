@@ -10,7 +10,7 @@ def snps(sparse: pd.DataFrame, details: pd.DataFrame) -> SNPs:
 
     snp_values = ind1["Value"].values
     snp_indices = ind1["SNP"].values
-    snp_details = details.iloc[snp_indices]
+    snp_details = details.iloc[snp_indices]  # type: ignore
     snps = SNPs(
         values=list(snp_values),
         chromosomes=snp_details["chr"].values,
@@ -22,6 +22,7 @@ def snps(sparse: pd.DataFrame, details: pd.DataFrame) -> SNPs:
         exome=snp_details["exome"].values,
     )
     return snps
+
 
 
 def test_individuals(fam: pd.DataFrame, snps: SNPs, iid: str = "1"):

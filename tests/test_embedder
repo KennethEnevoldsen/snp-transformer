@@ -1,0 +1,29 @@
+import pytest
+import torch
+
+from snp_transformer.embedder import Embedder, SNPEmbedding
+
+
+@pytest.mark.parametrize(
+    "embedding_module, embedding_kwargs",
+    [SNPEmbedding, dict(d_model=384, dropout_prob=0.1, max_sequence_length=128)],
+)
+def test_embeddding(individuals: list, embedding_module: Embedder, embedding_kwargs: dict):
+    """
+    Test embedding interface
+    """
+    embedding_module = embedding_module(**embedding_kwargs)  # type: ignore
+
+    embedding_module.fit(individuals)
+
+    inputs_ids = embedding_module.collate_fn(individuals)
+
+    assert isinstance(inputs_ids, dict)
+    assert isinstance(inputs_ids["snp"], torch.Tensor)
+    assert isinstance(inputs_ids["is_padding"], torch.Tensor)
+
+    # forward
+    outputs = embedding_module(inputs_ids)
+
+    assert isinstance(outputs["embeddings"], torch.Tensor)
+    assert isinstance(outputs["is_padding"], torch.Tensor)
