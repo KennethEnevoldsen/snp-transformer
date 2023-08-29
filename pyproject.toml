@@ -15,15 +15,17 @@ classifiers = [
   "Operating System :: POSIX :: Linux",
   "Operating System :: MacOS :: MacOS X",
   "Operating System :: Microsoft :: Windows",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
-  "pydantic>=2.1.1", 
-  "torch>=2.0.1", 
-  "confection>=0.1.1", 
+  "pydantic>=2.1.1",
+  "torch>=2.0.1",
+  "confection>=0.1.1",
   "wandb>=0.15.8",
+  "datasets>=2.14.4",
+
 ]
 
 [project.license]
@@ -38,6 +40,7 @@ dev = [
   "ruff>=0.0.254",
   "black[jupyter]>=22.8.0",
   "invoke>=2.2.0",
+  "bed-reader>=0.2.36",
 ]
 tests = [
   "pytest>=7.1.3",
