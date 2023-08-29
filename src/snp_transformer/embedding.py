@@ -8,7 +8,7 @@ from torch.nn.utils.rnn import pad_sequence
 from snp_transformer.data_objects import Individual
 
 
-class Embedder(Protocol):
+class Embedding(Protocol):
     """
     Interface for embedding modules
     """
