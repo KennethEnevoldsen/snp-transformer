@@ -2,6 +2,57 @@
 
 
 
+## v0.0.3 (2023-08-29)
+
+### Chore
+
+* chore: remove unused test ([`0c45166`](https://github.com/KennethEnevoldsen/snp-transformer/commit/0c45166608e568ad629ac459ff3af3872047a658))
+
+### Ci
+
+* ci: fixed tox + static type checking ([`3ae7413`](https://github.com/KennethEnevoldsen/snp-transformer/commit/3ae74130ef603c02007b4afaeb7292d586814356))
+
+* ci: change test to &gt;3.10 ([`c03760b`](https://github.com/KennethEnevoldsen/snp-transformer/commit/c03760b3b3708da0f5887c4e47e785d035d99f30))
+
+* ci: fix dependencies ([`0f5fbe9`](https://github.com/KennethEnevoldsen/snp-transformer/commit/0f5fbe9146f055abe79c2119953b4356050257e2))
+
+* ci: fix syntax error ([`2b37d45`](https://github.com/KennethEnevoldsen/snp-transformer/commit/2b37d452b50b58811a17c048b5701ac2fa6306b3))
+
+* ci: Add token to static type check ([`f48fef6`](https://github.com/KennethEnevoldsen/snp-transformer/commit/f48fef694f7a8b566fafd14cb51e2e2c417fbc1d))
+
+### Documentation
+
+* docs: minimal updated to docs ([`05eb82c`](https://github.com/KennethEnevoldsen/snp-transformer/commit/05eb82c609e6c41215292fe55281b9a73c263578))
+
+* docs: fixed badges ([`478ddb1`](https://github.com/KennethEnevoldsen/snp-transformer/commit/478ddb158ee53acaa2725e1d0ee5a40f98a84a19))
+
+### Fix
+
+* fix: ran pre-commit hooks ([`b6b7dc5`](https://github.com/KennethEnevoldsen/snp-transformer/commit/b6b7dc5f8c91af77adba3d1e32ee32a4128f8f3a))
+
+* fix: Got a working dataset along with data structures ([`e4df237`](https://github.com/KennethEnevoldsen/snp-transformer/commit/e4df2374ab017b1d4f76475a13ff770d2576d214))
+
+* fix: cruft update ([`d1cb893`](https://github.com/KennethEnevoldsen/snp-transformer/commit/d1cb8936827867497bac5f5ede66ffe00900b320))
+
+### Unknown
+
+* tests: Updated test to use conftest ([`f028a7c`](https://github.com/KennethEnevoldsen/snp-transformer/commit/f028a7ce3c8b7be4f7b596de5a61e61c3967fa8a))
+
+* Merge branch &#39;add-data-structures&#39; ([`8396b6e`](https://github.com/KennethEnevoldsen/snp-transformer/commit/8396b6ed763474a673f77b27a8f1eece3277f0f6))
+
+* Merge pull request #3 from KennethEnevoldsen/paper_outline
+
+Added paper outline ([`0f9dcc3`](https://github.com/KennethEnevoldsen/snp-transformer/commit/0f9dcc392828c9adb2a783ccf367fc9a616d385b))
+
+* paper: Updated based on comments from @dougspeed ([`826bdfc`](https://github.com/KennethEnevoldsen/snp-transformer/commit/826bdfc1471c43e528d0111393fc9ddfd952f4a8))
+
+* initial data structures ([`693232c`](https://github.com/KennethEnevoldsen/snp-transformer/commit/693232ce731f23d1e168caee3756d4c0cabd876c))
+
+* Merge branch &#39;main&#39; of https://github.com/KennethEnevoldsen/snp-transformer ([`3de7a88`](https://github.com/KennethEnevoldsen/snp-transformer/commit/3de7a8825aaa7fb90caa103e14fa7e1a050ffb2f))
+
+* fixed static type check ([`351384c`](https://github.com/KennethEnevoldsen/snp-transformer/commit/351384c37f3d7134b3dd05cf63408f665fcde281))
+
+
 ## v0.0.2 (2023-08-13)
 
 ### Fix
@@ -28,6 +79,8 @@
 * ci: removed docs workflow ([`b8d0560`](https://github.com/KennethEnevoldsen/snp-transformer/commit/b8d0560809e22c33d16575092cc56debcd733aca))
 
 ### Documentation
+
+* docs: added paper outline ([`a0de7e6`](https://github.com/KennethEnevoldsen/snp-transformer/commit/a0de7e654db886bfe9a0b4d195adef7beaf52719))
 
 * docs: updated docs ([`69a4222`](https://github.com/KennethEnevoldsen/snp-transformer/commit/69a42220e40db6a87f50f5b6cf9ef8027393a4d3))
 
