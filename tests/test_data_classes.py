@@ -24,7 +24,6 @@ def snps(sparse: pd.DataFrame, details: pd.DataFrame) -> SNPs:
     return snps
 
 
-
 def test_individuals(fam: pd.DataFrame, snps: SNPs, iid: str = "1"):
     iid = "1"
     ind_fam = fam.loc[iid]
