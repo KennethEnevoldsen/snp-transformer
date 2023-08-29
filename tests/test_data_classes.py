@@ -10,7 +10,7 @@ def snps(sparse: pd.DataFrame, details: pd.DataFrame) -> SNPs:
 
     snp_values = ind1["Value"].values
     snp_indices = ind1["SNP"].values
-    snp_details = details.iloc[snp_indices]
+    snp_details = details.iloc[snp_indices]  # type: ignore
     snps = SNPs(
         values=list(snp_values),
         chromosomes=snp_details["chr"].values,
@@ -45,13 +45,17 @@ def test_individuals(fam: pd.DataFrame, snps: SNPs, iid: str = "1"):
     assert len(individual) == len(individual.snps)
 
 
-def test_snps(fam: pd.DataFrame, sparse: pd.DataFrame, details: pd.DataFrame):
+def test_snps(
+    fam: pd.DataFrame,
+    sparse: pd.DataFrame,
+    details: pd.DataFrame,
+):
     iid = "1"
     ind1 = sparse[sparse["Individual"] == iid]
 
     snp_values = ind1["Value"].values
     snp_indices = ind1["SNP"].values
-    snp_details = details.iloc[snp_indices]
+    snp_details = details.iloc[snp_indices]  # type: ignore
     ind_fam = fam.loc[iid]
     ind_fam.sex
     snps = SNPs(
