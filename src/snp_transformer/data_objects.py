@@ -1,5 +1,3 @@
-from typing import Dict, List
-
 import pandas as pd
 from pydantic import BaseModel, Field
 
@@ -9,19 +7,20 @@ class SNPs(BaseModel):
     The single nucleotide polymorphisms (SNPs) of an individual.
     """
 
-    values: List[int] = Field(..., description="List of SNP values")
-    chromosomes: List[str] = Field(
-        ..., description="Chromosome ids corresponding to the SNPs"
+    values: list[int] = Field(..., description="List of SNP values")
+    chromosomes: list[str] = Field(
+        ...,
+        description="Chromosome ids corresponding to the SNPs",
     )
-    cm: List[float] = Field(..., description="Genetic distances in centimorgans")
-    bp: List[int] = Field(..., description="Base pair coordinates")
-    a1: List[str] = Field(..., description="Allele 1")
-    a2: List[str] = Field(..., description="Allele 2")
-    gene: List[str] = Field(..., description="gene name of the SNP")
-    exome: List[str] = Field(..., description="exome name of the SNP")
+    cm: list[float] = Field(..., description="Genetic distances in centimorgans")
+    bp: list[int] = Field(..., description="Base pair coordinates")
+    a1: list[str] = Field(..., description="Allele 1")
+    a2: list[str] = Field(..., description="Allele 2")
+    gene: list[str] = Field(..., description="gene name of the SNP")
+    exome: list[str] = Field(..., description="exome name of the SNP")
 
     def __repr_str__(self, join_str: str) -> str:
-        def string_rep(a, v) -> str:
+        def string_rep(a, v) -> str:  # type: ignore
             if isinstance(v, list):
                 # return the "a=[1, 2, ...]" representation with the first 2 elements
                 return f"{a}=[{v[0]}, {v[1]}, ...]"
@@ -45,11 +44,13 @@ class Individual(BaseModel):
     father: str = Field(..., description="Father id")
     mother: str = Field(..., description="Mother id")
     sex: int = Field(
-        ..., description="Sex code ('1' = male, '2' = female, '0' = unknown)"
+        ...,
+        description="Sex code ('1' = male, '2' = female, '0' = unknown)",
     )
 
-    phenotype: Dict[str, float] = Field(
-        ..., description="Phenotype of the individual and their value"
+    phenotype: dict[str, float] = Field(
+        ...,
+        description="Phenotype of the individual and their value",
     )
     snps: SNPs = Field(..., description="snps of the individual")
 
@@ -64,7 +65,7 @@ class Individual(BaseModel):
                 "father": self.father,
                 "mother": self.mother,
                 "sex": self.sex,
-            }
+            },
         )
         if include_phenotype is False:
             fam["phenotype"] = -9
@@ -93,7 +94,7 @@ class Individual(BaseModel):
                 "Individual": self.iid,
                 "SNP": snp_ids,
                 "Value": self.snps.values,
-            }
+            },
         )
         return sparse
 
@@ -120,7 +121,7 @@ class Individual(BaseModel):
                 "a2": self.snps.a2,
                 "gene": self.snps.gene,
                 "exome": self.snps.exome,
-            }
+            },
         )
         return details
 

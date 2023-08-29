@@ -30,6 +30,6 @@ G = read_plink1_bin(
 
 import numpy as np
 from bed_reader import open_bed
+
 bed = open_bed(str(data_path))
 val = bed.read(np.s_[1:, :3])
-

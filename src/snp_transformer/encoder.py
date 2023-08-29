@@ -21,7 +21,8 @@ class Encoder(nn.Module):
         self.snp_embedding_module = snp_embedding_module
 
         self.transformer_encoder = nn.TransformerEncoder(
-            encoder_layer, num_layers=num_layers
+            encoder_layer,
+            num_layers=num_layers,
         )
 
     def forward(self, individuals) -> torch.Tensor:

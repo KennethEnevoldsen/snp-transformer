@@ -1,20 +1,10 @@
+import pandas as pd
 import pytest
-
 from snp_transformer import Individual, SNPs
 
-from .utils import (  # also required to load fixtures of fixtures: https://stackoverflow.com/questions/47402435/pytest-fixture-of-fixture-not-found
-    details,
-    details_path,
-    fam,
-    fam_path,
-    sparse,
-    sparse_path,
-    test_data_folder,
-)
 
-
-@pytest.fixture
-def snps(sparse, details) -> SNPs:
+@pytest.fixture()
+def snps(sparse: pd.DataFrame, details: pd.DataFrame) -> SNPs:
     iid = "1"
     ind1 = sparse[sparse["Individual"] == iid]
 
@@ -34,7 +24,7 @@ def snps(sparse, details) -> SNPs:
     return snps
 
 
-def test_individuals(fam, snps: SNPs, iid: str = "1"):
+def test_individuals(fam: pd.DataFrame, snps: SNPs, iid: str = "1"):
     iid = "1"
     ind_fam = fam.loc[iid]
 
@@ -55,7 +45,7 @@ def test_individuals(fam, snps: SNPs, iid: str = "1"):
     assert len(individual) == len(individual.snps)
 
 
-def test_snps(fam, sparse, details):
+def test_snps(fam: pd.DataFrame, sparse: pd.DataFrame, details: pd.DataFrame):
     iid = "1"
     ind1 = sparse[sparse["Individual"] == iid]
 

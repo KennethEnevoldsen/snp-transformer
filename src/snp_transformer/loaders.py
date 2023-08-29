@@ -28,7 +28,7 @@ def load_fam(path: Path) -> pd.DataFrame:
             "phenotype": float,
         },
     )
-    fam.set_index("iid", inplace=True)
+    fam = fam.set_index("iid")
     return fam
 
 

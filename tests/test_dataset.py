@@ -1,9 +1,9 @@
+from pathlib import Path
+
 from snp_transformer import Individual, IndividualsDataset
 
-from .utils import test_data_folder
 
-
-def test_individuals_dataset(test_data_folder):
+def test_individuals_dataset(test_data_folder: Path):
     ind_dataset = IndividualsDataset(test_data_folder / "data")
 
     assert len(ind_dataset) == 3
