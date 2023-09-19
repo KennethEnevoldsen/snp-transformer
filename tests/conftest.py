@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+
 from snp_transformer import Individual, IndividualsDataset
 from snp_transformer.loaders import load_details, load_fam, load_sparse
 
@@ -11,6 +12,11 @@ def individuals(test_data_folder: Path) -> list[Individual]:
     ind_dataset = IndividualsDataset(test_data_folder / "data")
 
     return [ind_dataset[i] for i in range(len(ind_dataset))]
+
+
+@pytest.fixture()
+def training_dataset(test_data_folder: Path) -> IndividualsDataset:
+    return IndividualsDataset(test_data_folder / "data")
 
 
 @pytest.fixture()

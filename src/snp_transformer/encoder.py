@@ -5,13 +5,15 @@ A simple transformer encoder for SNPs.
 import torch
 from torch import nn
 
+from snp_transformer.data_objects import Individual
+from snp_transformer.embedders import Embedder
 
-class Encoder(nn.Module):
+
+class Model(nn.Module):
     def __init__(
         self,
-        snp_embedding_module: nn.Module,
-        encoder_layer=nn.Module,
-        num_layers: int = 6,
+        snp_embedding_module: Embedder,
+        encoder=nn.Module,
     ) -> None:
         # TODO add this assertion check to constructor!
         # assert (
@@ -19,28 +21,18 @@ class Encoder(nn.Module):
         # ), "Embedding dimensions must be equal"
 
         self.snp_embedding_module = snp_embedding_module
+        self.encoder = encoder
 
-        self.transformer_encoder = nn.TransformerEncoder(
-            encoder_layer,
-            num_layers=num_layers,
-        )
-
-    def forward(self, individuals) -> torch.Tensor:
+    def forward(self, individuals: list[Individual]) -> torch.Tensor:
         """
         Embed the SNPs
         """
-        batch_size = individuals.batch_size
-        max_seq_len = len(individuals)
 
-        x: torch.Tensor = self.snp_embedding_module(individuals.snps)
-        assert x.shape[:2] == (batch_size, max_seq_len), "Shape is incorrect"
-        embedding_shape = x.shape
+        inputs_ids: dict[
+            str, torch.Tensor
+        ] = self.snp_embedding_module.collate_individuals(individuals)
 
-        x = self.transformer_encoder(x)
-        assert x.shape == (
-            batch_size,
-            max_seq_len,
-            embedding_shape,
-        ), "Shape of contextualized embeddings is incorrect"
-
-        return x
+        embeddings = self.snp_embedding_module(inputs_ids)
+        padding_mask = inputs_ids["is_padding"]
+        contextualized = self.encoder(embeddings, src_key_padding_mask=padding_mask)
+        return contextualized
