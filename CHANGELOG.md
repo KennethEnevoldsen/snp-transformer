@@ -2,6 +2,23 @@
 
 
 
+## v0.0.4 (2023-08-29)
+
+### Fix
+
+* fix: refactor ([`1b47546`](https://github.com/KennethEnevoldsen/snp-transformer/commit/1b475460d3a4af13311c9c886c3f9eb7bacbed32))
+
+* fix: Added working test for the embedding module ([`d568eee`](https://github.com/KennethEnevoldsen/snp-transformer/commit/d568eee82937701412c3ef83b5578e14b454ff49))
+
+* fix: added embedding module ([`b6bbb22`](https://github.com/KennethEnevoldsen/snp-transformer/commit/b6bbb22d1f7b6bad32067121551bd3b4b5c312b0))
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/KennethEnevoldsen/snp-transformer ([`bed0bc7`](https://github.com/KennethEnevoldsen/snp-transformer/commit/bed0bc7813cfc38f02f5ecf6a4bc24c5b7e57a68))
+
+* Merge branch &#39;main&#39; into add-embedding-module ([`203beb9`](https://github.com/KennethEnevoldsen/snp-transformer/commit/203beb9fb9dd41df28db3d46aa9dad8c95ad78b8))
+
+
 ## v0.0.3 (2023-08-29)
 
 ### Chore
