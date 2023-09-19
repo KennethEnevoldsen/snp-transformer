@@ -56,13 +56,13 @@ class Embedder(Protocol):
     def __init__(self, *args: Any) -> None:
         ...
 
-    def forward(self, *args: Any) -> torch.Tensor:
+    def forward(self, *args: Any) -> dict[str, torch.Tensor]:
         ...
 
     def fit(self, individuals: list[Individual], *args: Any) -> None:
         ...
 
-    def __call__(self, *args: Any) -> torch.Tensor:
+    def __call__(self, *args: Any) -> dict[str, torch.Tensor]:
         ...
 
     def collate_individuals(self, individual: list[Individual]) -> InputIds:

@@ -24,6 +24,7 @@ dependencies = [
   "torch>=2.0.1",
   "confection>=0.1.1",
   "pandas>=2.0.3",
+  "lightning>=2.0.9",
   # "wandb>=0.15.8",
   # "datasets>=2.14.4",
 
@@ -42,6 +43,7 @@ dev = [
   "black[jupyter]>=22.8.0",
   "invoke>=2.2.0",
   "bed-reader>=0.2.36",
+
 ]
 tests = [
   "pytest>=7.1.3",

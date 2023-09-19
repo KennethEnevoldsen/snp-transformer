@@ -1,10 +1,14 @@
 from copy import copy
 from dataclasses import dataclass
+from typing import Callable
 
+import lightning.pytorch as pl
 import torch
+from lightning.pytorch.utilities.types import OptimizerLRScheduler
 from torch import nn
 
 from .embedders import Embedder, InputIds, Vocab
+from .registries import OptimizerFn
 
 
 @dataclass
@@ -13,16 +17,28 @@ class MaskingTargets:
     padding_idx: int
 
 
-class EncoderForMaskedLM(nn.Module):
+class EncoderForMaskedLM(pl.LightningModule):
     """A LM head wrapper for masked language modeling."""
 
     def __init__(
         self,
         embedding_module: Embedder,
         encoder_module: nn.TransformerEncoder,
+        create_optimizer_fn: OptimizerFn,
         domains_to_mask: list[str] | None = None,
     ):
         super().__init__()
+        self.initialize_model(embedding_module, encoder_module, domains_to_mask)
+
+        self.loss = nn.CrossEntropyLoss(ignore_index=-1)
+        self.create_optimizer_fn = create_optimizer_fn
+
+    def initialize_model(
+        self,
+        embedding_module: Embedder,
+        encoder_module: nn.TransformerEncoder,
+        domains_to_mask: list[str] | None = None,
+    ) -> None:
         self.embedding_module = embedding_module
         self.encoder_module = encoder_module
 
@@ -70,7 +86,11 @@ class EncoderForMaskedLM(nn.Module):
         # this assumed equal weighting of domains
         total_loss = torch.stack(list(domain_losses.values())).sum()
 
-        return {"logits": logits, "loss": total_loss, "domain_losses": domain_losses}
+        return {
+            "logits": logits,
+            "Training loss": total_loss,
+            "Domain Training Losses": domain_losses,
+        }
 
     def mask(
         self,
@@ -143,3 +163,18 @@ class EncoderForMaskedLM(nn.Module):
         padded_sequence_ids = self.embedding_module.collate_individuals(individuals)
         masked_sequence_ids, masked_labels = self.masking_fn(padded_sequence_ids)
         return masked_sequence_ids, masked_labels
+
+    def training_step(self, batch, batch_idx):
+        x, y = batch
+        output = self.forward(x, y)
+        self.log_training_step(output)
+        return output["Training loss"]
+
+    def log_training_step(self, output) -> None:
+        dom_train_losses = output.pop("Domain Training Losses")
+        for domain in dom_train_losses:
+            self.log(f"Training Loss ({domain})", dom_train_losses[domain])
+        self.log("Training Loss", output["Training loss"])
+
+    def configure_optimizers(self) -> torch.optim.Optimizer:
+        return self.create_optimizer_fn(self.parameters())

@@ -1,10 +1,13 @@
 from pathlib import Path
+from typing import Any, Callable
 
 import pandas as pd
 import pytest
+import torch
 
 from snp_transformer import Individual, IndividualsDataset
 from snp_transformer.loaders import load_details, load_fam, load_sparse
+from snp_transformer.optimizers import create_adam
 
 
 @pytest.fixture()
@@ -52,3 +55,8 @@ def fam(fam_path: Path) -> pd.DataFrame:
 @pytest.fixture()
 def sparse(sparse_path: Path) -> pd.DataFrame:
     return load_sparse(sparse_path)
+
+
+@pytest.fixture()
+def optimizer_fn() -> Callable[[Any], torch.optim.Optimizer]:
+    return create_adam(learning_rate=1e-3)
