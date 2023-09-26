@@ -25,9 +25,7 @@ dependencies = [
   "confection>=0.1.1",
   "pandas>=2.0.3",
   "lightning>=2.0.9",
-  # "wandb>=0.15.8",
-  # "datasets>=2.14.4",
-
+  "wandb>=0.15.8",
 ]
 
 [project.license]
