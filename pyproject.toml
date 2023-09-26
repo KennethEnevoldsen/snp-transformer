@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 
 name = "snp-transformer"
-version = "0.0.5"
+version = "0.0.6"
 authors = [
   { name = "Kenneth Enevoldsen", email = "kennethcenevoldsen@gmail.com" },
 ]
@@ -14,7 +14,6 @@ description = "SNP Transformer"
 classifiers = [
   "Operating System :: POSIX :: Linux",
   "Operating System :: MacOS :: MacOS X",
-  "Operating System :: Microsoft :: Windows",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
 ]
@@ -25,9 +24,7 @@ dependencies = [
   "confection>=0.1.1",
   "pandas>=2.0.3",
   "lightning>=2.0.9",
-  # "wandb>=0.15.8",
-  # "datasets>=2.14.4",
-
+  "wandb>=0.15.8",
 ]
 
 [project.license]

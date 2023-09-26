@@ -23,7 +23,8 @@ def training_dataset(test_data_folder: Path) -> IndividualsDataset:
 
 @pytest.fixture()
 def test_data_folder() -> Path:
-    return Path("tests/data/")
+    test_folder = Path(__file__).parent
+    return test_folder / "data"
 
 
 @pytest.fixture()

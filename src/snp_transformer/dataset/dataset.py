@@ -19,9 +19,10 @@ class IndividualsDataset(Dataset):
         self.details_path = path.with_suffix(".details")
 
         # ensure that they all exist
-        assert self.fam_path.exists()
-        assert self.sparse_path.exists()
-        assert self.details_path.exists()
+        error = f"does not exist in {path}, the following files exist: {list(path.glob('*'))}"
+        assert self.fam_path.exists(), f"{self.fam_path} {error}"
+        assert self.sparse_path.exists(), f"{self.sparse_path} {error}"
+        assert self.details_path.exists(), f"{self.details_path} {error}"
 
         self.fam = load_fam(self.fam_path)
         self.snp_details = load_details(self.details_path)
