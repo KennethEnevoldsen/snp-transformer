@@ -8,9 +8,8 @@ from torch import nn
 
 from snp_transformer.data_objects import Individual
 
-from .embedders import Embedder, InputIds, Vocab
 from ..registry import OptimizerFn, Registry
-
+from .embedders import Embedder, InputIds, Vocab
 
 
 @dataclass
@@ -183,7 +182,7 @@ class EncoderForMaskedLM(TrainableModule):
         return masked_sequence_ids, masked_labels
 
     def training_step(
-        self, batch, batch_idx: int
+        self, batch: tuple[InputIds, MaskingTargets], batch_idx: int
     ) -> torch.Tensor | dict[str, torch.Tensor]:
         x, y = batch
         output = self.forward(x, y)
@@ -195,6 +194,20 @@ class EncoderForMaskedLM(TrainableModule):
         for domain in dom_train_losses:
             self.log(f"Training Loss ({domain})", dom_train_losses[domain])
         self.log("Training Loss", output["Training loss"])
+
+    def validation_step(
+        self, batch: tuple[InputIds, MaskingTargets], batch_idx: int
+    ) -> torch.Tensor | dict[str, torch.Tensor]:
+        x, y = batch
+        output = self.forward(x, y)
+        self.log_validation_step(output)
+        return output["Training loss"]
+
+    def log_validation_step(self, output) -> None:
+        dom_train_losses = output.pop("Domain Training Losses")
+        for domain in dom_train_losses:
+            self.log(f"Validation Loss ({domain})", dom_train_losses[domain])
+        self.log("Validation Loss", output["Training loss"])
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
         return self.create_optimizer_fn(self.parameters())
