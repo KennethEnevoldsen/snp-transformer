@@ -1,7 +1,7 @@
 from snp_transformer import IndividualsDataset
 from snp_transformer.model.embedders import SNPEmbedder
-from snp_transformer.registry import OptimizerFn
 from snp_transformer.model.task_modules import EncoderForMaskedLM
+from snp_transformer.registry import OptimizerFn
 from torch import nn
 from torch.utils.data import DataLoader
 
@@ -32,7 +32,10 @@ def test_model(
 
     # create dataloader:
     dataloader = DataLoader(
-        training_dataset, batch_size=32, shuffle=True, collate_fn=mdl.collate_fn,
+        training_dataset,
+        batch_size=32,
+        shuffle=True,
+        collate_fn=mdl.collate_fn,
     )
 
     # run model:

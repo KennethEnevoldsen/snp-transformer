@@ -10,7 +10,9 @@ from snp_transformer.model.embedders import Embedder, InputIds, SNPEmbedder
     [(SNPEmbedder, {"d_model": 32, "dropout_prob": 0.1, "max_sequence_length": 128})],
 )
 def test_embeddding(
-    individuals: list, embedding_module: Embedder, embedding_kwargs: dict,
+    individuals: list,
+    embedding_module: Embedder,
+    embedding_kwargs: dict,
 ):
     """
     Test embedding interface

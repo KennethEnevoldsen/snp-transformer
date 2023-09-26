@@ -1,5 +1,6 @@
+from collections.abc import MutableMapping
 from pathlib import Path
-from typing import Any, Dict, List, MutableMapping, Tuple, Union
+from typing import Any, Union
 
 from confection import Config
 
@@ -22,10 +23,10 @@ def parse_config(config: Config) -> ResolvedConfigSchema:
 
 
 def flatten_nested_dict(
-    d: Union[Dict, MutableMapping],
+    d: Union[dict, MutableMapping],
     parent_key: str = "",
     sep: str = ".",
-) -> Dict:
+) -> dict:
     """Recursively flatten an infinitely nested config. E.g. {"level1":
 
     {"level2": "level3": {"level4": 5}}}} becomes:
@@ -42,7 +43,7 @@ def flatten_nested_dict(
         Dict: The flattened dict.
     """
 
-    items: List[Tuple[str, Any]] = []
+    items: list[tuple[str, Any]] = []
     for k, v in d.items():
         new_key = parent_key + sep + k if parent_key else k
         if isinstance(v, MutableMapping):

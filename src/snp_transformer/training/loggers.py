@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import Optional
 
 from lightning.pytorch.loggers.wandb import WandbLogger
-
 from snp_transformer.registry import Registry
 
 
@@ -12,8 +11,8 @@ def create_wandb_logger(
     save_dir: Path | str = ".",
     version: Optional[str] = None,
     offline: bool = False,
-    dir: Optional[Path] = None,
-    id: Optional[str] = None,
+    dir: Optional[Path] = None,  # noqa: A002
+    id: Optional[str] = None,  # noqa: A002
     anonymous: Optional[bool] = None,
     project: Optional[str] = None,
     prefix: str = "",

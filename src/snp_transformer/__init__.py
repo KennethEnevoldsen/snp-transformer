@@ -5,7 +5,9 @@ from snp_transformer.model.model_layers import create_encoder_layer  # noqa: F40
 from snp_transformer.model.model_layers import create_transformers_encoder  # noqa: F401
 from snp_transformer.model.optimizers import create_adam  # noqa: F401
 from snp_transformer.registry import Registry
-from snp_transformer.model.task_modules import create_encoder_for_masked_lm  # noqa: F401
+from snp_transformer.model.task_modules import (
+    create_encoder_for_masked_lm,
+)  # noqa: F401
 
 from .data_objects import Individual, SNPs
 from .dataset.dataset import IndividualsDataset

@@ -20,7 +20,7 @@ class SNPs(BaseModel):
     exome: list[str] = Field(..., description="exome name of the SNP")
 
     def __repr_str__(self, join_str: str) -> str:
-        def string_rep(a, v) -> str:  # type: ignore
+        def string_rep(a, v) -> str:  # type: ignore  # noqa
             if isinstance(v, list):
                 # return the "a=[1, 2, ...]" representation with the first 2 elements
                 return f"{a}=[{v[0]}, {v[1]}, ...]"

@@ -1,6 +1,5 @@
-from torch import nn
-
 from snp_transformer.registry import Registry
+from torch import nn
 
 
 @Registry.layers.register("transformer_encoder_layer")
@@ -10,7 +9,7 @@ def create_encoder_layer(
     dim_feedforward: int,
     layer_norm_eps: float = 1e-12,
     norm_first: bool = True,
-):
+) -> nn.TransformerEncoderLayer:
     return nn.TransformerEncoderLayer(
         d_model=d_model,
         nhead=nhead,

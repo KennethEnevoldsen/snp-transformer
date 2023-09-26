@@ -4,9 +4,8 @@ from dataclasses import dataclass
 
 import lightning.pytorch as pl
 import torch
-from torch import nn
-
 from snp_transformer.data_objects import Individual
+from torch import nn
 
 from ..registry import OptimizerFn, Registry
 from .embedders import Embedder, InputIds, Vocab
@@ -182,28 +181,32 @@ class EncoderForMaskedLM(TrainableModule):
         return masked_sequence_ids, masked_labels
 
     def training_step(
-        self, batch: tuple[InputIds, MaskingTargets], batch_idx: int
+        self,
+        batch: tuple[InputIds, MaskingTargets],
+        batch_idx: int,  # noqa: ARG002
     ) -> torch.Tensor | dict[str, torch.Tensor]:
         x, y = batch
         output = self.forward(x, y)
         self.log_training_step(output)
         return output["Training loss"]
 
-    def log_training_step(self, output) -> None:
+    def log_training_step(self, output: dict) -> None:
         dom_train_losses = output.pop("Domain Training Losses")
         for domain in dom_train_losses:
             self.log(f"Training Loss ({domain})", dom_train_losses[domain])
         self.log("Training Loss", output["Training loss"])
 
     def validation_step(
-        self, batch: tuple[InputIds, MaskingTargets], batch_idx: int
+        self,
+        batch: tuple[InputIds, MaskingTargets],
+        batch_idx: int,  # noqa: ARG002
     ) -> torch.Tensor | dict[str, torch.Tensor]:
         x, y = batch
         output = self.forward(x, y)
         self.log_validation_step(output)
         return output["Training loss"]
 
-    def log_validation_step(self, output) -> None:
+    def log_validation_step(self, output: dict) -> None:
         dom_train_losses = output.pop("Domain Training Losses")
         for domain in dom_train_losses:
             self.log(f"Validation Loss ({domain})", dom_train_losses[domain])

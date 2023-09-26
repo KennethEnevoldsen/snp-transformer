@@ -5,11 +5,10 @@ from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
 
 import torch
-from torch import nn
-from torch.nn.utils.rnn import pad_sequence
-
 from snp_transformer.data_objects import Individual
 from snp_transformer.registry import Registry
+from torch import nn
+from torch.nn.utils.rnn import pad_sequence
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +60,7 @@ class Vocab:
         }
 
     @classmethod
-    def from_dict(cls, vocab_dict: dict[str, Any]) -> "Vocab":
+    def from_dict(cls: type["Vocab"], vocab_dict: dict[str, Any]) -> "Vocab":
         return cls(**vocab_dict)
 
 
@@ -195,17 +194,25 @@ class SNPEmbedder(nn.Module, Embedder):
         for domain in self.vocab.domains:
             pad_idx = self.vocab.get_padding_idx(domain)
             padded_sequences[domain] = pad_sequence(
-                [p[domain] for p in sequences], batch_first=True, padding_value=pad_idx
+                [p[domain] for p in sequences],
+                batch_first=True,
+                padding_value=pad_idx,
             )
 
         key = "is_padding"
         padded_sequences[key] = padded_sequences[key] = pad_sequence(
-            [p[key] for p in sequences], batch_first=True, padding_value=True
+            [p[key] for p in sequences],
+            batch_first=True,
+            padding_value=True,
         )
 
         return padded_sequences
 
-    def fit(self, individuals: list[Individual], add_mask_token: bool = True):
+    def fit(
+        self,
+        individuals: list[Individual],  # noqa: ARG002
+        add_mask_token: bool = True,
+    ) -> None:
         # could also be estimated from the data but there is no need for that
         # and this ensure that 1 and 2 is masked as one would expect
         snp2idx = {"0": 0, "1": 1, "2": 2, "PAD": 3}
@@ -229,28 +236,28 @@ class SNPEmbedder(nn.Module, Embedder):
         }
 
         config_path = save_dir / "embedder_config.json"
-        with open(config_path, "w") as fp:
+        with config_path.open("w") as fp:
             json.dump(kwargs, fp)
 
         vocab_path = save_dir / "vocab.json"
-        with open(vocab_path, "w") as fp:
+        with vocab_path.open("w") as fp:
             json.dump(self.vocab.to_dict(), fp)
 
         torch.save(self.state_dict(), save_dir / "embedder.pt")
 
     @classmethod
-    def from_disk(cls, save_dir: Path) -> "SNPEmbedder":
+    def from_disk(cls: type["SNPEmbedder"], save_dir: Path) -> "SNPEmbedder":
         """
         Load the (trained) embedding from disk
         """
         assert save_dir.is_dir()
 
         config_path = save_dir / "embedder_config.json"
-        with open(config_path, "r") as fp:
+        with config_path.open() as fp:
             kwargs = json.load(fp)
 
         vocab_path = save_dir / "vocab.json"
-        with open(vocab_path, "r") as fp:
+        with vocab_path.open() as fp:
             vocab_dict = json.load(fp)
 
         vocab = Vocab.from_dict(vocab_dict)
@@ -288,7 +295,7 @@ def create_snp_embedder(
             logger.info(f"Loaded embedder from {checkpoint_path}")
             return emb
         logger.warn(
-            "Embedder kwargs do not match checkpoint kwargs, ignoring checkpoint"
+            "Embedder kwargs do not match checkpoint kwargs, ignoring checkpoint",
         )
 
     emb = SNPEmbedder(
