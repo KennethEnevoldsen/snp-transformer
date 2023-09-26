@@ -2,6 +2,19 @@
 
 
 
+## v0.0.5 (2023-09-19)
+
+### Fix
+
+* fix: Added working model ([`41fe4c9`](https://github.com/KennethEnevoldsen/snp-transformer/commit/41fe4c91ed43e9256f663a916f9c7f2c2687036a))
+
+### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/KennethEnevoldsen/snp-transformer ([`4242b31`](https://github.com/KennethEnevoldsen/snp-transformer/commit/4242b317c66383cc9598e4f320acd5e778ac33de))
+
+* Changed task modules to ligthning ([`2065cb3`](https://github.com/KennethEnevoldsen/snp-transformer/commit/2065cb39e3e7474d68bbe3c083eaafa838a44cd0))
+
+
 ## v0.0.4 (2023-08-29)
 
 ### Fix
