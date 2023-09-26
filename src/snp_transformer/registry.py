@@ -14,5 +14,4 @@ class Registry(registry):
     datasets = catalogue.create("snp_transformers", "datasets")
     tasks = catalogue.create("snp_transformers", "encoders")
     layers = catalogue.create("snp_transformers", "layers")
-
-
+    loggers = catalogue.create("snp_transformers", "loggers")

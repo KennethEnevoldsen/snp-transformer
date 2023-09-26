@@ -19,3 +19,8 @@ _build/
 
 # test data
 tests/data/snp_embedder_checkpoint.pt/*
+
+# training logs
+lightning_logs/*
+wandb/*
+*.ckpt

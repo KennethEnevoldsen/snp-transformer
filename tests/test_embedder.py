@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 import torch
-from snp_transformer.embedders import Embedder, InputIds, SNPEmbedder
+from snp_transformer.model.embedders import Embedder, InputIds, SNPEmbedder
 
 
 @pytest.mark.parametrize(

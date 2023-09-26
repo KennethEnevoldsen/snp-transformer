@@ -9,7 +9,8 @@ from torch import nn
 from snp_transformer.data_objects import Individual
 
 from .embedders import Embedder, InputIds, Vocab
-from .registry import OptimizerFn, Registry
+from ..registry import OptimizerFn, Registry
+
 
 
 @dataclass
@@ -79,7 +80,8 @@ class EncoderForMaskedLM(TrainableModule):
         embeddings = output["embeddings"]
         is_padding = output["is_padding"]
         encoded_individuals = self.encoder_module(
-            embeddings, src_key_padding_mask=is_padding,
+            embeddings,
+            src_key_padding_mask=is_padding,
         )
 
         logits = {
@@ -135,14 +137,17 @@ class EncoderForMaskedLM(TrainableModule):
         prob /= 0.8
         mask[mask.clone()] = prob[mask] < replace_with_random_prob
         domain_ids_tensor[mask] = torch.randint(
-            0, domain_vocab_size - 1, mask.sum().shape,
+            0,
+            domain_vocab_size - 1,
+            mask.sum().shape,
         )
 
         # -> rest 10% of the time, keep the original word
         return domain_ids_tensor, masked_lm_labels
 
     def masking_fn(
-        self, padded_sequence_ids: InputIds,
+        self,
+        padded_sequence_ids: InputIds,
     ) -> tuple[InputIds, MaskingTargets]:
         domain_embeddings = copy(padded_sequence_ids.domain_embeddings)
         masked_labels: dict[str, torch.Tensor] = {}
@@ -177,7 +182,9 @@ class EncoderForMaskedLM(TrainableModule):
         masked_sequence_ids, masked_labels = self.masking_fn(padded_sequence_ids)
         return masked_sequence_ids, masked_labels
 
-    def training_step(self, batch, batch_idx):
+    def training_step(
+        self, batch, batch_idx: int
+    ) -> torch.Tensor | dict[str, torch.Tensor]:
         x, y = batch
         output = self.forward(x, y)
         self.log_training_step(output)

@@ -1,7 +1,7 @@
 from snp_transformer import IndividualsDataset
-from snp_transformer.embedders import SNPEmbedder
+from snp_transformer.model.embedders import SNPEmbedder
 from snp_transformer.registry import OptimizerFn
-from snp_transformer.task_modules import EncoderForMaskedLM
+from snp_transformer.model.task_modules import EncoderForMaskedLM
 from torch import nn
 from torch.utils.data import DataLoader
 

@@ -28,6 +28,9 @@ class InputIds:
     def __getitem__(self, key: str) -> torch.Tensor:
         return self.domain_embeddings[key]
 
+    def get_device(self) -> torch.device:
+        return self.is_padding.device
+
 
 @dataclass
 class Vocab:
@@ -132,10 +135,13 @@ class SNPEmbedder(nn.Module, Embedder):
         batch_size = inputs.get_batch_size()
         max_seq_len = inputs.get_max_seq_len()
 
+        device = inputs.get_device()
+
         # start embeddings as a zero tensor
         embeddings = torch.zeros(
             (batch_size, max_seq_len, self.d_model),
             dtype=torch.float,
+            device=device,
         )
 
         for key, embedding in self.embeddings.items():

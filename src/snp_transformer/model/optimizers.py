@@ -2,7 +2,7 @@ from typing import Any, Callable
 
 import torch
 
-from .registry import Registry
+from ..registry import Registry
 
 
 @Registry.optimizers.register("adam")
