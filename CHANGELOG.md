@@ -2,6 +2,41 @@
 
 
 
+## v0.0.6 (2023-09-26)
+
+### Ci
+
+* ci: removed windows support ([`3be156f`](https://github.com/KennethEnevoldsen/snp-transformer/commit/3be156f2009aa3794631809af0248b016fc87c5d))
+
+### Fix
+
+* fix: remove static path in config ([`31dc374`](https://github.com/KennethEnevoldsen/snp-transformer/commit/31dc3742e823ebf724f5d398c9fc15ff3883989c))
+
+* fix: updated error message ([`5ebd81a`](https://github.com/KennethEnevoldsen/snp-transformer/commit/5ebd81a8f29afab7cf008e5234bcc306154db11d))
+
+* fix: added missing dependency ([`d44edd0`](https://github.com/KennethEnevoldsen/snp-transformer/commit/d44edd0c1a8ab7e5b5841fbad32720ce5311bfac))
+
+* fix: Updated configs ([`ac467b3`](https://github.com/KennethEnevoldsen/snp-transformer/commit/ac467b3dc7629c217085f9d2df821d8c90ca76d4))
+
+* fix: tests ([`5081a3e`](https://github.com/KennethEnevoldsen/snp-transformer/commit/5081a3e24f9300e143b149668241a0402649a985))
+
+* fix: ensure that logging works as intended ([`3f51073`](https://github.com/KennethEnevoldsen/snp-transformer/commit/3f5107309e12695a334467776f5ebcafa24ce000))
+
+### Unknown
+
+* ran ruff ([`23f0198`](https://github.com/KennethEnevoldsen/snp-transformer/commit/23f01981b3a727db0fdfd11b1f90a96291e55e40))
+
+* Merge branch &#39;main&#39; of https://github.com/KennethEnevoldsen/snp-transformer ([`b69f98c`](https://github.com/KennethEnevoldsen/snp-transformer/commit/b69f98c9daad22fe828b0b79b7cab9c25a56ea15))
+
+* minor ([`fd66009`](https://github.com/KennethEnevoldsen/snp-transformer/commit/fd66009481180afbe3697aa51e29437482fc2238))
+
+* restructured repo ([`c9a32d1`](https://github.com/KennethEnevoldsen/snp-transformer/commit/c9a32d127c47f3b8bb63164c7dca4568aea6f3d9))
+
+* added training config ([`136fa40`](https://github.com/KennethEnevoldsen/snp-transformer/commit/136fa4077d0bd837eb7a3b9bc0378fba41ac2440))
+
+* added keynote presentation ([`272d7be`](https://github.com/KennethEnevoldsen/snp-transformer/commit/272d7be368adbcfdaca92504dfe472cf1207e055))
+
+
 ## v0.0.5 (2023-09-19)
 
 ### Fix
