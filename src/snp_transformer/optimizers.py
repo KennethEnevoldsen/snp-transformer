@@ -2,12 +2,12 @@ from typing import Any, Callable
 
 import torch
 
-from .registries import optimizers
+from .registry import Registry
 
 
-@optimizers.register("adam")
-def create_adam(learning_rate: float) -> Callable[[Any], torch.optim.Optimizer]:
+@Registry.optimizers.register("adam")
+def create_adam(lr: float) -> Callable[[Any], torch.optim.Optimizer]:
     def configure_optimizers(parameters) -> torch.optim.Optimizer:
-        return torch.optim.Adam(parameters, lr=learning_rate)
+        return torch.optim.Adam(parameters, lr=lr)
 
     return configure_optimizers

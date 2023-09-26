@@ -16,3 +16,6 @@ _build/
 
 # MacOS
 .DS_Store
+
+# test data
+tests/data/snp_embedder_checkpoint.pt/*

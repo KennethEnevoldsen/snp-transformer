@@ -1,14 +1,15 @@
+from abc import abstractmethod
 from copy import copy
 from dataclasses import dataclass
-from typing import Callable
 
 import lightning.pytorch as pl
 import torch
-from lightning.pytorch.utilities.types import OptimizerLRScheduler
 from torch import nn
 
+from snp_transformer.data_objects import Individual
+
 from .embedders import Embedder, InputIds, Vocab
-from .registries import OptimizerFn
+from .registry import OptimizerFn, Registry
 
 
 @dataclass
@@ -17,7 +18,19 @@ class MaskingTargets:
     padding_idx: int
 
 
-class EncoderForMaskedLM(pl.LightningModule):
+class TrainableModule(pl.LightningModule):
+    """
+    Interface for a trainable module
+    """
+
+    embedding_module: Embedder
+
+    @abstractmethod
+    def collate_fn(self, individual: list[Individual]) -> InputIds:
+        ...
+
+
+class EncoderForMaskedLM(TrainableModule):
     """A LM head wrapper for masked language modeling."""
 
     def __init__(
@@ -53,7 +66,7 @@ class EncoderForMaskedLM(pl.LightningModule):
             {
                 domain: nn.Linear(self.d_model, vocab.get_vocab_size(domain))
                 for domain in self.domains_to_mask
-            }
+            },
         )
         self.loss = nn.CrossEntropyLoss(ignore_index=-1)
 
@@ -66,7 +79,7 @@ class EncoderForMaskedLM(pl.LightningModule):
         embeddings = output["embeddings"]
         is_padding = output["is_padding"]
         encoded_individuals = self.encoder_module(
-            embeddings, src_key_padding_mask=is_padding
+            embeddings, src_key_padding_mask=is_padding,
         )
 
         logits = {
@@ -122,14 +135,14 @@ class EncoderForMaskedLM(pl.LightningModule):
         prob /= 0.8
         mask[mask.clone()] = prob[mask] < replace_with_random_prob
         domain_ids_tensor[mask] = torch.randint(
-            0, domain_vocab_size - 1, mask.sum().shape
+            0, domain_vocab_size - 1, mask.sum().shape,
         )
 
         # -> rest 10% of the time, keep the original word
         return domain_ids_tensor, masked_lm_labels
 
     def masking_fn(
-        self, padded_sequence_ids: InputIds
+        self, padded_sequence_ids: InputIds,
     ) -> tuple[InputIds, MaskingTargets]:
         domain_embeddings = copy(padded_sequence_ids.domain_embeddings)
         masked_labels: dict[str, torch.Tensor] = {}
@@ -178,3 +191,18 @@ class EncoderForMaskedLM(pl.LightningModule):
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
         return self.create_optimizer_fn(self.parameters())
+
+
+@Registry.tasks.register("masked_lm")
+def create_encoder_for_masked_lm(
+    embedding_module: Embedder,
+    encoder_module: nn.TransformerEncoder,
+    create_optimizer_fn: OptimizerFn,
+    domains_to_mask: list[str] | None = None,
+) -> EncoderForMaskedLM:
+    return EncoderForMaskedLM(
+        embedding_module=embedding_module,
+        encoder_module=encoder_module,
+        create_optimizer_fn=create_optimizer_fn,
+        domains_to_mask=domains_to_mask,
+    )

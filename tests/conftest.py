@@ -4,7 +4,6 @@ from typing import Any, Callable
 import pandas as pd
 import pytest
 import torch
-
 from snp_transformer import Individual, IndividualsDataset
 from snp_transformer.loaders import load_details, load_fam, load_sparse
 from snp_transformer.optimizers import create_adam

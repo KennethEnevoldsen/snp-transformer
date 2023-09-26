@@ -1,11 +1,10 @@
-import torch
+from snp_transformer import IndividualsDataset
+from snp_transformer.embedders import SNPEmbedder
+from snp_transformer.registry import OptimizerFn
+from snp_transformer.task_modules import EncoderForMaskedLM
 from torch import nn
 from torch.utils.data import DataLoader
 
-from snp_transformer import IndividualsDataset
-from snp_transformer.embedders import SNPEmbedder
-from snp_transformer.registries import OptimizerFn
-from snp_transformer.task_modules import EncoderForMaskedLM
 
 def test_model(
     training_dataset: IndividualsDataset,
@@ -33,7 +32,7 @@ def test_model(
 
     # create dataloader:
     dataloader = DataLoader(
-        training_dataset, batch_size=32, shuffle=True, collate_fn=mdl.collate_fn
+        training_dataset, batch_size=32, shuffle=True, collate_fn=mdl.collate_fn,
     )
 
     # run model:
@@ -41,4 +40,3 @@ def test_model(
         output = mdl(input_ids, masked_labels)
         loss = output["Training loss"]
         loss.backward()  # ensure that the backward pass works
-

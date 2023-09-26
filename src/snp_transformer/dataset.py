@@ -9,6 +9,7 @@ from torch.utils.data import Dataset
 
 from snp_transformer.data_objects import Individual, SNPs
 from snp_transformer.loaders import load_details, load_fam, load_sparse
+from snp_transformer.registry import Registry
 
 
 class IndividualsDataset(Dataset):
@@ -68,3 +69,8 @@ class IndividualsDataset(Dataset):
         )
 
         return individual
+
+
+@Registry.datasets.register("individuals_dataset")
+def create_individuals_dataset(path: Path) -> IndividualsDataset:
+    return IndividualsDataset(path)

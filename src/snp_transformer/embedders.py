@@ -1,11 +1,17 @@
+import json
+import logging
 from dataclasses import dataclass
-from typing import Any, Protocol
+from pathlib import Path
+from typing import Any, Protocol, runtime_checkable
 
 import torch
 from torch import nn
 from torch.nn.utils.rnn import pad_sequence
 
 from snp_transformer.data_objects import Individual
+from snp_transformer.registry import Registry
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -26,8 +32,8 @@ class InputIds:
 @dataclass
 class Vocab:
     domains: dict[str, dict[str, Any]]
-    mask = "MASK"
-    pad = "PAD"
+    mask: str = "MASK"
+    pad: str = "PAD"
 
     def get_padding_idx(self, key: str) -> int:
         return self.domains[key][self.pad]
@@ -44,7 +50,19 @@ class Vocab:
             for domain, domain_vocab in self.domains.items()
         }
 
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "domains": self.domains,
+            "mask": self.mask,
+            "pad": self.pad,
+        }
 
+    @classmethod
+    def from_dict(cls, vocab_dict: dict[str, Any]) -> "Vocab":
+        return cls(**vocab_dict)
+
+
+@runtime_checkable
 class Embedder(Protocol):
     """
     Interface for embedding modules
@@ -52,6 +70,7 @@ class Embedder(Protocol):
 
     d_model: int
     vocab: Vocab
+    is_fitted: bool
 
     def __init__(self, *args: Any) -> None:
         ...
@@ -79,6 +98,7 @@ class SNPEmbedder(nn.Module, Embedder):
         super().__init__()
         self.d_model = d_model
         self.max_sequence_length = max_sequence_length
+        self.dropout_prob = dropout_prob
 
         self.is_fitted: bool = False
 
@@ -91,8 +111,12 @@ class SNPEmbedder(nn.Module, Embedder):
 
     def initialize_embeddings_layers(
         self,
-        n_unique_snps: int,
+        vocab: Vocab,
     ) -> None:
+        self.not_embeddings = {"is_padding"}
+        self.vocab = vocab
+
+        n_unique_snps = vocab.get_vocab_size("snp")
         self.n_unique_snps = n_unique_snps
         snp_embedding = nn.Embedding(n_unique_snps, self.d_model)
 
@@ -182,11 +206,96 @@ class SNPEmbedder(nn.Module, Embedder):
         if add_mask_token:
             snp2idx["MASK"] = 3
 
-        self.vocab: Vocab = Vocab(domains={"snp": snp2idx})
+        vocab: Vocab = Vocab(domains={"snp": snp2idx}, mask="MASK", pad="PAD")
 
-        self.not_embeddings = {"is_padding"}
-        n_unique_snps = len(snp2idx)
+        self.initialize_embeddings_layers(vocab)
 
-        self.initialize_embeddings_layers(
-            n_unique_snps=n_unique_snps,
+    def to_disk(self, save_dir: Path):
+        """
+        Save the (trained) embedding to disk
+        """
+        save_dir.mkdir(exist_ok=True, parents=True)
+
+        kwargs = {
+            "d_model": self.d_model,
+            "dropout_prob": self.dropout_prob,
+            "max_sequence_length": self.max_sequence_length,
+        }
+
+        config_path = save_dir / "embedder_config.json"
+        with open(config_path, "w") as fp:
+            json.dump(kwargs, fp)
+
+        vocab_path = save_dir / "vocab.json"
+        with open(vocab_path, "w") as fp:
+            json.dump(self.vocab.to_dict(), fp)
+
+        torch.save(self.state_dict(), save_dir / "embedder.pt")
+
+    @classmethod
+    def from_disk(cls, save_dir: Path) -> "SNPEmbedder":
+        """
+        Load the (trained) embedding from disk
+        """
+        assert save_dir.is_dir()
+
+        config_path = save_dir / "embedder_config.json"
+        with open(config_path, "r") as fp:
+            kwargs = json.load(fp)
+
+        vocab_path = save_dir / "vocab.json"
+        with open(vocab_path, "r") as fp:
+            vocab_dict = json.load(fp)
+
+        vocab = Vocab.from_dict(vocab_dict)
+
+        embedder = cls(**kwargs)
+        embedder.initialize_embeddings_layers(vocab)
+        embedder.load_state_dict(torch.load(save_dir / "embedder.pt"))
+
+        return embedder
+
+
+@Registry.embedders.register("snp_embedder")
+def create_snp_embedder(
+    d_model: int,
+    dropout_prob: float,
+    max_sequence_length: int,
+    individuals: list[Individual] | None = None,
+    checkpoint_path: Path | None = None,
+) -> Embedder:
+    should_load_ckpt = (
+        checkpoint_path is not None
+        and checkpoint_path.is_dir()
+        and list(checkpoint_path.iterdir())  # is not empty
+    )
+
+    if should_load_ckpt:
+        emb = SNPEmbedder.from_disk(checkpoint_path)  # type: ignore
+
+        kwargs_match = (
+            emb.d_model == d_model
+            and emb.dropout_prob == dropout_prob
+            and emb.max_sequence_length == max_sequence_length
         )
+        if kwargs_match:
+            logger.info(f"Loaded embedder from {checkpoint_path}")
+            return emb
+        logger.warn(
+            "Embedder kwargs do not match checkpoint kwargs, ignoring checkpoint"
+        )
+
+    emb = SNPEmbedder(
+        d_model=d_model,
+        dropout_prob=dropout_prob,
+        max_sequence_length=max_sequence_length,
+    )
+
+    if individuals is None:
+        individuals = []
+    emb.fit(individuals)
+
+    if checkpoint_path is not None:
+        emb.to_disk(checkpoint_path)
+
+    return emb
