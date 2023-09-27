@@ -1,3 +1,11 @@
+"""
+Time taken with 
+- naive pandas implementation:
+    - 1:17:8
+- Apache Arrow
+    - 1:12:39
+"""
+
 import datetime
 from pathlib import Path
 

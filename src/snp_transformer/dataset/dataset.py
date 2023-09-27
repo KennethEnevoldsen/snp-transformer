@@ -6,10 +6,11 @@ import logging
 from pathlib import Path
 
 import pandas as pd
+from torch.utils.data import Dataset
+
 from snp_transformer.data_objects import Individual, SNPs
 from snp_transformer.dataset.loaders import load_details, load_fam, load_sparse
 from snp_transformer.registry import Registry
-from torch.utils.data import Dataset
 
 logger = logging.getLogger(__name__)
 
