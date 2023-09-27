@@ -4,11 +4,23 @@ from dataclasses import dataclass
 
 import lightning.pytorch as pl
 import torch
-from snp_transformer.data_objects import Individual
 from torch import nn
+from torchmetrics.classification import MulticlassAccuracy
+
+from snp_transformer.data_objects import Individual
 
 from ..registry import OptimizerFn, Registry
 from .embedders import Embedder, InputIds, Vocab
+
+target = tensor([2, 1, 0, 0])
+preds = tensor(
+    [[0.16, 0.26, 0.58], [0.22, 0.61, 0.17], [0.71, 0.09, 0.20], [0.05, 0.82, 0.13]]
+)
+metric = MulticlassAccuracy(num_classes=3)
+metric(preds, target)
+
+mca = MulticlassAccuracy(num_classes=3, average=None)
+mca(preds, target)
 
 
 @dataclass
@@ -44,6 +56,15 @@ class EncoderForMaskedLM(TrainableModule):
 
         self.loss = nn.CrossEntropyLoss(ignore_index=-1)
         self.create_optimizer_fn = create_optimizer_fn
+
+    def initialize_metrics(self):
+        vocab: Vocab = self.embedding_module.vocab
+        self.metrics = {
+            (domain, "accuracy"): MulticlassAccuracy(
+                num_classes=vocab.get_vocab_size(domain)
+            )
+            for domain in self.domains_to_mask
+        }
 
     def initialize_model(
         self,
@@ -95,14 +116,29 @@ class EncoderForMaskedLM(TrainableModule):
             for domain in self.domains_to_mask
         }
 
+        # compute MLM Accuracy
+        # convert logits to probs
+        probs = {
+            domain: torch.softmax(logits[domain], dim=-1)
+            for domain in self.domains_to_mask
+        }
+        # compute accuracy
+        mlm_acc = {
+            domain: self.metrics[(domain, "accuracy")](
+                probs[domain], masked_lm_labels.domain_targets[domain]
+            )
+            for domain in self.domains_to_mask
+        }
+
         # compute total loss using torch
         # this assumed equal weighting of domains
         total_loss = torch.stack(list(domain_losses.values())).sum()
 
         return {
             "logits": logits,
-            "Training loss": total_loss,
-            "Domain Training Losses": domain_losses,
+            "loss": total_loss,
+            "Domain Losses": domain_losses,
+            "MLM Accuracies": mlm_acc,
         }
 
     def mask(
@@ -188,13 +224,16 @@ class EncoderForMaskedLM(TrainableModule):
         x, y = batch
         output = self.forward(x, y)
         self.log_training_step(output)
-        return output["Training loss"]
+        return output["loss"]
 
     def log_training_step(self, output: dict) -> None:
         dom_train_losses = output.pop("Domain Training Losses")
         for domain in dom_train_losses:
             self.log(f"Training Loss ({domain})", dom_train_losses[domain])
-        self.log("Training Loss", output["Training loss"])
+        dom_mlm_acc = output.pop("MLM Accuracies")
+        for domain in dom_mlm_acc:
+            self.log(f"Training MLM Accuracy ({domain})", dom_mlm_acc[domain])
+        self.log("Training Loss", output["loss"])
 
     def validation_step(
         self,
@@ -210,6 +249,9 @@ class EncoderForMaskedLM(TrainableModule):
         dom_train_losses = output.pop("Domain Training Losses")
         for domain in dom_train_losses:
             self.log(f"Validation Loss ({domain})", dom_train_losses[domain])
+        dom_mlm_acc = output.pop("MLM Accuracies")
+        for domain in dom_mlm_acc:
+            self.log(f"Training MLM Accuracy ({domain})", dom_mlm_acc[domain])
         self.log("Validation Loss", output["Training loss"])
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
