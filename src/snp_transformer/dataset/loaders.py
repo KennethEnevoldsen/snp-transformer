@@ -152,10 +152,12 @@ def load_sparse(path: Path) -> pl.DataFrame:
 
     Where the individual ID maps to the .fam file. I.e. the first individual in the sparse file
     is the first individual in the .fam file. So to get their iid, you can do:
-    
+
         ```
+        idx = 1
         fam = load_fam(fam_path)
-        iid = fam.iloc[0].iid
+        offset_by_one = idx - 1  # .sparse is 1-indexed
+        iid = fam.iloc[offset_by_one].iid
         ```
     """
     sparse = pl.read_csv(

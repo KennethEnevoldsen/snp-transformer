@@ -39,7 +39,7 @@ class IndividualsDataset(Dataset):
 
     def __getitem__(self, idx: int) -> Individual:
         iid = self.idx2iid[idx]
-        ind = self.idx2snp[idx]
+        ind = self.idx2snp[idx + 1]  # sparse is 1-indexed
 
         snp_values = ind["Value"].to_numpy()
         snp_indices = ind["SNP"].to_numpy()
