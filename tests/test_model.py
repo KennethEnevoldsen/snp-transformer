@@ -1,9 +1,10 @@
+from torch import nn
+from torch.utils.data import DataLoader
+
 from snp_transformer import IndividualsDataset
 from snp_transformer.model.embedders import SNPEmbedder
 from snp_transformer.model.task_modules import EncoderForMaskedLM
 from snp_transformer.registry import OptimizerFn
-from torch import nn
-from torch.utils.data import DataLoader
 
 
 def test_model(
@@ -41,5 +42,5 @@ def test_model(
     # run model:
     for input_ids, masked_labels in dataloader:
         output = mdl(input_ids, masked_labels)
-        loss = output["Training loss"]
+        loss = output["loss"]
         loss.backward()  # ensure that the backward pass works
