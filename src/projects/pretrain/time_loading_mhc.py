@@ -1,5 +1,5 @@
 """
-Time taken with 
+Time taken with
 - naive pandas implementation:
     - 1:17:8
 - Apache Arrow
