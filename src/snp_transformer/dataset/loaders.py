@@ -1,4 +1,3 @@
-import json
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
@@ -151,6 +150,9 @@ def load_sparse(path: Path) -> pl.DataFrame:
     3 3 2
     ```
     """
-    sparse = pl.read_csv(path, separator=" ", 
-                 dtypes={"Individual": pl.Utf8, "SNP": pl.Int64, "Value": pl.Int64})
+    sparse = pl.read_csv(
+        path,
+        separator=" ",
+        dtypes={"Individual": pl.Utf8, "SNP": pl.Int64, "Value": pl.Int64},
+    )
     return sparse
