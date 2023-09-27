@@ -4,30 +4,7 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
-
-
-class Psparse:
-    def __init__(self, path: Path):
-        assert path.is_dir()
-        self.path = path
-
-        self.individuals = set(self._load_individuals())
-
-    def _load_individuals(self) -> list[str]:
-        individuals = []
-        path = self.path / "individuals.json"
-        with path.open("r") as f:
-            individuals = json.load(f)
-        return individuals
-
-    def __getitem__(self, iid: str) -> pd.DataFrame:
-        if iid not in self.individuals:
-            raise KeyError(f"Individual {iid} not in dataset")
-        path = self.path / f"{iid}.sparse"
-        return load_sparse(path)
-
-    def __len__(self) -> int:
-        return len(self.individuals)
+import polars as pl
 
 
 def read_csv_with_sep_handling(
@@ -158,7 +135,7 @@ def convert_bim_to_details(bim: pd.DataFrame) -> pd.DataFrame:
     return details
 
 
-def load_sparse(path: Path) -> pd.DataFrame:
+def load_sparse(path: Path) -> pl.DataFrame:
     """
     Load in the custom .sparse format on the form:
 
@@ -174,10 +151,6 @@ def load_sparse(path: Path) -> pd.DataFrame:
     3 3 2
     ```
     """
-    sparse = pd.read_csv(
-        path,
-        sep=" ",
-        dtype={"Individual": str, "SNP": int, "Value": int},
-        engine="pyarrow",
-    )
+    sparse = pl.read_csv(path, separator=" ", 
+                 dtypes={"Individual": pl.Utf8, "SNP": pl.Int64, "Value": pl.Int64})
     return sparse

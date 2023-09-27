@@ -4,6 +4,9 @@ Time taken with
     - 1:17:8
 - Apache Arrow
     - 1:12:39
+- With conversion to psparse (polars and pandas)
+    - it takes aobut ____
+    - but requries a preprocessing which performs ~200-300 individuals pr. second (a total of 200634 individuals)
 """
 
 import datetime

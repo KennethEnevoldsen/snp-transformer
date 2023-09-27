@@ -8,7 +8,7 @@ from pathlib import Path
 from torch.utils.data import Dataset
 
 from snp_transformer.data_objects import Individual, SNPs
-from snp_transformer.dataset.loaders import Psparse, load_details, load_fam
+from snp_transformer.dataset.loaders import load_details, load_fam, load_sparse
 from snp_transformer.registry import Registry
 
 logger = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ class IndividualsDataset(Dataset):
     def __init__(self, path: Path):
         self.path = path
         self.fam_path = path.with_suffix(".fam")
-        self.psparse_path = path.with_suffix(".psparse")
+        self.psparse_path = path.with_suffix(".sparse")
         self.details_path = path.with_suffix(".details")
 
         # ensure that they all exist
@@ -29,31 +29,33 @@ class IndividualsDataset(Dataset):
 
         self.fam = load_fam(self.fam_path)
         self.snp_details = load_details(self.details_path)
-        self.psparse = Psparse(self.psparse_path)
+        sparse = load_sparse(self.psparse_path)
         self.idx2iid = self.fam.index.values
+
+        self.iid2idx = sparse.partition_by("Individual", as_dict=True)
 
     def __len__(self) -> int:
         return self.fam.shape[0]
 
     def __getitem__(self, idx: int) -> Individual:
         iid = self.idx2iid[idx]
-        ind = self.psparse[iid]
+        ind = self.iid2idx[iid]
 
-        snp_values = ind["Value"].values
-        snp_indices = ind["SNP"].values
+        snp_values = ind["Value"].to_numpy()
+        snp_indices = ind["SNP"].to_numpy()
 
         snp_details = self.snp_details.iloc[snp_indices]  # type: ignore
         ind_fam = self.fam.loc[iid]
 
         snps = SNPs(
             values=list(snp_values),
-            chromosomes=snp_details["chr"].values,
-            cm=snp_details["cm"].values,
-            bp=snp_details["bp"].values,
-            a1=snp_details["a1"].values,
-            a2=snp_details["a2"].values,
-            gene=snp_details["gene"].values,
-            exome=snp_details["exome"].values,
+            chromosomes=list(snp_details["chr"].values),
+            cm=list(snp_details["cm"].values),
+            bp=list(snp_details["bp"].values),
+            a1=list(snp_details["a1"].values),
+            a2=list(snp_details["a2"].values),
+            gene=list(snp_details["gene"].values),
+            exome=list(snp_details["exome"].values),
         )
 
         individual = Individual(
