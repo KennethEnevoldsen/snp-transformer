@@ -1,15 +1,27 @@
 from pathlib import Path
+from typing import Any, Sequence
 
 import pandas as pd
 
 
+def read_csv_with_sep_handling(path: Path, sep: Sequence[str], **kwargs: Any) -> pd.DataFrame:
+    """
+    Read in a csv file with multiple possible separators.
+    """
+    for s in sep:
+        try:
+            return pd.read_csv(path, sep=s, **kwargs)
+        except:
+            pass
+    raise ValueError(f"Could not read file {path} with any of the separators {sep}")
+    
 def load_fam(path: Path) -> pd.DataFrame:
     """
     Load in the .fam dataset format.
     """
-    fam = pd.read_csv(
+    fam = read_csv_with_sep_handling(
         path,
-        sep=" ",
+        sep=[" ", "\t"],
         header=None,
         names=[
             "fid",
@@ -73,6 +85,44 @@ def load_details(path: Path) -> pd.DataFrame:
     )
     return details
 
+
+def load_bim(path: Path) -> pd.DataFrame:
+    """
+    Load in the .bim dataset format.
+    """
+    bim = pd.read_csv(
+        path,
+        sep="\t",
+        header=None,
+        names=[
+            "chr",
+            "snp_id",
+            "cm",
+            "bp",
+            "a1",
+            "a2",
+        ],
+        dtype={
+            "chr": str,
+            "snp_id": str,
+            "cm": float,
+            "bp": int,
+            "a1": str,
+            "a2": str,
+        },
+    )
+    return bim
+
+
+def convert_bim_to_details(bim: pd.DataFrame) -> pd.DataFrame:
+    """
+    Convert a .bim dataframe to a .details dataframe.
+    """
+    details = bim
+    details["gene"] = "NO_GENE"
+    details["exome"] = "NO_EXON"
+    details["snp_id"] = details["snp_id"].astype(str)
+    return details
 
 def load_sparse(path: Path) -> pd.DataFrame:
     """

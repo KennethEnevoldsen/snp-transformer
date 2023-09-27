@@ -1,15 +1,18 @@
+import logging
 from abc import abstractmethod
 from copy import copy
 from dataclasses import dataclass
 
 import lightning.pytorch as pl
 import torch
-from snp_transformer.data_objects import Individual
 from torch import nn
+
+from snp_transformer.data_objects import Individual
 
 from ..registry import OptimizerFn, Registry
 from .embedders import Embedder, InputIds, Vocab
 
+logger = logging.getLogger(__name__)
 
 @dataclass
 class MaskingTargets:
@@ -223,6 +226,8 @@ def create_encoder_for_masked_lm(
     create_optimizer_fn: OptimizerFn,
     domains_to_mask: list[str] | None = None,
 ) -> EncoderForMaskedLM:
+    
+    logger.info("Creating task module for masked lm")
     return EncoderForMaskedLM(
         embedding_module=embedding_module,
         encoder_module=encoder_module,

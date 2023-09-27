@@ -2,14 +2,17 @@
 A dataset for loading in patients
 """
 
+import logging
 from pathlib import Path
 
 import pandas as pd
+from torch.utils.data import Dataset
+
 from snp_transformer.data_objects import Individual, SNPs
 from snp_transformer.dataset.loaders import load_details, load_fam, load_sparse
 from snp_transformer.registry import Registry
-from torch.utils.data import Dataset
 
+logger = logging.getLogger(__name__)
 
 class IndividualsDataset(Dataset):
     def __init__(self, path: Path):
@@ -51,7 +54,7 @@ class IndividualsDataset(Dataset):
             values=list(snp_values),
             chromosomes=snp_details["chr"].values,
             cm=snp_details["cm"].values,
-            bp=snp_details["bp"].values,
+            bp=snp_details["bp"].values,    
             a1=snp_details["a1"].values,
             a2=snp_details["a2"].values,
             gene=snp_details["gene"].values,
@@ -73,4 +76,5 @@ class IndividualsDataset(Dataset):
 
 @Registry.datasets.register("individuals_dataset")
 def create_individuals_dataset(path: Path) -> IndividualsDataset:
+    logger.info("Creating dataset")
     return IndividualsDataset(path)
