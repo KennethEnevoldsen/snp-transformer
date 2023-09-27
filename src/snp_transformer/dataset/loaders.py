@@ -6,7 +6,9 @@ import pandas as pd
 
 
 def read_csv_with_sep_handling(
-    path: Path, sep: Sequence[str], **kwargs: Any,
+    path: Path,
+    sep: Sequence[str],
+    **kwargs: Any,
 ) -> pd.DataFrame:
     """
     Read in a csv file with multiple possible separators.
