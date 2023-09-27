@@ -4,6 +4,7 @@ from typing import Any, Callable
 import pandas as pd
 import pytest
 import torch
+
 from snp_transformer import Individual, IndividualsDataset
 from snp_transformer.dataset.loaders import load_details, load_fam, load_sparse
 from snp_transformer.model.optimizers import create_adam
@@ -54,7 +55,7 @@ def fam(fam_path: Path) -> pd.DataFrame:
 
 @pytest.fixture()
 def sparse(sparse_path: Path) -> pd.DataFrame:
-    return load_sparse(sparse_path)
+    return load_sparse(sparse_path).to_pandas()
 
 
 @pytest.fixture()
