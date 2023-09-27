@@ -11,16 +11,6 @@ from torchmetrics.classification import MulticlassAccuracy
 from ..registry import OptimizerFn, Registry
 from .embedders import Embedder, InputIds, Vocab
 
-target = tensor([2, 1, 0, 0])
-preds = tensor(
-    [[0.16, 0.26, 0.58], [0.22, 0.61, 0.17], [0.71, 0.09, 0.20], [0.05, 0.82, 0.13]],
-)
-metric = MulticlassAccuracy(num_classes=3)
-metric(preds, target)
-
-mca = MulticlassAccuracy(num_classes=3, average=None)
-mca(preds, target)
-
 
 @dataclass
 class MaskingTargets:
