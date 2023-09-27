@@ -10,7 +10,7 @@ Time taken with
 - with just polars for .sparse
     - 0:0:11
 
-Then there is no need to use the psparse format    
+Then there is no need to use the psparse format
 """
 
 import datetime
