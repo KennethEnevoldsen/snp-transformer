@@ -4,10 +4,9 @@ from dataclasses import dataclass
 
 import lightning.pytorch as pl
 import torch
+from snp_transformer.data_objects import Individual
 from torch import nn
 from torchmetrics.classification import MulticlassAccuracy
-
-from snp_transformer.data_objects import Individual
 
 from ..registry import OptimizerFn, Registry
 from .embedders import Embedder, InputIds, Vocab
