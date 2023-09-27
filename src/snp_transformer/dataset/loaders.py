@@ -1,4 +1,3 @@
-import json
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
@@ -150,7 +149,18 @@ def load_sparse(path: Path) -> pl.DataFrame:
     2 9 1
     3 3 2
     ```
+
+    Where the individual ID maps to the .fam file. I.e. the first individual in the sparse file
+    is the first individual in the .fam file. So to get their iid, you can do:
+    
+        ```
+        fam = load_fam(fam_path)
+        iid = fam.iloc[0].iid
+        ```
     """
-    sparse = pl.read_csv(path, separator=" ", 
-                 dtypes={"Individual": pl.Utf8, "SNP": pl.Int64, "Value": pl.Int64})
+    sparse = pl.read_csv(
+        path,
+        separator=" ",
+        dtypes={"Individual": pl.Int64, "SNP": pl.Int64, "Value": pl.Int64},
+    )
     return sparse
