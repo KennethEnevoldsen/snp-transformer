@@ -7,6 +7,10 @@ Time taken with
 - With conversion to psparse (polars and pandas)
     - it takes aobut ____
     - but requries a preprocessing which performs ~200-300 individuals pr. second (a total of 200634 individuals)
+- with just polars for .sparse
+    - 0:0:11
+
+Then there is no need to use the psparse format    
 """
 
 import datetime
