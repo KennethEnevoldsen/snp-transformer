@@ -5,8 +5,8 @@ from pathlib import Path
 
 from snp_transformer.dataset.loaders import convert_bim_to_details, load_bim
 
-home=Path.home()
-data_folder = home / "snpher" / "faststorage"/"biobank"/"exomes"/"reformat"
+home = Path.home()
+data_folder = home / "snpher" / "faststorage" / "biobank" / "exomes" / "reformat"
 
 bim = load_bim(data_folder / "mhc.bim")
 details = convert_bim_to_details(bim)

@@ -1,10 +1,13 @@
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any
 
 import pandas as pd
 
 
-def read_csv_with_sep_handling(path: Path, sep: Sequence[str], **kwargs: Any) -> pd.DataFrame:
+def read_csv_with_sep_handling(
+    path: Path, sep: Sequence[str], **kwargs: Any,
+) -> pd.DataFrame:
     """
     Read in a csv file with multiple possible separators.
     """
@@ -14,7 +17,8 @@ def read_csv_with_sep_handling(path: Path, sep: Sequence[str], **kwargs: Any) ->
         except:
             pass
     raise ValueError(f"Could not read file {path} with any of the separators {sep}")
-    
+
+
 def load_fam(path: Path) -> pd.DataFrame:
     """
     Load in the .fam dataset format.
@@ -125,6 +129,7 @@ def convert_bim_to_details(bim: pd.DataFrame) -> pd.DataFrame:
     details["exome"] = "NO_EXON"
     details["snp_id"] = details["snp_id"].astype(str)
     return details
+
 
 def load_sparse(path: Path) -> pd.DataFrame:
     """

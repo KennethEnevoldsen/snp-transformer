@@ -8,10 +8,10 @@ from pathlib import Path
 import lightning.pytorch as pl
 from torch.utils.data import DataLoader
 
-from snp_transformer.config import (flatten_nested_dict, load_config,
-                                    parse_config)
+from snp_transformer.config import flatten_nested_dict, load_config, parse_config
 
 std_logger = logging.getLogger(__name__)
+
 
 def train(config_path: Path | None = None) -> None:
     config_dict = load_config(config_path)
@@ -42,8 +42,7 @@ def train(config_path: Path | None = None) -> None:
         collate_fn=model.collate_fn,
     )
 
-
     trainer = pl.Trainer(**trainer_kwargs)
-    
+
     std_logger.info("Starting training")
     trainer.fit(model=model, train_dataloaders=train_loader, val_dataloaders=val_loader)
