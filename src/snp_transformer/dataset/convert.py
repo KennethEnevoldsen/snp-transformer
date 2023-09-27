@@ -4,6 +4,9 @@ import shutil
 from pathlib import Path
 
 import polars as pl
+from tqdm import tqdm
+
+from snp_transformer.dataset.loaders import load_fam
 
 logger = logging.getLogger(__name__)
 
@@ -13,6 +16,7 @@ def sparse_to_psparse(
     psparse_path: Path,
     overwrite: bool = False,
     batch_size=50_000,
+    verbose: bool = True,
 ) -> None:
     """
     loads in a sparse file and converts it to a psparse format. A psparse format is a
@@ -54,6 +58,14 @@ def sparse_to_psparse(
     )
 
     batch = reader.next_batches(1)
+    if verbose: 
+        fam_path = psparse_path.with_suffix(".fam")
+        if fam_path.exists():
+            fam = load_fam(fam_path)
+            total = fam.shape[0]
+            pbar = tqdm(total=total, desc="Converting to psparse")
+        else:
+            pbar = tqdm(desc="Converting to psparse")
 
     while batch is not None:
         df = batch[0]
@@ -68,8 +80,11 @@ def sparse_to_psparse(
             else:
                 df.write_csv(path, separator=" ")
                 seen_groups.add(str_iid)
+                if verbose:
+                    pbar.update(1)  # type: ignore
 
         batch = reader.next_batches(1)
+
 
     # save the seen groups to a json file
     seen_groups_path = psparse_path / "individuals.json"
