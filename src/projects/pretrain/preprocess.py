@@ -16,7 +16,9 @@ data_folder = home / "snpher" / "faststorage" / "biobank" / "exomes" / "reformat
 
 # convert MHC .sparse to .psparse
 sparse_to_psparse(
-    data_folder / "mhc.sparse", data_folder / "mhc.psparse", overwrite=True,
+    data_folder / "mhc.sparse",
+    data_folder / "mhc.psparse",
+    overwrite=True,
 )
 
 
