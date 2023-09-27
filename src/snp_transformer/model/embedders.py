@@ -5,10 +5,11 @@ from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
 
 import torch
-from snp_transformer.data_objects import Individual
-from snp_transformer.registry import Registry
 from torch import nn
 from torch.nn.utils.rnn import pad_sequence
+
+from snp_transformer.data_objects import Individual
+from snp_transformer.registry import Registry
 
 logger = logging.getLogger(__name__)
 
@@ -187,21 +188,27 @@ class SNPEmbedder(nn.Module, Embedder):
         any_key = keys[0]
 
         max_seq_len = max([len(p[any_key]) for p in sequences])
-        assert max_seq_len <= self.max_sequence_length
+        if max_seq_len <= self.max_sequence_length:
+            logger.warning(
+                "Sequence longer than max sequence length, truncating to max length"
+            )
+            max_seq_len = self.max_sequence_length
 
         padded_sequences: dict[str, torch.Tensor] = {}
 
         for domain in self.vocab.domains:
             pad_idx = self.vocab.get_padding_idx(domain)
+            truncated_seq = [p[domain][:max_seq_len] for p in sequences]
             padded_sequences[domain] = pad_sequence(
-                [p[domain] for p in sequences],
+                truncated_seq,
                 batch_first=True,
                 padding_value=pad_idx,
             )
 
         key = "is_padding"
+        truncated_seq = [p[key][:max_seq_len] for p in sequences]
         padded_sequences[key] = padded_sequences[key] = pad_sequence(
-            [p[key] for p in sequences],
+            truncated_seq,
             batch_first=True,
             padding_value=True,
         )
