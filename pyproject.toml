@@ -25,6 +25,7 @@ dependencies = [
   "pandas>=2.0.3",
   "lightning>=2.0.9",
   "wandb>=0.15.8",
+  "pyarrow>=12.0.0",
 ]
 
 [project.license]
