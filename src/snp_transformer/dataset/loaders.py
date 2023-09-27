@@ -27,6 +27,7 @@ def load_fam(path: Path) -> pd.DataFrame:
             "sex": int,
             "phenotype": float,
         },
+        engine="pyarrow",
     )
     fam = fam.set_index("iid")
     return fam
@@ -70,6 +71,7 @@ def load_details(path: Path) -> pd.DataFrame:
             "gene": str,
             "exome": str,
         },
+        engine="pyarrow",
     )
     return details
 
@@ -94,5 +96,6 @@ def load_sparse(path: Path) -> pd.DataFrame:
         path,
         sep=" ",
         dtype={"Individual": str, "SNP": int, "Value": int},
+        engine="pyarrow",
     )
     return sparse
