@@ -1,7 +1,6 @@
 import json
 import logging
 import shutil
-from os import sep
 from pathlib import Path
 
 import polars as pl
@@ -42,7 +41,7 @@ def sparse_to_psparse(
             shutil.rmtree(psparse_path)
         else:
             raise ValueError(
-                f"{psparse_path} already exists, set overwrite=True to overwrite it"
+                f"{psparse_path} already exists, set overwrite=True to overwrite it",
             )
 
     psparse_path.with_suffix(".psparse").mkdir(exist_ok=True, parents=True)

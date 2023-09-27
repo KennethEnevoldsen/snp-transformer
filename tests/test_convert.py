@@ -2,7 +2,6 @@ import shutil
 from pathlib import Path
 
 import pytest
-
 from snp_transformer.dataset.convert import sparse_to_psparse
 
 
