@@ -40,6 +40,7 @@ class EncoderForMaskedLM(TrainableModule):
         domains_to_mask: list[str] | None = None,
     ):
         super().__init__()
+        self.save_hyperparameters()
         self.initialize_model(embedding_module, encoder_module, domains_to_mask)
 
         self.loss = nn.CrossEntropyLoss(ignore_index=-1)
