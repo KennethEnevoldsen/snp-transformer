@@ -124,7 +124,8 @@ class EncoderForMaskedLM(TrainableModule):
         # compute accuracy
         mlm_acc = {
             domain: self.metrics[(domain, "accuracy")](
-                probs[domain], masked_lm_labels.domain_targets[domain],
+                probs[domain],
+                masked_lm_labels.domain_targets[domain],
             )
             for domain in self.domains_to_mask
         }
