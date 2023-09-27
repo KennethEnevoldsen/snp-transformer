@@ -4,17 +4,16 @@ from dataclasses import dataclass
 
 import lightning.pytorch as pl
 import torch
+from snp_transformer.data_objects import Individual
 from torch import nn
 from torchmetrics.classification import MulticlassAccuracy
-
-from snp_transformer.data_objects import Individual
 
 from ..registry import OptimizerFn, Registry
 from .embedders import Embedder, InputIds, Vocab
 
 target = tensor([2, 1, 0, 0])
 preds = tensor(
-    [[0.16, 0.26, 0.58], [0.22, 0.61, 0.17], [0.71, 0.09, 0.20], [0.05, 0.82, 0.13]]
+    [[0.16, 0.26, 0.58], [0.22, 0.61, 0.17], [0.71, 0.09, 0.20], [0.05, 0.82, 0.13]],
 )
 metric = MulticlassAccuracy(num_classes=3)
 metric(preds, target)
@@ -61,7 +60,7 @@ class EncoderForMaskedLM(TrainableModule):
         vocab: Vocab = self.embedding_module.vocab
         self.metrics = {
             (domain, "accuracy"): MulticlassAccuracy(
-                num_classes=vocab.get_vocab_size(domain)
+                num_classes=vocab.get_vocab_size(domain),
             )
             for domain in self.domains_to_mask
         }
@@ -125,7 +124,7 @@ class EncoderForMaskedLM(TrainableModule):
         # compute accuracy
         mlm_acc = {
             domain: self.metrics[(domain, "accuracy")](
-                probs[domain], masked_lm_labels.domain_targets[domain]
+                probs[domain], masked_lm_labels.domain_targets[domain],
             )
             for domain in self.domains_to_mask
         }
