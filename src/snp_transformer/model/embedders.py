@@ -5,11 +5,10 @@ from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
 
 import torch
-from torch import nn
-from torch.nn.utils.rnn import pad_sequence
-
 from snp_transformer.data_objects import Individual
 from snp_transformer.registry import Registry
+from torch import nn
+from torch.nn.utils.rnn import pad_sequence
 
 logger = logging.getLogger(__name__)
 
@@ -190,7 +189,7 @@ class SNPEmbedder(nn.Module, Embedder):
         max_seq_len = max([len(p[any_key]) for p in sequences])
         if max_seq_len <= self.max_sequence_length:
             logger.warning(
-                "Sequence longer than max sequence length, truncating to max length"
+                "Sequence longer than max sequence length, truncating to max length",
             )
             max_seq_len = self.max_sequence_length
 
