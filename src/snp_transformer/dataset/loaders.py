@@ -1,8 +1,33 @@
+import json
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
+
+
+class Psparse:
+    def __init__(self, path: Path):
+        assert path.is_dir()
+        self.path = path
+
+        self.individuals = set(self._load_individuals())
+
+    def _load_individuals(self) -> list[str]:
+        individuals = []
+        path = self.path / "individuals.json"
+        with path.open("r") as f:
+            individuals = json.load(f)
+        return individuals
+
+    def __getitem__(self, iid: str) -> pd.DataFrame:
+        if iid not in self.individuals:
+            raise KeyError(f"Individual {iid} not in dataset")
+        path = self.path / f"{iid}.sparse"
+        return load_sparse(path)
+
+    def __len__(self) -> int:
+        return len(self.individuals)
 
 
 def read_csv_with_sep_handling(
@@ -16,7 +41,7 @@ def read_csv_with_sep_handling(
     for s in sep:
         try:
             return pd.read_csv(path, sep=s, **kwargs)
-        except:
+        except:  # noqa
             pass
     raise ValueError(f"Could not read file {path} with any of the separators {sep}")
 

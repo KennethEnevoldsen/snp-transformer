@@ -5,11 +5,10 @@ A dataset for loading in patients
 import logging
 from pathlib import Path
 
-import pandas as pd
 from torch.utils.data import Dataset
 
 from snp_transformer.data_objects import Individual, SNPs
-from snp_transformer.dataset.loaders import load_details, load_fam, load_sparse
+from snp_transformer.dataset.loaders import Psparse, load_details, load_fam
 from snp_transformer.registry import Registry
 
 logger = logging.getLogger(__name__)
@@ -19,31 +18,26 @@ class IndividualsDataset(Dataset):
     def __init__(self, path: Path):
         self.path = path
         self.fam_path = path.with_suffix(".fam")
-        self.sparse_path = path.with_suffix(".sparse")
+        self.psparse_path = path.with_suffix(".psparse")
         self.details_path = path.with_suffix(".details")
 
         # ensure that they all exist
         error = f"does not exist in {path}, the following files exist: {list(path.glob('*'))}"
         assert self.fam_path.exists(), f"{self.fam_path} {error}"
-        assert self.sparse_path.exists(), f"{self.sparse_path} {error}"
+        assert self.psparse_path.exists(), f"{self.psparse_path} {error}"
         assert self.details_path.exists(), f"{self.details_path} {error}"
 
         self.fam = load_fam(self.fam_path)
         self.snp_details = load_details(self.details_path)
-        sparse = load_sparse(self.sparse_path)
+        self.psparse = Psparse(self.psparse_path)
         self.idx2iid = self.fam.index.values
-
-        # splits the sparse matrix into individual specific sections
-        self.iid2sparse: dict[str, pd.DataFrame] = {
-            str(iid): df for iid, df in sparse.groupby("Individual")
-        }
 
     def __len__(self) -> int:
         return self.fam.shape[0]
 
     def __getitem__(self, idx: int) -> Individual:
         iid = self.idx2iid[idx]
-        ind = self.iid2sparse[iid]
+        ind = self.psparse[iid]
 
         snp_values = ind["Value"].values
         snp_indices = ind["SNP"].values
