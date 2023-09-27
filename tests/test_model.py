@@ -1,4 +1,3 @@
-
 import pytest
 from snp_transformer import IndividualsDataset
 from snp_transformer.model.embedders import SNPEmbedder
