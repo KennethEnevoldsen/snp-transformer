@@ -5,11 +5,10 @@ from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
 
 import torch
-from torch import nn
-from torch.nn.utils.rnn import pad_sequence
-
 from snp_transformer.data_objects import Individual
 from snp_transformer.registry import Registry
+from torch import nn
+from torch.nn.utils.rnn import pad_sequence
 
 logger = logging.getLogger(__name__)
 
