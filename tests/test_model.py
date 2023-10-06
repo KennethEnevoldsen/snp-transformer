@@ -56,5 +56,5 @@ def test_model(
     # run model:
     for input_ids, masked_labels in dataloader:
         output = mdl(input_ids, masked_labels)
-        loss = output["Training loss"]
+        loss = output["loss"]
         loss.backward()  # ensure that the backward pass works
