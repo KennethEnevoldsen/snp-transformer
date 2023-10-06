@@ -31,12 +31,14 @@ def train(config_path: Path | None = None) -> None:
         batch_size=training_cfg.batch_size,
         shuffle=True,
         collate_fn=model.collate_fn,
+        num_workers=training_cfg.num_workers_for_dataloader,
     )
     val_loader = DataLoader(
         validation_dataset,
         batch_size=training_cfg.batch_size,
         shuffle=True,
         collate_fn=model.collate_fn,
+        num_workers=training_cfg.num_workers_for_dataloader,
     )
 
     trainer = pl.Trainer(**trainer_kwargs)
