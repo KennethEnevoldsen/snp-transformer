@@ -44,6 +44,7 @@ class TrainerConfigSchema(BaseModel):
 
 class TrainingConfigSchema(BaseModel):
     batch_size: int
+    num_workers_for_dataloader: int = 8
     trainer: TrainerConfigSchema
 
 
