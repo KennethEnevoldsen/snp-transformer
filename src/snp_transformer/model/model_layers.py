@@ -23,4 +23,6 @@ def create_encoder_layer(
 
 @Registry.layers.register("transformer_encoder")
 def create_transformers_encoder(num_layers: int, encoder_layer: nn.Module) -> nn.Module:
-    return nn.TransformerEncoder(encoder_layer, num_layers=num_layers, enable_nested_tensor=False)
+    return nn.TransformerEncoder(
+        encoder_layer, num_layers=num_layers, enable_nested_tensor=False
+    )

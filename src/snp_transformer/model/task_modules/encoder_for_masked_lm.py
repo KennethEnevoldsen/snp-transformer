@@ -1,38 +1,17 @@
 import logging
-from abc import abstractmethod
 from copy import copy
-from dataclasses import dataclass
 from typing import Literal, Union
 
-import lightning.pytorch as pl
 import torch
 from torch import nn
 from torchmetrics.classification import MulticlassAccuracy
 
-from snp_transformer.data_objects import Individual
-
-from ..registry import OptimizerFn, Registry
-from .embedders import Embedder, InputIds, Vocab
+from ...registry import OptimizerFn, Registry
+from ..embedders import Embedder, InputIds, Vocab
+from .trainable_modules import MaskingTargets, TrainableModule
 
 logger = logging.getLogger(__name__)
 
-
-@dataclass
-class MaskingTargets:
-    domain_targets: dict[str, torch.Tensor]  # domain -> target ids
-    padding_idx: int
-
-
-class TrainableModule(pl.LightningModule):
-    """
-    Interface for a trainable module
-    """
-
-    embedding_module: Embedder
-
-    @abstractmethod
-    def collate_fn(self, individual: list[Individual]) -> InputIds:
-        ...
 
 
 class EncoderForMaskedLM(TrainableModule):

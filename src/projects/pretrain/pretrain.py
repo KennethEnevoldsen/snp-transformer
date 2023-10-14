@@ -10,8 +10,8 @@ train(path)
 
 
 # TODO:
-    # get it running for 1 full epoch
-    # run a model training to convergence
-    # fine-tune the model
-      # add phenotype prediction
-    # add positional encoding
+# [x] get it running for 1 full epoch
+# [x] run a model training to convergence
+# fine-tune the model
+# add phenotype prediction
+# add positional encoding
