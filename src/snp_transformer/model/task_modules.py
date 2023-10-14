@@ -2,7 +2,7 @@ import logging
 from abc import abstractmethod
 from copy import copy
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, Union
 
 import lightning.pytorch as pl
 import torch
@@ -44,7 +44,7 @@ class EncoderForMaskedLM(TrainableModule):
         embedding_module: Embedder,
         encoder_module: nn.TransformerEncoder,
         create_optimizer_fn: OptimizerFn,
-        domains_to_mask: list[str] | None = None,
+        domains_to_mask: Union[list[str], None] = None,
     ):
         super().__init__()
         self.save_hyperparameters(ignore=["encoder_module", "embedding_module"])
@@ -68,7 +68,7 @@ class EncoderForMaskedLM(TrainableModule):
         self,
         embedding_module: Embedder,
         encoder_module: nn.TransformerEncoder,
-        domains_to_mask: list[str] | None = None,
+        domains_to_mask: Union[list[str], None] = None,
     ) -> None:
         self.embedding_module = embedding_module
         self.encoder_module = encoder_module
@@ -122,7 +122,7 @@ class EncoderForMaskedLM(TrainableModule):
         self,
         inputs: InputIds,
         masked_lm_labels: MaskingTargets,
-    ) -> dict[str, torch.Tensor | dict[str, torch.Tensor]]:
+    ) -> dict[str, Union[torch.Tensor, dict[str, torch.Tensor]]]:
         output = self.embedding_module(inputs)
         embeddings = output["embeddings"]
         is_padding = output["is_padding"]
@@ -237,7 +237,7 @@ class EncoderForMaskedLM(TrainableModule):
         self,
         batch: tuple[InputIds, MaskingTargets],
         batch_idx: int,  # noqa: ARG002
-    ) -> torch.Tensor | dict[str, torch.Tensor]:
+    ) -> Union[torch.Tensor, dict[str, torch.Tensor]]:
         x, y = batch
         output = self.forward(x, y)
         self.log_step(output, batch_size=x.get_batch_size(), mode="Training")
@@ -247,7 +247,7 @@ class EncoderForMaskedLM(TrainableModule):
         self,
         batch: tuple[InputIds, MaskingTargets],
         batch_idx: int,  # noqa: ARG002
-    ) -> torch.Tensor | dict[str, torch.Tensor]:
+    ) -> Union[torch.Tensor, dict[str, torch.Tensor]]:
         x, y = batch
         output = self.forward(x, y)
 
@@ -285,7 +285,7 @@ def create_encoder_for_masked_lm(
     embedding_module: Embedder,
     encoder_module: nn.TransformerEncoder,
     create_optimizer_fn: OptimizerFn,
-    domains_to_mask: list[str] | None = None,
+    domains_to_mask: Union[list[str], None] = None,
 ) -> EncoderForMaskedLM:
 
     logger.info("Creating task module for masked lm")

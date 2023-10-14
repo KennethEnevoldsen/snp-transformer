@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0.0", "wheel", "setuptools_scm"]
+requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -14,10 +14,11 @@ description = "SNP Transformer"
 classifiers = [
   "Operating System :: POSIX :: Linux",
   "Operating System :: MacOS :: MacOS X",
+  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 dependencies = [
   "pydantic>=2.1.1",
   "torch>=2.0.1",
@@ -41,7 +42,6 @@ dev = [
   "ruff>=0.0.254",
   "black[jupyter]>=22.8.0",
   "invoke>=2.2.0",
-  "bed-reader>=0.2.36",
 
 ]
 tests = [
@@ -155,7 +155,7 @@ include-package-data = true
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py{310, 311}
+envlist = py{39, 310, 311}
 
 [testenv]
 description: run unit tests
@@ -167,7 +167,7 @@ commands =
 [testenv:type]
 description: run type checks
 extras = tests, dev
-basepython = py310 # Setting these explicitly avoid recreating env if your shell is set to a different version
+basepython = py39 # Setting these explicitly avoid recreating env if your shell is set to a different version
 use_develop = true
 commands =
   pyright src/
