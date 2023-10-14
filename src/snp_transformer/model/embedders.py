@@ -2,7 +2,7 @@ import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Protocol, runtime_checkable
+from typing import Any, Dict, List, Protocol, Union, runtime_checkable
 
 import torch
 from snp_transformer.data_objects import Individual
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class InputIds:
-    domain_embeddings: dict[str, torch.Tensor]  # domain -> embeddings ids
+    domain_embeddings: Dict[str, torch.Tensor]  # domain -> embeddings ids
     is_padding: torch.Tensor
 
     def get_batch_size(self) -> int:
@@ -33,7 +33,7 @@ class InputIds:
 
 @dataclass
 class Vocab:
-    domains: dict[str, dict[str, Any]]
+    domains: Dict[str, Dict[str, Any]]
     mask: str = "MASK"
     pad: str = "PAD"
 
@@ -46,13 +46,13 @@ class Vocab:
     def get_vocab_size(self, key: str) -> int:
         return len(self.domains[key])
 
-    def get_mask_ids(self) -> dict[str, int]:
+    def get_mask_ids(self) -> Dict[str, int]:
         return {
             domain: domain_vocab[self.mask]
             for domain, domain_vocab in self.domains.items()
         }
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         return {
             "domains": self.domains,
             "mask": self.mask,
@@ -60,7 +60,7 @@ class Vocab:
         }
 
     @classmethod
-    def from_dict(cls: type["Vocab"], vocab_dict: dict[str, Any]) -> "Vocab":
+    def from_dict(cls: type["Vocab"], vocab_dict: Dict[str, Any]) -> "Vocab":
         return cls(**vocab_dict)
 
 
@@ -77,16 +77,16 @@ class Embedder(Protocol):
     def __init__(self, *args: Any) -> None:
         ...
 
-    def forward(self, *args: Any) -> dict[str, torch.Tensor]:
+    def forward(self, *args: Any) -> Dict[str, torch.Tensor]:
         ...
 
-    def fit(self, individuals: list[Individual], *args: Any) -> None:
+    def fit(self, individuals: List[Individual], *args: Any) -> None:
         ...
 
-    def __call__(self, *args: Any) -> dict[str, torch.Tensor]:
+    def __call__(self, *args: Any) -> Dict[str, torch.Tensor]:
         ...
 
-    def collate_individuals(self, individual: list[Individual]) -> InputIds:
+    def collate_individuals(self, individual: List[Individual]) -> InputIds:
         ...
 
 
@@ -128,7 +128,7 @@ class SNPEmbedder(nn.Module, Embedder):
 
         self.is_fitted = True
 
-    def forward(self, inputs: InputIds) -> dict[str, torch.Tensor]:
+    def forward(self, inputs: InputIds) -> Dict[str, torch.Tensor]:
         self.check_if_fitted()
 
         batch_size = inputs.get_batch_size()
@@ -155,7 +155,7 @@ class SNPEmbedder(nn.Module, Embedder):
         }
         return output_embeddings
 
-    def _collate_individual(self, individual: Individual) -> dict[str, torch.Tensor]:
+    def _collate_individual(self, individual: Individual) -> Dict[str, torch.Tensor]:
         snps = individual.snps
         snp_values = snps.values
         # convert to idx tensor
@@ -166,7 +166,7 @@ class SNPEmbedder(nn.Module, Embedder):
         inputs_ids = {"snp": snp_ids, "is_padding": is_padding}
         return inputs_ids
 
-    def collate_individuals(self, individual: list[Individual]) -> InputIds:
+    def collate_individuals(self, individual: List[Individual]) -> InputIds:
         """
         Handles padding and indexing by converting each to an index tensor
         """
@@ -181,8 +181,8 @@ class SNPEmbedder(nn.Module, Embedder):
 
     def _pad_sequences(
         self,
-        sequences: list[dict[str, torch.Tensor]],
-    ) -> dict[str, torch.Tensor]:
+        sequences: List[Dict[str, torch.Tensor]],
+    ) -> Dict[str, torch.Tensor]:
         keys = list(sequences[0].keys())
         any_key = keys[0]
 
@@ -210,7 +210,7 @@ class SNPEmbedder(nn.Module, Embedder):
 
     def fit(
         self,
-        individuals: list[Individual],  # noqa: ARG002
+        individuals: List[Individual],  # noqa: ARG002
         add_mask_token: bool = True,
     ) -> None:
         # could also be estimated from the data but there is no need for that
@@ -274,8 +274,8 @@ def create_snp_embedder(
     d_model: int,
     dropout_prob: float,
     max_sequence_length: int,
-    individuals: list[Individual] | None = None,
-    checkpoint_path: Path | None = None,
+    individuals: Union[List[Individual], None] = None,
+    checkpoint_path: Union[Path, None] = None,
 ) -> Embedder:
     should_load_ckpt = (
         checkpoint_path is not None

@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0.0", "wheel", "setuptools_scm"]
+requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -14,10 +14,11 @@ description = "SNP Transformer"
 classifiers = [
   "Operating System :: POSIX :: Linux",
   "Operating System :: MacOS :: MacOS X",
+  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 dependencies = [
   "pydantic>=2.1.1",
   "torch>=2.0.1",
@@ -39,7 +40,6 @@ dev = [
   "ruff>=0.0.254",
   "black[jupyter]>=22.8.0",
   "invoke>=2.2.0",
-  "bed-reader>=0.2.36",
 
 ]
 tests = [

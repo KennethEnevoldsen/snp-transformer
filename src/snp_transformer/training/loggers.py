@@ -1,14 +1,15 @@
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 from lightning.pytorch.loggers.wandb import WandbLogger
+
 from snp_transformer.registry import Registry
 
 
 @Registry.loggers.register("wandb")
 def create_wandb_logger(
     name: Optional[str] = None,
-    save_dir: Path | str = ".",
+    save_dir: Union[Path, str] = ".",
     version: Optional[str] = None,
     offline: bool = False,
     dir: Optional[Path] = None,  # noqa: A002

@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, List
 
 import pandas as pd
 import pytest
@@ -10,7 +10,7 @@ from snp_transformer.model.optimizers import create_adam
 
 
 @pytest.fixture()
-def individuals(test_data_folder: Path) -> list[Individual]:
+def individuals(test_data_folder: Path) -> List[Individual]:
     ind_dataset = IndividualsDataset(test_data_folder / "data")
 
     return [ind_dataset[i] for i in range(len(ind_dataset))]

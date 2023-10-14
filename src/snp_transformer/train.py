@@ -3,6 +3,7 @@
 
 
 from pathlib import Path
+from typing import Optional
 
 import lightning.pytorch as pl
 from torch.utils.data import DataLoader
@@ -10,7 +11,7 @@ from torch.utils.data import DataLoader
 from snp_transformer.config import flatten_nested_dict, load_config, parse_config
 
 
-def train(config_path: Path | None = None) -> None:
+def train(config_path: Optional[Path] = None) -> None:
     config_dict = load_config(config_path)
     config = parse_config(config_dict)
 
