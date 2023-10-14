@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import Optional, Union
 
 from lightning.pytorch.loggers.wandb import WandbLogger
-
 from snp_transformer.registry import Registry
 
 
