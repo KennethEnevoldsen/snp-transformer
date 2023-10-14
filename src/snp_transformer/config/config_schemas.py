@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any, Optional, Union
 
-from lightning.pytorch.loggers.logger import Logger
+from lightning.pytorch.loggers.wandb import WandbLogger
 from pydantic import BaseModel, ConfigDict
 
 from snp_transformer.dataset.dataset import IndividualsDataset
@@ -16,10 +16,10 @@ class TrainerConfigSchema(BaseModel):
     devices: Union[list[int], str, int] = "auto"
     num_nodes: int = 1
     precision: str = "32-true"
-    logger: Logger
+    logger: WandbLogger
     max_epochs: Optional[int] = None
     min_epochs: Optional[int] = None
-    max_steps: int = 10
+    max_steps: int = 10  # use -1 for no limit
     min_steps: Optional[int] = None
     limit_train_batches: Optional[Union[int, float]] = None
     limit_val_batches: Optional[Union[int, float]] = None

@@ -6,9 +6,10 @@ from typing import Literal, Union
 
 import lightning.pytorch as pl
 import torch
-from snp_transformer.data_objects import Individual
 from torch import nn
 from torchmetrics.classification import MulticlassAccuracy
+
+from snp_transformer.data_objects import Individual
 
 from ..registry import OptimizerFn, Registry
 from .embedders import Embedder, InputIds, Vocab
@@ -260,20 +261,17 @@ class EncoderForMaskedLM(TrainableModule):
         batch_size: int,
         mode: Literal["Validation", "Training"],
     ) -> None:
-        self.log("{mode} Loss", output["loss"], batch_size=batch_size)
+        log_kwargs = {"batch_size": batch_size, "sync_dist": True}
+        self.log(f"{mode} Loss", output["loss"], **log_kwargs)
         dom_train_losses = output.pop("Domain Losses")
         for domain in dom_train_losses:
-            self.log(
-                f"{mode} Loss ({domain})",
-                dom_train_losses[domain],
-                batch_size=batch_size,
-            )
+            self.log(f"{mode} Loss ({domain})", dom_train_losses[domain], **log_kwargs)
         dom_mlm_acc = output.pop("MLM Accuracies")
         for domain in dom_mlm_acc:
             self.log(
                 f"{mode} MLM Accuracy ({domain})",
                 dom_mlm_acc[domain],
-                batch_size=batch_size,
+                **log_kwargs,
             )
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
@@ -287,7 +285,6 @@ def create_encoder_for_masked_lm(
     create_optimizer_fn: OptimizerFn,
     domains_to_mask: Union[list[str], None] = None,
 ) -> EncoderForMaskedLM:
-
     logger.info("Creating task module for masked lm")
     return EncoderForMaskedLM(
         embedding_module=embedding_module,

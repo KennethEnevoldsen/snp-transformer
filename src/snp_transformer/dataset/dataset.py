@@ -5,10 +5,11 @@ A dataset for loading in patients
 import logging
 from pathlib import Path
 
+from torch.utils.data import Dataset
+
 from snp_transformer.data_objects import Individual, SNPs
 from snp_transformer.dataset.loaders import load_details, load_fam, load_sparse
 from snp_transformer.registry import Registry
-from torch.utils.data import Dataset
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +42,7 @@ class IndividualsDataset(Dataset):
         ind = self.idx2snp[idx + 1]  # sparse is 1-indexed
 
         snp_values = ind["Value"].to_numpy()
-        snp_indices = ind["SNP"].to_numpy()
+        snp_indices = ind["SNP"].to_numpy() -1 # sparse is 1-indexed
 
         snp_details = self.snp_details.iloc[snp_indices]  # type: ignore
         ind_fam = self.fam.loc[iid]

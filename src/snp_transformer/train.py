@@ -9,7 +9,8 @@ from typing import Optional
 import lightning.pytorch as pl
 from torch.utils.data import DataLoader
 
-from snp_transformer.config import flatten_nested_dict, load_config, parse_config
+from snp_transformer.config import (flatten_nested_dict, load_config,
+                                    parse_config)
 
 std_logger = logging.getLogger(__name__)
 
@@ -27,7 +28,9 @@ def train(config_path: Optional[Path] = None) -> None:
 
     # update config
     flat_config = flatten_nested_dict(config_dict)
-    logger.experiment.config.update(flat_config)  # type: ignore
+
+    # a hack to get the wandb logger to work
+    logger._wandb_init["config"] = flat_config
 
     # create dataloader:
     train_loader = DataLoader(

@@ -7,3 +7,11 @@ logging.basicConfig(level=logging.INFO)
 path = Path(__file__).parent / "config.cfg"
 
 train(path)
+
+
+# TODO:
+    # get it running for 1 full epoch
+    # run a model training to convergence
+    # fine-tune the model
+      # add phenotype prediction
+    # add positional encoding
