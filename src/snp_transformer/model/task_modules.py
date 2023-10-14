@@ -2,14 +2,13 @@ import logging
 from abc import abstractmethod
 from copy import copy
 from dataclasses import dataclass
-from typing import Literal, Union
+from typing import Literal
 
 import lightning.pytorch as pl
 import torch
+from snp_transformer.data_objects import Individual
 from torch import nn
 from torchmetrics.classification import MulticlassAccuracy
-
-from snp_transformer.data_objects import Individual
 
 from ..registry import OptimizerFn, Registry
 from .embedders import Embedder, InputIds, Vocab
@@ -48,7 +47,7 @@ class EncoderForMaskedLM(TrainableModule):
         domains_to_mask: list[str] | None = None,
     ):
         super().__init__()
-        self.save_hyperparameters(ignore=['encoder_module', 'embedding_module'])
+        self.save_hyperparameters(ignore=["encoder_module", "embedding_module"])
         self.initialize_model(embedding_module, encoder_module, domains_to_mask)
 
         self.loss = nn.CrossEntropyLoss(ignore_index=self.ignore_index)
@@ -151,8 +150,6 @@ class EncoderForMaskedLM(TrainableModule):
         # compute total loss using torch
         # this assumed equal weighting of domains
         total_loss = torch.stack(list(domain_losses.values())).sum()
-        
-        
 
         return {
             "logits": logits,
@@ -246,7 +243,6 @@ class EncoderForMaskedLM(TrainableModule):
         self.log_step(output, batch_size=x.get_batch_size(), mode="Training")
         return output["loss"]
 
-
     def validation_step(
         self,
         batch: tuple[InputIds, MaskingTargets],
@@ -258,14 +254,24 @@ class EncoderForMaskedLM(TrainableModule):
         self.log_step(output, x.get_batch_size(), mode="Validation")
         return output["loss"]
 
-    def log_step(self, output: dict, batch_size: int, mode: Literal["Validation", "Training"]) -> None:
+    def log_step(
+        self, output: dict, batch_size: int, mode: Literal["Validation", "Training"],
+    ) -> None:
         self.log("{mode} Loss", output["loss"], batch_size=batch_size)
         dom_train_losses = output.pop("Domain Losses")
         for domain in dom_train_losses:
-            self.log(f"{mode} Loss ({domain})", dom_train_losses[domain], batch_size=batch_size)
+            self.log(
+                f"{mode} Loss ({domain})",
+                dom_train_losses[domain],
+                batch_size=batch_size,
+            )
         dom_mlm_acc = output.pop("MLM Accuracies")
         for domain in dom_mlm_acc:
-            self.log(f"{mode} MLM Accuracy ({domain})", dom_mlm_acc[domain], batch_size=batch_size)
+            self.log(
+                f"{mode} MLM Accuracy ({domain})",
+                dom_mlm_acc[domain],
+                batch_size=batch_size,
+            )
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
         return self.create_optimizer_fn(self.parameters())
