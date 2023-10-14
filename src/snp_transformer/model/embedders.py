@@ -2,7 +2,7 @@ import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Protocol, runtime_checkable
+from typing import Any, Protocol, Union, runtime_checkable
 
 import torch
 from snp_transformer.data_objects import Individual
@@ -274,8 +274,8 @@ def create_snp_embedder(
     d_model: int,
     dropout_prob: float,
     max_sequence_length: int,
-    individuals: list[Individual] | None = None,
-    checkpoint_path: Path | None = None,
+    individuals: Union[list[Individual], None] = None,
+    checkpoint_path: Union[Path, None] = None,
 ) -> Embedder:
     should_load_ckpt = (
         checkpoint_path is not None
