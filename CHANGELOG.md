@@ -2,6 +2,33 @@
 
 
 
+## v0.2.0 (2023-10-14)
+
+### Ci
+
+* ci: Updated tests to only run lowest version ([`d737ff0`](https://github.com/KennethEnevoldsen/snp-transformer/commit/d737ff052139c35c07b070e8265d543c0995753b))
+
+### Feature
+
+* feat: add 39 support ([`79ccd84`](https://github.com/KennethEnevoldsen/snp-transformer/commit/79ccd84a9119c1deb039c863677a9b7eb0a24c97))
+
+### Fix
+
+* fix: added missing test env ([`bd1e157`](https://github.com/KennethEnevoldsen/snp-transformer/commit/bd1e157f55d789eaee1d0051756bfa18f8fa1eb1))
+
+### Style
+
+* style: linting ([`ab3d611`](https://github.com/KennethEnevoldsen/snp-transformer/commit/ab3d611bb020abf608fcea7667340e90717b84fd))
+
+### Unknown
+
+* Merge pull request #16 from KennethEnevoldsen/39-support
+
+feat: add 39 support ([`f0c7a06`](https://github.com/KennethEnevoldsen/snp-transformer/commit/f0c7a0658acd8a16c94967413ee2a17a099767a0))
+
+* Merge branch &#39;39-support&#39; of https://github.com/KennethEnevoldsen/snp-transformer into 39-support ([`80e306c`](https://github.com/KennethEnevoldsen/snp-transformer/commit/80e306cff5cc62d224e228d5d9b5b1ade4bbdf82))
+
+
 ## v0.1.0 (2023-10-06)
 
 ### Feature
