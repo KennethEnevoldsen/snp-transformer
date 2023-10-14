@@ -255,7 +255,10 @@ class EncoderForMaskedLM(TrainableModule):
         return output["loss"]
 
     def log_step(
-        self, output: dict, batch_size: int, mode: Literal["Validation", "Training"],
+        self,
+        output: dict,
+        batch_size: int,
+        mode: Literal["Validation", "Training"],
     ) -> None:
         self.log("{mode} Loss", output["loss"], batch_size=batch_size)
         dom_train_losses = output.pop("Domain Losses")
