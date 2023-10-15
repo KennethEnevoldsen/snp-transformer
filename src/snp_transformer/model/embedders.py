@@ -2,20 +2,33 @@ import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Protocol, Union, runtime_checkable
+from typing import Any, Optional, Protocol, Union, runtime_checkable
 
 import torch
-from snp_transformer.data_objects import Individual
-from snp_transformer.registry import Registry
 from torch import nn
 from torch.nn.utils.rnn import pad_sequence
+
+from snp_transformer.data_objects import Individual
+from snp_transformer.dataset.dataset import IndividualsDataset
+from snp_transformer.registry import Registry
+
+from ..dataclass import DataclassAsDict
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass
-class InputIds:
-    domain_embeddings: dict[str, torch.Tensor]  # domain -> embeddings ids
+class InputIds(DataclassAsDict):
+    """
+
+    Attributes:
+        type_indexes: Indexes of the domain (e.g. snps and phenotype types such as height, weight)
+        value_indexes: Indexes of the values (e.g. snp values, phenotype values)
+        is_padding: Boolean tensor indicating which values are padding
+    """
+
+    type_indexes: torch.Tensor
+    value_indexes: torch.Tensor
     is_padding: torch.Tensor
 
     def get_batch_size(self) -> int:
@@ -24,40 +37,62 @@ class InputIds:
     def get_max_seq_len(self) -> int:
         return self.is_padding.shape[1]
 
-    def __getitem__(self, key: str) -> torch.Tensor:
-        return self.domain_embeddings[key]
-
     def get_device(self) -> torch.device:
         return self.is_padding.device
 
 
 @dataclass
+class Embeddings(DataclassAsDict):
+    embeddings: torch.Tensor
+    is_padding: torch.Tensor
+
+
+@dataclass
 class Vocab:
-    domains: dict[str, dict[str, Any]]
+    """
+
+    Attributes:
+        snp2idx: Mapping from SNP value to index
+        type2idx: Mapping from type to index. Type includes phenotype types (e.g. height, weight) and snp
+        phenotype2idx: Mapping from phenotype value to index
+
+    """
+
+    snp2idx: dict[str, int]
+    type2idx: dict[str, int]
+    phenotype2idx: dict[str, int]
     mask: str = "MASK"
     pad: str = "PAD"
 
-    def get_padding_idx(self, key: str) -> int:
-        return self.domains[key][self.pad]
+    @property
+    def vocab_size_phenotype(self) -> int:
+        return len(self.phenotype2idx)
 
-    def get_mask_idx(self, key: str) -> int:
-        return self.domains[key][self.mask]
+    @property
+    def vocab_size_snps(self) -> int:
+        return len(self.snp2idx)
 
-    def get_vocab_size(self, key: str) -> int:
-        return len(self.domains[key])
+    @property
+    def vocab_size_types(self) -> int:
+        return len(self.type2idx)
 
-    def get_mask_ids(self) -> dict[str, int]:
-        return {
-            domain: domain_vocab[self.mask]
-            for domain, domain_vocab in self.domains.items()
-        }
+    @property
+    def vocab_size(self) -> int:
+        # as e.g. snp2idx and phenotype2idx can have overlapping values for the mask and pad tokens
+        unique_values = set(
+            list(self.type2idx.values())
+            + list(self.snp2idx.values())
+            + list(self.phenotype2idx.values())
+        )
+        return len(unique_values)
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "domains": self.domains,
-            "mask": self.mask,
-            "pad": self.pad,
+            "snp2idx": self.snp2idx,
+            "type2idx": self.type2idx,
+            "phenotype2idx": self.phenotype2idx,
         }
+    
 
     @classmethod
     def from_dict(cls: type["Vocab"], vocab_dict: dict[str, Any]) -> "Vocab":
@@ -91,6 +126,9 @@ class Embedder(Protocol):
 
 
 class SNPEmbedder(nn.Module, Embedder):
+    mask_token = "MASK"
+    pad_token = "PAD"
+
     def __init__(
         self,
         d_model: int,
@@ -118,17 +156,12 @@ class SNPEmbedder(nn.Module, Embedder):
         self.not_embeddings = {"is_padding"}
         self.vocab = vocab
 
-        n_unique_snps = vocab.get_vocab_size("snp")
-        self.n_unique_snps = n_unique_snps
-        snp_embedding = nn.Embedding(n_unique_snps, self.d_model)
-
-        self.embeddings = nn.ModuleDict({"snp": snp_embedding})
-
-        # TODO: Add additional embeddings once the tests run
+        # includes all embeddings
+        self.embedding = nn.Embedding(vocab.vocab_size, self.d_model)
 
         self.is_fitted = True
 
-    def forward(self, inputs: InputIds) -> dict[str, torch.Tensor]:
+    def forward(self, inputs: InputIds) -> Embeddings:
         self.check_if_fitted()
 
         batch_size = inputs.get_batch_size()
@@ -143,27 +176,52 @@ class SNPEmbedder(nn.Module, Embedder):
             device=device,
         )
 
-        for key, embedding in self.embeddings.items():
-            embeddings += embedding(inputs[key])
+        # add the domain (e.g. snps, phenotype_type) embeddings
+        embeddings += self.embedding(inputs.type_indexes)
+        # add the value embeddings
+        embeddings += self.embedding(inputs.value_indexes)
 
         embeddings = self.LayerNorm(embeddings)
         embeddings = self.dropout(embeddings)
 
-        output_embeddings = {
-            "embeddings": embeddings,
-            "is_padding": inputs.is_padding,
-        }
-        return output_embeddings
+        return Embeddings(
+            embeddings=embeddings,
+            is_padding=inputs.is_padding,
+        )
 
     def _collate_individual(self, individual: Individual) -> dict[str, torch.Tensor]:
-        snps = individual.snps
-        snp_values = snps.values
-        # convert to idx tensor
+        """
+        Collate an indivivual into ids
+        """
+        # SNP Values
+        snps = individual.snps.values
+        snp_ids = torch.tensor(snps, dtype=torch.long)
 
-        snp_ids = torch.tensor(snp_values, dtype=torch.long)
-        is_padding = torch.zeros_like(snp_ids, dtype=torch.bool)
+        # Phenotypes Values
+        phenotypes = list(individual.phenotype.values())
+        phenotype_ids = torch.tensor(phenotypes, dtype=torch.long)
 
-        inputs_ids = {"snp": snp_ids, "is_padding": is_padding}
+        values_ids = torch.cat([snp_ids, phenotype_ids])
+
+        # Type (e.g. snp and phenotypes such as height, weight)
+        snp_type_idx = self.vocab.type2idx["snp"]
+        snp_type_ids_: list[int] = [snp_type_idx] * len(snps)
+
+        phenotype_types = list(individual.phenotype.keys())
+        phenotype_type_ids_: list[int] = [
+            self.vocab.type2idx[ptype] for ptype in phenotype_types
+        ]
+
+        type_ids = torch.tensor(snp_type_ids_ + phenotype_type_ids_, dtype=torch.long)
+
+        # Padding
+        is_padding = torch.zeros_like(values_ids, dtype=torch.bool)
+
+        inputs_ids = {
+            "values": values_ids,
+            "type": type_ids,
+            "is_padding": is_padding,
+        }
         return inputs_ids
 
     def collate_individuals(self, individual: list[Individual]) -> InputIds:
@@ -176,8 +234,11 @@ class SNPEmbedder(nn.Module, Embedder):
             self._collate_individual(ind) for ind in individual
         ]
         padded_seqs = self._pad_sequences(inds)
-        input_ids = padded_seqs.pop("is_padding")
-        return InputIds(domain_embeddings=padded_seqs, is_padding=input_ids)
+        return InputIds(
+            type_indexes=padded_seqs["type"],
+            value_indexes=padded_seqs["values"],
+            is_padding=padded_seqs["is_padding"],
+        )
 
     def _pad_sequences(
         self,
@@ -193,39 +254,66 @@ class SNPEmbedder(nn.Module, Embedder):
             )
             max_seq_len = self.max_sequence_length
 
-        padded_sequences: dict[str, torch.Tensor] = {}
+        values = [p["values"][:max_seq_len] for p in sequences]
+        values_w_padding = pad_sequence(
+            values,
+            batch_first=True,
+            padding_value=self.vocab.type2idx[self.pad_token],
+        )
 
-        for domain in self.vocab.domains:
-            pad_idx = self.vocab.get_padding_idx(domain)
-            truncated_seq = [p[domain][:max_seq_len] for p in sequences]
-            padded_sequences[domain] = pad_sequence(
-                truncated_seq,
-                batch_first=True,
-                padding_value=pad_idx,
-            )
+        types = [p["type"][:max_seq_len] for p in sequences]
+        types_w_padding = pad_sequence(
+            types,
+            batch_first=True,
+            padding_value=self.vocab.type2idx[self.pad_token],
+        )
 
-        key = "is_padding"
-        truncated_seq = [p[key][:max_seq_len] for p in sequences]
-        padded_sequences[key] = padded_sequences[key] = pad_sequence(
-            truncated_seq,
+        is_padding = [p["is_padding"][:max_seq_len] for p in sequences]
+        is_padding_w_padding = pad_sequence(
+            is_padding,
             batch_first=True,
             padding_value=True,
         )
-
-        return padded_sequences
+        return {
+            "values": values_w_padding,
+            "type": types_w_padding,
+            "is_padding": is_padding_w_padding,
+        }
 
     def fit(
         self,
-        individuals: list[Individual],  # noqa: ARG002
-        add_mask_token: bool = True,
+        individuals: list[Individual],
     ) -> None:
         # could also be estimated from the data but there is no need for that
         # and this ensure that 1 and 2 is masked as one would expect
-        snp2idx = {"0": 0, "1": 1, "2": 2, "PAD": 3}
-        if add_mask_token:
-            snp2idx["MASK"] = 3
+        snp2idx = {self.pad_token: 0, self.mask_token: 1, "0": 2, "1": 3, "2": 4}
+        max_token = max(snp2idx.values())
 
-        vocab: Vocab = Vocab(domains={"snp": snp2idx}, mask="MASK", pad="PAD")
+        type2idx: dict[str, int] = {
+            self.pad_token: 0,
+            "snp": max_token + 1,
+            "phenotype": max_token + 2,
+        }
+        max_token += 2
+        phenotype2idx: dict[str, int] = {self.pad_token: 0, self.mask_token: 1}
+
+        for ind in individuals:
+            for pheno_type, value in ind.phenotype.items():
+                if pheno_type not in type2idx:
+                    # continue from max_token
+                    max_token += 1
+                    type2idx[pheno_type] = max_token
+                if value not in phenotype2idx:
+                    max_token += 1
+                    phenotype2idx[str(value)] = max_token
+
+        vocab: Vocab = Vocab(
+            snp2idx=snp2idx,
+            type2idx=type2idx,
+            phenotype2idx=phenotype2idx,
+        )
+
+        assert vocab.vocab_size == max_token + 1
 
         self.initialize_embeddings_layers(vocab)
 
@@ -280,7 +368,7 @@ def create_snp_embedder(
     d_model: int,
     dropout_prob: float,
     max_sequence_length: int,
-    individuals: Union[list[Individual], None] = None,
+    individuals: Union[list[Individual], IndividualsDataset, None] = None,
     checkpoint_path: Union[Path, None] = None,
 ) -> Embedder:
     should_load_ckpt = (
@@ -300,7 +388,7 @@ def create_snp_embedder(
         if kwargs_match:
             logger.info(f"Loaded embedder from {checkpoint_path}")
             return emb
-        logger.warn(
+        logger.warning(
             "Embedder kwargs do not match checkpoint kwargs, ignoring checkpoint",
         )
 
@@ -312,6 +400,8 @@ def create_snp_embedder(
 
     if individuals is None:
         individuals = []
+    if isinstance(individuals, IndividualsDataset):
+        individuals = individuals.get_individuals()
     emb.fit(individuals)
 
     if checkpoint_path is not None:

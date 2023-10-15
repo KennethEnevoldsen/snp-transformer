@@ -134,6 +134,44 @@ def convert_bim_to_details(bim: pd.DataFrame) -> pd.DataFrame:
     return details
 
 
+def load_pheno(path: Path) -> dict[str, int]:
+    """
+    load a phenotype file on the form:
+
+    ```
+    1 1 1
+    2 2 1
+    3 3 0
+    ```
+
+    Where the columns are:
+        iid fid phenotype
+    """
+
+    pheno = pl.read_csv(
+        path,
+        separator=" ",
+        has_header=False,
+        dtypes={"iid": pl.Int64, "fid": pl.Int64, "phenotype": pl.Int64},
+    )
+    return {iid: phenotype for iid, phenotype in zip(pheno["iid"], pheno["phenotype"])}
+
+
+def load_pheno_folder(path: Path) -> dict[str, dict[str, float]]:
+    """
+    Assumes a folder on the format is place as path; pheno/*.pheno files one for each phenotype, e.g. pheno/height.pheno.
+    """
+    assert path.is_dir(), f"Path {path} is not a directory"
+    
+    # load all .pheno
+    pheno_files = list(path.glob("*.pheno"))
+    pheno = {}
+    for pheno_file in pheno_files:
+        pheno_name = pheno_file.stem
+        pheno[pheno_name] = load_pheno(pheno_file)
+    return pheno
+
+
 def load_sparse(path: Path) -> pl.DataFrame:
     """
     Load in the custom .sparse format on the form:

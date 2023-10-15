@@ -3,12 +3,15 @@ A dataset for loading in patients
 """
 
 import logging
+from collections import defaultdict
+from email.policy import default
 from pathlib import Path
 
 from torch.utils.data import Dataset
 
 from snp_transformer.data_objects import Individual, SNPs
-from snp_transformer.dataset.loaders import load_details, load_fam, load_sparse
+from snp_transformer.dataset.loaders import (load_details, load_fam,
+                                             load_pheno_folder, load_sparse)
 from snp_transformer.registry import Registry
 
 logger = logging.getLogger(__name__)
@@ -34,12 +37,40 @@ class IndividualsDataset(Dataset):
 
         self.idx2snp = sparse.partition_by("Individual", as_dict=True)
 
+        pheno_folder = path.parent / "pheno"
+        if pheno_folder.exists():
+            self.iid2pheno = self.load_phenos(pheno_folder)
+        else:
+            self.iid2pheno = None
+            logger.warning(f"No pheno folder found in {path.parent}")
+
+
+    def load_phenos(self, path: Path) -> dict[str, dict[str, float]]:
+        pheno2iid = load_pheno_folder(path)
+        iid2pheno: dict[str, dict[str, float]] = defaultdict(dict)
+        for pheno, iid_map in pheno2iid.items():
+            for iid, value in iid_map.items():
+                iid2pheno[iid][pheno] = value
+        return iid2pheno
+    
+
+    def get_individuals(self) -> list[Individual]:
+        return [self[i] for i in range(len(self))]
+    
+
     def __len__(self) -> int:
         return self.fam.shape[0]
+
+    def get_pheno(self, iid: str) -> dict[str, float]:
+        if self.iid2pheno is None:
+            return {}
+        else:
+            return self.iid2pheno[iid]
 
     def __getitem__(self, idx: int) -> Individual:
         iid = self.idx2iid[idx]
         ind = self.idx2snp[idx + 1]  # sparse is 1-indexed
+        phenos = self.get_pheno(iid)
 
         snp_values = ind["Value"].to_numpy()
         snp_indices = ind["SNP"].to_numpy() -1 # sparse is 1-indexed
@@ -65,7 +96,7 @@ class IndividualsDataset(Dataset):
             father=ind_fam.father,
             mother=ind_fam.mother,
             sex=ind_fam.sex,
-            phenotype={},
+            phenotype=phenos,
         )
 
         return individual

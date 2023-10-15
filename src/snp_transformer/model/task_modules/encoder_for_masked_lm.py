@@ -13,7 +13,6 @@ from .trainable_modules import MaskingTargets, TrainableModule
 logger = logging.getLogger(__name__)
 
 
-
 class EncoderForMaskedLM(TrainableModule):
     """A LM head wrapper for masked language modeling."""
 
@@ -56,16 +55,22 @@ class EncoderForMaskedLM(TrainableModule):
         self.d_model = self.embedding_module.d_model
         vocab: Vocab = self.embedding_module.vocab
         self.mask_token_ids = vocab.get_mask_ids()
+
         self.domains_to_mask = (
-            vocab.domains if domains_to_mask is None else domains_to_mask
+            ["snps", "phenotype"] if domains_to_mask is None else domains_to_mask
         )
 
-        self.mlm_heads: nn.ModuleDict = nn.ModuleDict(
-            {
-                domain: nn.Linear(self.d_model, vocab.get_vocab_size(domain))
-                for domain in self.domains_to_mask
-            },
-        )
+        mlm_heads = {}
+        snp_head = nn.Linear(self.d_model, vocab.get_vocab_size("snps"))
+        mlm_heads["snps"] = snp_head
+
+        if "phenotype" in self.domains_to_mask:
+            phenotype_head = nn.Linear(
+                self.d_model, vocab.get_vocab_size("phenotype_values")
+            )
+            mlm_heads["phenotype"] = phenotype_head
+
+        self.mlm_heads: nn.ModuleDict = nn.ModuleDict(mlm_heads)
         self.loss = nn.CrossEntropyLoss(ignore_index=-1)
 
     def calculate_mlm_accuracy(
