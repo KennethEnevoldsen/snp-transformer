@@ -8,6 +8,8 @@ from snp_transformer import Individual, IndividualsDataset
 from snp_transformer.dataset.loaders import load_details, load_fam, load_sparse
 from snp_transformer.model.optimizers import create_adam
 
+TEST_DATA_FOLDER = Path(__file__).parent / "data"
+
 
 @pytest.fixture()
 def individuals(test_data_folder: Path) -> list[Individual]:
@@ -23,8 +25,7 @@ def training_dataset(test_data_folder: Path) -> IndividualsDataset:
 
 @pytest.fixture()
 def test_data_folder() -> Path:
-    test_folder = Path(__file__).parent
-    return test_folder / "data"
+    return TEST_DATA_FOLDER
 
 
 @pytest.fixture()
@@ -54,7 +55,7 @@ def fam(fam_path: Path) -> pd.DataFrame:
 
 @pytest.fixture()
 def sparse(sparse_path: Path) -> pd.DataFrame:
-    return load_sparse(sparse_path)
+    return load_sparse(sparse_path).to_pandas()
 
 
 @pytest.fixture()

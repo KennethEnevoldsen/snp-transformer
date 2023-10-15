@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 import torch
-from snp_transformer.model.embedders import Embedder, InputIds, SNPEmbedder
+from snp_transformer.model.embedders import Embedder, Embeddings, InputIds, SNPEmbedder
 
 
 @pytest.mark.parametrize(
@@ -26,20 +26,22 @@ def test_embeddding(
     inputs_ids = embedding_module.collate_individuals(individuals)
 
     assert isinstance(inputs_ids, InputIds)
-    assert isinstance(inputs_ids["snp"], torch.Tensor)
+    assert isinstance(inputs_ids.snp_value_ids, torch.Tensor)
     assert isinstance(inputs_ids.is_padding, torch.Tensor)
 
-    assert inputs_ids["snp"].shape == inputs_ids.is_padding.shape
-    assert inputs_ids["snp"].shape[0] == batch_size
+    assert inputs_ids.snp_value_ids.shape == inputs_ids.is_padding.shape
+    assert inputs_ids.snp_value_ids.shape[0] == batch_size
 
-    max_seq_len_in_batch = inputs_ids["snp"].shape[1]
+    max_seq_len_in_batch = inputs_ids.snp_value_ids.shape[1]
 
     # forward
     outputs = embedding_module(inputs_ids)
 
-    assert isinstance(outputs["embeddings"], torch.Tensor)
-    assert isinstance(inputs_ids.is_padding, torch.Tensor)
-    assert outputs["embeddings"].shape == (
+    assert isinstance(outputs, Embeddings)
+
+    assert isinstance(outputs.embeddings, torch.Tensor)
+    assert isinstance(outputs.is_padding, torch.Tensor)
+    assert outputs.embeddings.shape == (
         batch_size,
         max_seq_len_in_batch,
         embedding_kwargs["d_model"],
@@ -70,4 +72,4 @@ def test_saving_and_loading(
     assert emb_loaded.dropout_prob == emb.dropout_prob
     assert emb_loaded.max_sequence_length == emb.max_sequence_length
     assert emb_loaded.is_fitted == emb.is_fitted
-    assert emb_loaded.vocab.domains == emb.vocab.domains
+    assert emb_loaded.vocab == emb.vocab
