@@ -2,7 +2,6 @@ from pathlib import Path
 
 import pytest
 import torch
-
 from snp_transformer.model.embedders import Embedder, Embeddings, InputIds, SNPEmbedder
 
 
@@ -27,18 +26,17 @@ def test_embeddding(
     inputs_ids = embedding_module.collate_individuals(individuals)
 
     assert isinstance(inputs_ids, InputIds)
-    assert isinstance(inputs_ids.value_indexes, torch.Tensor)
+    assert isinstance(inputs_ids.snp_value_ids, torch.Tensor)
     assert isinstance(inputs_ids.is_padding, torch.Tensor)
 
-    assert inputs_ids.value_indexes.shape == inputs_ids.is_padding.shape
-    assert inputs_ids.value_indexes.shape[0] == batch_size
+    assert inputs_ids.snp_value_ids.shape == inputs_ids.is_padding.shape
+    assert inputs_ids.snp_value_ids.shape[0] == batch_size
 
-    max_seq_len_in_batch = inputs_ids.value_indexes.shape[1]
+    max_seq_len_in_batch = inputs_ids.snp_value_ids.shape[1]
 
     # forward
     outputs = embedding_module(inputs_ids)
 
-    assert isinstance(outputs, dict)
     assert isinstance(outputs, Embeddings)
 
     assert isinstance(outputs.embeddings, torch.Tensor)

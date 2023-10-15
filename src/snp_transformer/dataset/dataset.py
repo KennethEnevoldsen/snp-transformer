@@ -4,14 +4,17 @@ A dataset for loading in patients
 
 import logging
 from collections import defaultdict
-from email.policy import default
 from pathlib import Path
 
 from torch.utils.data import Dataset
 
 from snp_transformer.data_objects import Individual, SNPs
-from snp_transformer.dataset.loaders import (load_details, load_fam,
-                                             load_pheno_folder, load_sparse)
+from snp_transformer.dataset.loaders import (
+    load_details,
+    load_fam,
+    load_pheno_folder,
+    load_sparse,
+)
 from snp_transformer.registry import Registry
 
 logger = logging.getLogger(__name__)
@@ -44,28 +47,24 @@ class IndividualsDataset(Dataset):
             self.iid2pheno = None
             logger.warning(f"No pheno folder found in {path.parent}")
 
-
-    def load_phenos(self, path: Path) -> dict[str, dict[str, float]]:
+    def load_phenos(self, path: Path) -> dict[str, dict[str, int]]:
         pheno2iid = load_pheno_folder(path)
-        iid2pheno: dict[str, dict[str, float]] = defaultdict(dict)
+        iid2pheno: dict[str, dict[str, int]] = defaultdict(dict)
         for pheno, iid_map in pheno2iid.items():
             for iid, value in iid_map.items():
                 iid2pheno[iid][pheno] = value
         return iid2pheno
-    
 
     def get_individuals(self) -> list[Individual]:
         return [self[i] for i in range(len(self))]
-    
 
     def __len__(self) -> int:
         return self.fam.shape[0]
 
-    def get_pheno(self, iid: str) -> dict[str, float]:
+    def get_pheno(self, iid: str) -> dict[str, int]:
         if self.iid2pheno is None:
             return {}
-        else:
-            return self.iid2pheno[iid]
+        return self.iid2pheno[iid]
 
     def __getitem__(self, idx: int) -> Individual:
         iid = self.idx2iid[idx]
@@ -73,7 +72,7 @@ class IndividualsDataset(Dataset):
         phenos = self.get_pheno(iid)
 
         snp_values = ind["Value"].to_numpy()
-        snp_indices = ind["SNP"].to_numpy() -1 # sparse is 1-indexed
+        snp_indices = ind["SNP"].to_numpy() - 1  # sparse is 1-indexed
 
         snp_details = self.snp_details.iloc[snp_indices]  # type: ignore
         ind_fam = self.fam.loc[iid]

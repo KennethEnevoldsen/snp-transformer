@@ -37,7 +37,7 @@ def test_model(
     encoder = nn.TransformerEncoder(encoder_layer, num_layers=2)
 
     individuals = [training_dataset[i] for i in range(len(training_dataset))]
-    emb.fit(individuals, add_mask_token=True)
+    emb.fit(individuals)
 
     mdl = EncoderForMaskedLM(
         embedding_module=emb,

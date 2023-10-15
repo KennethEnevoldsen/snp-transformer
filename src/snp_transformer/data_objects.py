@@ -48,7 +48,7 @@ class Individual(BaseModel):
         description="Sex code ('1' = male, '2' = female, '0' = unknown)",
     )
 
-    phenotype: dict[str, float] = Field(
+    phenotype: dict[str, int] = Field(
         ...,
         description="Phenotype of the individual and their value",
     )

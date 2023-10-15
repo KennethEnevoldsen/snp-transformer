@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import pytest
-
 from snp_transformer.train import train
 
 

@@ -9,8 +9,7 @@ from typing import Optional
 import lightning.pytorch as pl
 from torch.utils.data import DataLoader
 
-from snp_transformer.config import (flatten_nested_dict, load_config,
-                                    parse_config)
+from snp_transformer.config import flatten_nested_dict, load_config, parse_config
 
 std_logger = logging.getLogger(__name__)
 

@@ -157,12 +157,12 @@ def load_pheno(path: Path) -> dict[str, int]:
     return {iid: phenotype for iid, phenotype in zip(pheno["iid"], pheno["phenotype"])}
 
 
-def load_pheno_folder(path: Path) -> dict[str, dict[str, float]]:
+def load_pheno_folder(path: Path) -> dict[str, dict[str, int]]:
     """
     Assumes a folder on the format is place as path; pheno/*.pheno files one for each phenotype, e.g. pheno/height.pheno.
     """
     assert path.is_dir(), f"Path {path} is not a directory"
-    
+
     # load all .pheno
     pheno_files = list(path.glob("*.pheno"))
     pheno = {}

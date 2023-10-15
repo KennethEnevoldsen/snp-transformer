@@ -8,7 +8,7 @@ from torchmetrics.classification import MulticlassAccuracy
 
 from ...registry import OptimizerFn, Registry
 from ..embedders import Embedder, InputIds, Vocab
-from .trainable_modules import MaskingTargets, TrainableModule
+from .trainable_modules import Targets, TrainableModule
 
 logger = logging.getLogger(__name__)
 
@@ -23,11 +23,12 @@ class EncoderForMaskedLM(TrainableModule):
         embedding_module: Embedder,
         encoder_module: nn.TransformerEncoder,
         create_optimizer_fn: OptimizerFn,
-        domains_to_mask: Union[list[str], None] = None,
+        mask_phenotype: bool = True,
     ):
         super().__init__()
+        self.mask_phenotype = mask_phenotype
         self.save_hyperparameters(ignore=["encoder_module", "embedding_module"])
-        self.initialize_model(embedding_module, encoder_module, domains_to_mask)
+        self.initialize_model(embedding_module, encoder_module)
 
         self.loss = nn.CrossEntropyLoss(ignore_index=self.ignore_index)
         self.create_optimizer_fn = create_optimizer_fn
@@ -35,69 +36,30 @@ class EncoderForMaskedLM(TrainableModule):
 
     def initialize_metrics(self):
         vocab: Vocab = self.embedding_module.vocab
-        self.metrics = {
-            (domain, "accuracy"): MulticlassAccuracy(
-                num_classes=vocab.get_vocab_size(domain),
-                ignore_index=self.ignore_index,
-            )
-            for domain in self.domains_to_mask
-        }
+        self.accuracy_pheno = MulticlassAccuracy(
+            num_classes=vocab.vocab_size_phenotype_value,
+            ignore_index=self.ignore_index,
+        )
+        self.accuracy_snp = MulticlassAccuracy(
+            num_classes=vocab.vocab_size_snps,
+            ignore_index=self.ignore_index,
+        )
 
     def initialize_model(
         self,
         embedding_module: Embedder,
         encoder_module: nn.TransformerEncoder,
-        domains_to_mask: Union[list[str], None] = None,
     ) -> None:
         self.embedding_module = embedding_module
         self.encoder_module = encoder_module
 
         self.d_model = self.embedding_module.d_model
         vocab: Vocab = self.embedding_module.vocab
-        self.mask_token_ids = vocab.get_mask_ids()
 
-        self.domains_to_mask = (
-            ["snps", "phenotype"] if domains_to_mask is None else domains_to_mask
-        )
+        self.snp_head = nn.Linear(self.d_model, vocab.vocab_size_snps)
+        self.phenotype_head = nn.Linear(self.d_model, vocab.vocab_size_phenotype_value)
 
-        mlm_heads = {}
-        snp_head = nn.Linear(self.d_model, vocab.get_vocab_size("snps"))
-        mlm_heads["snps"] = snp_head
-
-        if "phenotype" in self.domains_to_mask:
-            phenotype_head = nn.Linear(
-                self.d_model, vocab.get_vocab_size("phenotype_values")
-            )
-            mlm_heads["phenotype"] = phenotype_head
-
-        self.mlm_heads: nn.ModuleDict = nn.ModuleDict(mlm_heads)
         self.loss = nn.CrossEntropyLoss(ignore_index=-1)
-
-    def calculate_mlm_accuracy(
-        self,
-        logits: dict[str, torch.Tensor],
-        masked_lm_labels: MaskingTargets,
-    ) -> dict[str, torch.Tensor]:
-        device = next(self.parameters()).device
-
-        # shape: (batch_size, seq_len, vocab_size)  # noqa
-        preds = {
-            domain: torch.argmax(logits[domain], dim=-1)
-            for domain in self.domains_to_mask
-        }
-
-        # move to device
-        for domain in preds:
-            self.metrics[(domain, "accuracy")].to(device)
-
-        mlm_acc = {
-            domain: self.metrics[(domain, "accuracy")](
-                preds[domain],
-                masked_lm_labels.domain_targets[domain],
-            )
-            for domain in self.domains_to_mask
-        }
-        return mlm_acc
 
     @property
     def device(self) -> torch.device:
@@ -106,42 +68,48 @@ class EncoderForMaskedLM(TrainableModule):
     def forward(
         self,
         inputs: InputIds,
-        masked_lm_labels: MaskingTargets,
+        targets: Targets,
     ) -> dict[str, Union[torch.Tensor, dict[str, torch.Tensor]]]:
-        output = self.embedding_module(inputs)
-        embeddings = output["embeddings"]
-        is_padding = output["is_padding"]
+        embeddings = self.embedding_module(inputs)
 
         encoded_individuals = self.encoder_module(
-            embeddings,
-            src_key_padding_mask=is_padding,
+            embeddings.embeddings,
+            src_key_padding_mask=embeddings.is_padding,
         )
 
-        logits = {
-            domain: self.mlm_heads[domain](encoded_individuals)
-            for domain in self.domains_to_mask
+        logits_snp = self.snp_head(encoded_individuals)
+
+        loss_snp = self.loss(
+            logits_snp.view(-1, logits_snp.size(-1)),
+            targets.snp_targets.view(-1),
+        )
+
+        snp_preds = torch.argmax(logits_snp, dim=-1)
+        snp_acc = self.accuracy_snp(snp_preds, targets.snp_targets)
+
+        result = {
+            "loss": loss_snp,
+            "SNP Loss": loss_snp,
+            "SNP Accuracy": snp_acc,
         }
-        # compute loss pr. domain
-        domain_losses = {
-            domain: self.loss(
-                logits[domain].view(-1, logits[domain].size(-1)),
-                masked_lm_labels.domain_targets[domain].view(-1),
+
+        if self.mask_phenotype:
+            logits_pheno = self.phenotype_head(encoded_individuals)
+            loss_pheno = self.loss(
+                logits_pheno.view(-1, logits_pheno.size(-1)),
+                targets.phenotype_targets.view(-1),
             )
-            for domain in self.domains_to_mask
-        }
+            pheno_preds = torch.argmax(logits_pheno, dim=-1)
+            pheno_acc = self.accuracy_pheno(pheno_preds, targets.phenotype_targets)
 
-        mlm_acc = self.calculate_mlm_accuracy(logits, masked_lm_labels)
+            # check if loss is nan (this happens when there are no phenotype values)
+            if torch.isnan(loss_pheno):
+                loss_pheno = torch.tensor(0.0, device=self.device)
+            result["loss"] += loss_pheno  # assumes equal weighting of domains
+            result["Phenotype Loss"] = loss_pheno
+            result["Phenotype Accuracy"] = pheno_acc
 
-        # compute total loss using torch
-        # this assumed equal weighting of domains
-        total_loss = torch.stack(list(domain_losses.values())).sum()
-
-        return {
-            "logits": logits,
-            "loss": total_loss,
-            "Domain Losses": domain_losses,
-            "MLM Accuracies": mlm_acc,
-        }
+        return result
 
     def mask(
         self,
@@ -172,9 +140,10 @@ class EncoderForMaskedLM(TrainableModule):
         # 10% of the time, replace with random token
         prob /= 0.8
         mask[mask.clone()] = prob[mask] < replace_with_random_prob
+
         domain_ids_tensor[mask] = torch.randint(
             0,
-            domain_vocab_size - 1,
+            domain_vocab_size,
             mask.sum().shape,
         )
 
@@ -184,33 +153,60 @@ class EncoderForMaskedLM(TrainableModule):
     def masking_fn(
         self,
         padded_sequence_ids: InputIds,
-    ) -> tuple[InputIds, MaskingTargets]:
-        domain_embeddings = copy(padded_sequence_ids.domain_embeddings)
-        masked_labels: dict[str, torch.Tensor] = {}
+    ) -> tuple[InputIds, Targets]:
+        vocab = self.embedding_module.vocab
         is_padding = padded_sequence_ids.is_padding
-        # perform masking
-        for domain in self.domains_to_mask:
-            domain_tensor = domain_embeddings[domain]
-            mask_token_id = self.mask_token_ids[domain]
-            domain_vocab_size = self.embedding_module.vocab.get_vocab_size(domain)
 
-            masked_sequence, masked_label = self.mask(
-                domain_tensor,
-                domain_vocab_size=domain_vocab_size,
-                mask_token_id=mask_token_id,
-            )
-            # Set padding to -1 to ignore in loss
-            masked_label[is_padding] = -1
+        snp_mask_token_id = vocab.snp2idx[vocab.mask_token]
+        snp_value_ids = copy(padded_sequence_ids.snp_value_ids)
 
-            domain_embeddings[domain] = masked_sequence
-            masked_labels[domain] = masked_label
-
-        return (
-            InputIds(domain_embeddings, is_padding),
-            MaskingTargets(masked_labels, padding_idx=-1),
+        is_snp_mask = (
+            padded_sequence_ids.domain_ids == vocab.domain2idx[vocab.snp_token]
         )
 
-    def collate_fn(self, individuals: list) -> tuple[InputIds, MaskingTargets]:
+        snp_ids_masked, snp_masked_label = self.mask(
+            snp_value_ids,
+            domain_vocab_size=vocab.vocab_size_snps,
+            mask_token_id=snp_mask_token_id,
+        )
+
+        if self.mask_phenotype:
+            phenotype_mask_token_id = vocab.phenotype_value2idx[vocab.mask_token]
+            pheno_value_ids = copy(padded_sequence_ids.phenotype_value_ids)
+            pheno_ids_masked, pheno_masked_label = self.mask(
+                pheno_value_ids,
+                domain_vocab_size=vocab.vocab_size_phenotype_value,
+                mask_token_id=phenotype_mask_token_id,
+            )
+
+        else:
+            pheno_ids_masked = padded_sequence_ids.phenotype_value_ids
+            pheno_masked_label = padded_sequence_ids.phenotype_value_ids
+
+        # Make sure to ignore padding when calculating loss and token from other domains
+        is_pheno_or_padding = ~is_snp_mask | is_padding
+        is_snp_or_padding = is_snp_mask | is_padding
+        snp_masked_label[is_padding] = self.ignore_index
+        pheno_masked_label[is_snp_or_padding] = self.ignore_index
+
+        masked_sequence_ids = InputIds(
+            domain_ids=padded_sequence_ids.domain_ids,
+            snp_value_ids=snp_ids_masked,
+            phenotype_value_ids=pheno_ids_masked,
+            phenotype_type_ids=padded_sequence_ids.phenotype_type_ids,
+            is_padding=is_padding,
+        )
+
+        targets = Targets(
+            snp_targets=snp_masked_label,
+            phenotype_targets=pheno_masked_label,
+            is_snp_mask=~is_pheno_or_padding,
+            is_phenotype_mask=~is_snp_or_padding,
+        )
+
+        return masked_sequence_ids, targets
+
+    def collate_fn(self, individuals: list) -> tuple[InputIds, Targets]:
         """
         Takes a list of individuals and returns a dictionary of padded sequence ids.
         """
@@ -220,7 +216,7 @@ class EncoderForMaskedLM(TrainableModule):
 
     def training_step(
         self,
-        batch: tuple[InputIds, MaskingTargets],
+        batch: tuple[InputIds, Targets],
         batch_idx: int,  # noqa: ARG002
     ) -> Union[torch.Tensor, dict[str, torch.Tensor]]:
         x, y = batch
@@ -230,7 +226,7 @@ class EncoderForMaskedLM(TrainableModule):
 
     def validation_step(
         self,
-        batch: tuple[InputIds, MaskingTargets],
+        batch: tuple[InputIds, Targets],
         batch_idx: int,  # noqa: ARG002
     ) -> Union[torch.Tensor, dict[str, torch.Tensor]]:
         x, y = batch
@@ -246,17 +242,8 @@ class EncoderForMaskedLM(TrainableModule):
         mode: Literal["Validation", "Training"],
     ) -> None:
         log_kwargs = {"batch_size": batch_size, "sync_dist": True}
-        self.log(f"{mode} Loss", output["loss"], **log_kwargs)
-        dom_train_losses = output.pop("Domain Losses")
-        for domain in dom_train_losses:
-            self.log(f"{mode} Loss ({domain})", dom_train_losses[domain], **log_kwargs)
-        dom_mlm_acc = output.pop("MLM Accuracies")
-        for domain in dom_mlm_acc:
-            self.log(
-                f"{mode} MLM Accuracy ({domain})",
-                dom_mlm_acc[domain],
-                **log_kwargs,
-            )
+        for key in output:
+            self.log(f"{mode} {key}", output[key], **log_kwargs)
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
         return self.create_optimizer_fn(self.parameters())
@@ -267,12 +254,12 @@ def create_encoder_for_masked_lm(
     embedding_module: Embedder,
     encoder_module: nn.TransformerEncoder,
     create_optimizer_fn: OptimizerFn,
-    domains_to_mask: Union[list[str], None] = None,
+    mask_phenotype: bool,
 ) -> EncoderForMaskedLM:
     logger.info("Creating task module for masked lm")
     return EncoderForMaskedLM(
         embedding_module=embedding_module,
         encoder_module=encoder_module,
         create_optimizer_fn=create_optimizer_fn,
-        domains_to_mask=domains_to_mask,
+        mask_phenotype=mask_phenotype,
     )
