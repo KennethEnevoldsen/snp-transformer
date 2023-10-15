@@ -2,6 +2,31 @@
 
 
 
+## v0.3.0 (2023-10-15)
+
+### Feature
+
+* feat: Added phenos to embedding module ([`be5f552`](https://github.com/KennethEnevoldsen/snp-transformer/commit/be5f552363806f355934a40fe316726a2a2fbbca))
+
+### Fix
+
+* fix: restructured folders ([`90c456f`](https://github.com/KennethEnevoldsen/snp-transformer/commit/90c456f336c77551cefed24e184592826650e441))
+
+### Style
+
+* style: linting ([`d832519`](https://github.com/KennethEnevoldsen/snp-transformer/commit/d832519ddbb0aefecdeb8ab507d0301bf45d7172))
+
+### Unknown
+
+* Merge pull request #6 from KennethEnevoldsen/pretrain_simple
+
+initial outline for pre-training ([`d2a1a69`](https://github.com/KennethEnevoldsen/snp-transformer/commit/d2a1a695533da40ed0a8400fabbf06c559dbd1d2))
+
+* added phenotypes ([`1ba08ef`](https://github.com/KennethEnevoldsen/snp-transformer/commit/1ba08eff79576a065d206dee924a7b718aff5b83))
+
+* ran a full epoch on on the MHC region ([`7543d7a`](https://github.com/KennethEnevoldsen/snp-transformer/commit/7543d7acca610a43a8e4ef17c105f581bf13b2dc))
+
+
 ## v0.2.0 (2023-10-14)
 
 ### Ci
@@ -16,17 +41,33 @@
 
 * fix: added missing test env ([`bd1e157`](https://github.com/KennethEnevoldsen/snp-transformer/commit/bd1e157f55d789eaee1d0051756bfa18f8fa1eb1))
 
+* fix: added fixes from genomedk ([`6500b47`](https://github.com/KennethEnevoldsen/snp-transformer/commit/6500b4793f5d07c6c71b2e1c2d0efd6e443dfdb4))
+
+* fix: ran precommit ([`f889552`](https://github.com/KennethEnevoldsen/snp-transformer/commit/f8895529a3351c7c3c4c10719043045498bd2922))
+
 ### Style
 
 * style: linting ([`ab3d611`](https://github.com/KennethEnevoldsen/snp-transformer/commit/ab3d611bb020abf608fcea7667340e90717b84fd))
 
+* style: linting ([`1e68d98`](https://github.com/KennethEnevoldsen/snp-transformer/commit/1e68d98c288cbf2a2ca74d797c67519617e94c6f))
+
+* style: linting ([`3be9733`](https://github.com/KennethEnevoldsen/snp-transformer/commit/3be97330051394cb25fe619acf877886c5bf1a9b))
+
+* style: linting ([`0a65559`](https://github.com/KennethEnevoldsen/snp-transformer/commit/0a655599691b99709ed1198ec61085c105c62432))
+
 ### Unknown
+
+* Merge remote-tracking branch &#39;origin&#39; into pretrain_simple ([`d8cbc36`](https://github.com/KennethEnevoldsen/snp-transformer/commit/d8cbc36551269110be77d8cf7097865f0ac4e4f2))
+
+* Merge remote-tracking branch &#39;origin&#39; into pretrain_simple ([`f3404ed`](https://github.com/KennethEnevoldsen/snp-transformer/commit/f3404edfc51303c6f86d8956130f64c4a3301884))
 
 * Merge pull request #16 from KennethEnevoldsen/39-support
 
 feat: add 39 support ([`f0c7a06`](https://github.com/KennethEnevoldsen/snp-transformer/commit/f0c7a0658acd8a16c94967413ee2a17a099767a0))
 
 * Merge branch &#39;39-support&#39; of https://github.com/KennethEnevoldsen/snp-transformer into 39-support ([`80e306c`](https://github.com/KennethEnevoldsen/snp-transformer/commit/80e306cff5cc62d224e228d5d9b5b1ade4bbdf82))
+
+* Merge branch &#39;pretrain_simple&#39; of https://github.com/KennethEnevoldsen/snp-transformer into pretrain_simple ([`8ec7701`](https://github.com/KennethEnevoldsen/snp-transformer/commit/8ec770145622d06293947b993a45de52e0094d55))
 
 
 ## v0.1.0 (2023-10-06)
@@ -35,21 +76,55 @@ feat: add 39 support ([`f0c7a06`](https://github.com/KennethEnevoldsen/snp-trans
 
 * feat: save hyperparameters in checkpoints ([`add3320`](https://github.com/KennethEnevoldsen/snp-transformer/commit/add332045f76eba33396db51ed7810a4bc565e24))
 
+* feat: Updated loaders to you pyarrow backend ([`9d16f69`](https://github.com/KennethEnevoldsen/snp-transformer/commit/9d16f69dc5257fe3b63499682c6a20cd466c396c))
+
 ### Fix
 
 * fix: fixed erorrs raised from test ([`c14ae16`](https://github.com/KennethEnevoldsen/snp-transformer/commit/c14ae163cbf82f7edef4299afc8b2bce61b98927))
 
 * fix: minor fixes ([`c551612`](https://github.com/KennethEnevoldsen/snp-transformer/commit/c551612caf4c91d91b130b63b0b7064d2de04663))
 
+* fix: indexing issues with sparse ([`f74fcc5`](https://github.com/KennethEnevoldsen/snp-transformer/commit/f74fcc597640bb572db8d2061b1843c7970f4bb0))
+
+* fix: Updated tests to work with polars ([`e38021b`](https://github.com/KennethEnevoldsen/snp-transformer/commit/e38021bf67258a06ad022853c624cc43b1e6e8ed))
+
+* fix: Added progressbar to convertion script ([`44bd751`](https://github.com/KennethEnevoldsen/snp-transformer/commit/44bd7516d5dd673f0d22c96421b1de6c6f800d9b))
+
+* fix: Added psparse format ([`a418095`](https://github.com/KennethEnevoldsen/snp-transformer/commit/a418095249a69f7e3a0d243046f83d2b3bba66b7))
+
+* fix: Added logging during setup ([`a393683`](https://github.com/KennethEnevoldsen/snp-transformer/commit/a39368303281e2c5af6a4071b481519c8c915adf))
+
+* fix: added missing dependency ([`b2e7fcc`](https://github.com/KennethEnevoldsen/snp-transformer/commit/b2e7fcce8f863cfd89af7df5cf510c1cbc97da7b))
+
 ### Style
 
+* style: linting ([`664db5e`](https://github.com/KennethEnevoldsen/snp-transformer/commit/664db5ea38e5352858280793f334cce568bcf6ab))
+
+* style: linting ([`026e9ce`](https://github.com/KennethEnevoldsen/snp-transformer/commit/026e9ce001c9dc4df5a6ba6ba6f76b33987bb13e))
+
+* style: linting ([`cd0410c`](https://github.com/KennethEnevoldsen/snp-transformer/commit/cd0410ca6c46a87f6a737bbfc66ddf3175722943))
+
+* style: linting ([`e48e180`](https://github.com/KennethEnevoldsen/snp-transformer/commit/e48e18028875656877f2cafbb5885cff7e39c9f0))
+
 * style: linting ([`ef3b320`](https://github.com/KennethEnevoldsen/snp-transformer/commit/ef3b3209df43ae5d54bb3a87c631751d459416cb))
+
+* style: linting ([`87b3941`](https://github.com/KennethEnevoldsen/snp-transformer/commit/87b39410c17cca11878533b0c195991c8ad0f5f0))
 
 * style: linting ([`e0f6f3d`](https://github.com/KennethEnevoldsen/snp-transformer/commit/e0f6f3db882ef2c149bc3cb9f37da618caab9987))
 
 * style: linting ([`c0dbd39`](https://github.com/KennethEnevoldsen/snp-transformer/commit/c0dbd3937fbff0ce97e8efb4e48663656e386230))
 
+* style: linting ([`15104e8`](https://github.com/KennethEnevoldsen/snp-transformer/commit/15104e8c4dbc681ba30660f0ef62bfd525ade750))
+
+* style: linting ([`77a3359`](https://github.com/KennethEnevoldsen/snp-transformer/commit/77a33594377c5a45eb76d2222445e26fa973c7b9))
+
+* style: linting ([`929981a`](https://github.com/KennethEnevoldsen/snp-transformer/commit/929981a4132026d38d54676e307551f79befdcd9))
+
+* style: linting ([`4f75ac9`](https://github.com/KennethEnevoldsen/snp-transformer/commit/4f75ac9f3952dad793b9663e1024d01244988297))
+
 ### Unknown
+
+* Merge branch &#39;main&#39; of https://github.com/KennethEnevoldsen/snp-transformer into pretrain_simple ([`ca26bd5`](https://github.com/KennethEnevoldsen/snp-transformer/commit/ca26bd5e053af8f0f70927b16ad7f8dcc97c47bf))
 
 * Merge pull request #11 from KennethEnevoldsen/add-mlm-accuracy
 
@@ -61,12 +136,34 @@ feat: save hyperparameters in checkpoints ([`14983d5`](https://github.com/Kennet
 
 * Merge branch &#39;add-mlm-accuracy&#39; of https://github.com/KennethEnevoldsen/snp-transformer into add-mlm-accuracy ([`006c71e`](https://github.com/KennethEnevoldsen/snp-transformer/commit/006c71e368f89459d9e062c9bedb27c56bd5147a))
 
+* Added truncation for initial training ([`e959bbf`](https://github.com/KennethEnevoldsen/snp-transformer/commit/e959bbfb8bb570cf81f3ccd6b5d9d78004783599))
+
+* Merge branch &#39;pretrain_simple&#39; of https://github.com/KennethEnevoldsen/snp-transformer into pretrain_simple ([`2d8e83e`](https://github.com/KennethEnevoldsen/snp-transformer/commit/2d8e83e2ec6b01fbac330eeaeb60211d1de54d48))
+
+* Merge branch &#39;pretrain_simple&#39; of https://github.com/KennethEnevoldsen/snp-transformer into pretrain_simple ([`efa32b0`](https://github.com/KennethEnevoldsen/snp-transformer/commit/efa32b042aee4073ea189708b7d257ffb7c1a136))
+
+* clean up application scripts ([`7bbc314`](https://github.com/KennethEnevoldsen/snp-transformer/commit/7bbc31471b64e1825218802594b6b56e96e4f64a))
+
 * moved mlm acc into function ([`7ed7247`](https://github.com/KennethEnevoldsen/snp-transformer/commit/7ed7247de9d4d4444caeb1a9fbdc5ebcf67f6496))
+
+* Merge branch &#39;pretrain_simple&#39; of https://github.com/KennethEnevoldsen/snp-transformer into pretrain_simple ([`12e8c21`](https://github.com/KennethEnevoldsen/snp-transformer/commit/12e8c210fb9695629b66327eea6a8b7614d08a63))
+
+* moved to polars ([`91d24ad`](https://github.com/KennethEnevoldsen/snp-transformer/commit/91d24ad5deb12a4f407bde611aa819844e5fa9fe))
 
 * remove accidental copy paste ([`9bd452c`](https://github.com/KennethEnevoldsen/snp-transformer/commit/9bd452c8c7e25115a000e2014864fe7825fac6ef))
 
 * 0.0.6
 Automatically generated by python-semantic-release ([`de54d40`](https://github.com/KennethEnevoldsen/snp-transformer/commit/de54d405cbeefd4c2d7e810e18bacb0bba00a5fc))
+
+* Merge branch &#39;pretrain_simple&#39; of https://github.com/KennethEnevoldsen/snp-transformer into pretrain_simple ([`497e562`](https://github.com/KennethEnevoldsen/snp-transformer/commit/497e562e76362cd99493ecf8d161efd4dc7394de))
+
+* ran speed test for loading mhc ([`cb3d39b`](https://github.com/KennethEnevoldsen/snp-transformer/commit/cb3d39ba25d9d787b38563c8c4a007559b157dd5))
+
+* Merge branch &#39;pretrain_simple&#39; of https://github.com/KennethEnevoldsen/snp-transformer into pretrain_simple ([`e2e416d`](https://github.com/KennethEnevoldsen/snp-transformer/commit/e2e416d99e028881933594d6b17d4c0f7b126cf6))
+
+* Added speed test for loading the mhc region ([`9a4df12`](https://github.com/KennethEnevoldsen/snp-transformer/commit/9a4df12567dc9efc523cd4e00f913dc150be1a62))
+
+* Merge branch &#39;main&#39; of https://github.com/KennethEnevoldsen/snp-transformer into pretrain_simple ([`1c0e00b`](https://github.com/KennethEnevoldsen/snp-transformer/commit/1c0e00b2ec78cf11940da787fb0e3a49292a3b40))
 
 
 ## v0.0.6 (2023-09-26)
@@ -76,6 +173,8 @@ Automatically generated by python-semantic-release ([`de54d40`](https://github.c
 * ci: removed windows support ([`3be156f`](https://github.com/KennethEnevoldsen/snp-transformer/commit/3be156f2009aa3794631809af0248b016fc87c5d))
 
 ### Fix
+
+* fix: removed removed poor defaults from config ([`baef699`](https://github.com/KennethEnevoldsen/snp-transformer/commit/baef6998e3be75809c582328d5ae9d1684e7ebdb))
 
 * fix: remove static path in config ([`31dc374`](https://github.com/KennethEnevoldsen/snp-transformer/commit/31dc3742e823ebf724f5d398c9fc15ff3883989c))
 
@@ -89,7 +188,15 @@ Automatically generated by python-semantic-release ([`de54d40`](https://github.c
 
 * fix: ensure that logging works as intended ([`3f51073`](https://github.com/KennethEnevoldsen/snp-transformer/commit/3f5107309e12695a334467776f5ebcafa24ce000))
 
+### Style
+
+* style: linting ([`0773f52`](https://github.com/KennethEnevoldsen/snp-transformer/commit/0773f525e9bbc69a7a64531203f8067fe08e5111))
+
 ### Unknown
+
+* Merge branch &#39;pretrain_simple&#39; of https://github.com/KennethEnevoldsen/snp-transformer into pretrain_simple ([`182b1bc`](https://github.com/KennethEnevoldsen/snp-transformer/commit/182b1bc1133288faaee06ae0b8efa2ca62dd92de))
+
+* initial outline for pretraining ([`914062b`](https://github.com/KennethEnevoldsen/snp-transformer/commit/914062b532fe41c7f762aa9340a81b9237d69aab))
 
 * ran ruff ([`23f0198`](https://github.com/KennethEnevoldsen/snp-transformer/commit/23f01981b3a727db0fdfd11b1f90a96291e55e40))
 
