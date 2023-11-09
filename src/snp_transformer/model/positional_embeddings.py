@@ -20,7 +20,7 @@ class AbsolutePositionalEncoding(nn.Module):
         """
         div_term = torch.exp(
             torch.arange(0, self.d_model, 2)
-            * (-math.log(self.w_k_const) / self.d_model)
+            * (-math.log(self.w_k_const) / self.d_model),
         )
         pe = torch.zeros(positions.size(0), 1, self.d_model)
         pe[:, 0, 0::2] = torch.sin(positions * div_term)
@@ -69,7 +69,7 @@ class tAPE(nn.Module):
         """
         div_term = torch.exp(
             torch.arange(0, self.d_model, 2)
-            * (-math.log(self.w_k_const) / self.d_model)
+            * (-math.log(self.w_k_const) / self.d_model),
         )
         pe = torch.zeros(positions.size(0), 1, self.d_model)
         norm_const = self.d_model / self.length_sequence
