@@ -1,10 +1,12 @@
 import pytest
-from snp_transformer import IndividualsDataset
-from snp_transformer.model.embedders import SNPEmbedder
-from snp_transformer.model.task_modules import EncoderForMaskedLM
-from snp_transformer.registry import OptimizerFn
 from torch import nn
 from torch.utils.data import DataLoader
+
+from snp_transformer import IndividualsDataset
+from snp_transformer.model.embedders import SNPEmbedder
+from snp_transformer.model.positional_embeddings import AbsolutePositionalEncoding
+from snp_transformer.model.task_modules import EncoderForMaskedLM
+from snp_transformer.registry import OptimizerFn
 
 from .conftest import TEST_DATA_FOLDER
 
@@ -27,7 +29,12 @@ def test_model(
 ) -> None:
     # create model:
     d_model = 32
-    emb = SNPEmbedder(d_model=d_model, dropout_prob=0.1, max_sequence_length=128)
+    emb = SNPEmbedder(
+        d_model=d_model,
+        dropout_prob=0.1,
+        max_sequence_length=128,
+        positonal_embedding=AbsolutePositionalEncoding(d_model=32),
+    )
     encoder_layer = nn.TransformerEncoderLayer(
         d_model=d_model,
         nhead=int(d_model / 4),

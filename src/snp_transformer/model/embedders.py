@@ -13,6 +13,8 @@ from snp_transformer.data_objects import Individual
 from snp_transformer.dataset.dataset import IndividualsDataset
 from snp_transformer.registry import Registry
 
+from .positional_embeddings import PositionalEncodingModule
+
 logger = logging.getLogger(__name__)
 
 
@@ -28,6 +30,7 @@ class InputIds:
 
     domain_ids: torch.Tensor
     snp_value_ids: torch.Tensor
+    snp_position_ids: torch.Tensor
     phenotype_value_ids: torch.Tensor
     phenotype_type_ids: torch.Tensor
     is_padding: torch.Tensor
@@ -111,7 +114,7 @@ class Embedder(nn.Module):
     vocab: Vocab
     is_fitted: bool
 
-    def __init__(self, *args, **kwargs):  # noqa
+    def __init__(self, *args, **kwargs):
         super().__init__()
 
     @abstractmethod
@@ -144,12 +147,18 @@ class SNPEmbedder(Embedder):
         d_model: int,
         dropout_prob: float,
         max_sequence_length: int,
+        positonal_embedding: PositionalEncodingModule,
     ):
         super().__init__()
 
         self.d_model = d_model
         self.max_sequence_length = max_sequence_length
         self.dropout_prob = dropout_prob
+
+        assert (
+            d_model == positonal_embedding.d_model
+        ), "d_model is not the same for positional embedding and embedder"
+        self.positional_embedding = positonal_embedding
 
         self.is_fitted: bool = False
 
@@ -218,6 +227,8 @@ class SNPEmbedder(Embedder):
         # add the phenotype type embeddings only to the phenotype embeddings
         embeddings += self.phenotype_type_embedding(inputs.phenotype_type_ids)
 
+        embeddings += self.positional_embedding(inputs.snp_position_ids)
+
         embeddings = self.LayerNorm(embeddings)
         embeddings = self.dropout(embeddings)
 
@@ -231,8 +242,9 @@ class SNPEmbedder(Embedder):
         Collate an indivivual into ids
         """
         # SNP Values
-        snps = individual.snps.values
-        snp_ids = torch.tensor(snps, dtype=torch.long)
+        snps = individual.snps
+        snp_ids = torch.tensor(snps.values, dtype=torch.long)
+        snp_pos_ids = torch.tensor(snps.bp, dtype=torch.long)
 
         # Phenotypes Values
         phenotypes = list(individual.phenotype.values())
@@ -275,6 +287,7 @@ class SNPEmbedder(Embedder):
 
         inputs_ids = {
             "snp_value_ids": snp_ids,
+            "snp_position_ids": snp_pos_ids,
             "phenotype_value_ids": phenotype_ids,
             "phenotype_type_ids": phenotype_types,
             "domain_ids": domain_ids,
@@ -295,6 +308,7 @@ class SNPEmbedder(Embedder):
         return InputIds(
             domain_ids=padded_seqs["domain_ids"],
             snp_value_ids=padded_seqs["snp_value_ids"],
+            snp_position_ids=padded_seqs["snp_position_ids"],
             phenotype_value_ids=padded_seqs["phenotype_value_ids"],
             phenotype_type_ids=padded_seqs["phenotype_type_ids"],
             is_padding=padded_seqs["is_padding"],
@@ -393,6 +407,8 @@ class SNPEmbedder(Embedder):
         with vocab_path.open("w") as fp:
             json.dump(self.vocab.to_dict(), fp)
 
+        # save positonal embedding
+        self.positional_embedding.to_disk(save_dir / "positional_embedding.pt")
         torch.save(self.state_dict(), save_dir / "embedder.pt")
 
     @classmethod
@@ -412,6 +428,10 @@ class SNPEmbedder(Embedder):
 
         vocab = Vocab.from_dict(vocab_dict)
 
+        kwargs["positonal_embedding"] = PositionalEncodingModule.from_disk(
+            save_dir / "positional_embedding.pt",
+        )
+
         embedder = cls(**kwargs)
         embedder.initialize_embeddings_layers(vocab)
         embedder.load_state_dict(torch.load(save_dir / "embedder.pt"))
@@ -424,7 +444,8 @@ def create_snp_embedder(
     d_model: int,
     dropout_prob: float,
     max_sequence_length: int,
-    individuals: Union[list[Individual], IndividualsDataset, None] = None,
+    positional_embedding: PositionalEncodingModule,
+    individuals: Union[list[Individual], IndividualsDataset],
     checkpoint_path: Union[Path, None] = None,
 ) -> Embedder:
     should_load_ckpt = (
@@ -452,10 +473,9 @@ def create_snp_embedder(
         d_model=d_model,
         dropout_prob=dropout_prob,
         max_sequence_length=max_sequence_length,
+        positonal_embedding=positional_embedding,
     )
 
-    if individuals is None:
-        individuals = []
     if isinstance(individuals, IndividualsDataset):
         individuals = individuals.get_individuals()
     emb.fit(individuals)

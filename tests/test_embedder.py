@@ -2,14 +2,26 @@ from pathlib import Path
 
 import pytest
 import torch
+
 from snp_transformer.model.embedders import Embedder, Embeddings, InputIds, SNPEmbedder
+from snp_transformer.model.positional_embeddings import AbsolutePositionalEncoding
 
 
 @pytest.mark.parametrize(
     ("embedding_module", "embedding_kwargs"),
-    [(SNPEmbedder, {"d_model": 32, "dropout_prob": 0.1, "max_sequence_length": 128})],
+    [
+        (
+            SNPEmbedder,
+            {
+                "d_model": 32,
+                "dropout_prob": 0.1,
+                "max_sequence_length": 128,
+                "positonal_embedding": AbsolutePositionalEncoding(d_model=32),
+            },
+        )
+    ],
 )
-def test_embeddding(
+def test_embedding(
     individuals: list,
     embedding_module: Embedder,
     embedding_kwargs: dict,
@@ -18,7 +30,6 @@ def test_embeddding(
     Test embedding interface
     """
     batch_size = len(individuals)
-
     embedding_module = embedding_module(**embedding_kwargs)  # type: ignore
 
     embedding_module.fit(individuals)
@@ -50,7 +61,17 @@ def test_embeddding(
 
 @pytest.mark.parametrize(
     ("embedding_module", "embedding_kwargs"),
-    [(SNPEmbedder, {"d_model": 32, "dropout_prob": 0.1, "max_sequence_length": 128})],
+    [
+        (
+            SNPEmbedder,
+            {
+                "d_model": 32,
+                "dropout_prob": 0.1,
+                "max_sequence_length": 128,
+                "positonal_embedding": AbsolutePositionalEncoding(d_model=32),
+            },
+        )
+    ],
 )
 def test_saving_and_loading(
     embedding_module: Embedder,
