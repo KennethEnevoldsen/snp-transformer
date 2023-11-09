@@ -5,7 +5,8 @@ from torch import nn
 
 
 @pytest.mark.parametrize(
-    "module", [AbsolutePositionalEncoding(d_model=256), tAPE(d_model=256)],
+    "module",
+    [AbsolutePositionalEncoding(d_model=256), tAPE(d_model=256)],
 )
 def test_positional_encoding(module: nn.Module):
     x = torch.arange(8_482_506, 8_482_506 + 100)
