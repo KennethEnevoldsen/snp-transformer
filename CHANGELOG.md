@@ -2,6 +2,49 @@
 
 
 
+## v0.3.1 (2023-11-09)
+
+### Ci
+
+* ci: update cruft ([`86dae70`](https://github.com/KennethEnevoldsen/snp-transformer/commit/86dae70698164a6ad04e3b05b0e16b5ebb519d01))
+
+### Fix
+
+* fix: ran linting ([`6760456`](https://github.com/KennethEnevoldsen/snp-transformer/commit/676045640a0cfc8b788dabdeff0573da77a38c2a))
+
+### Style
+
+* style: linting ([`2621aec`](https://github.com/KennethEnevoldsen/snp-transformer/commit/2621aec3d37eff3ac40f68122cd4fb0b16cc4155))
+
+* style: linting ([`3363715`](https://github.com/KennethEnevoldsen/snp-transformer/commit/3363715d2d95758defeb7ff4c1ca6f61d6e04af0))
+
+### Unknown
+
+* Merge pull request #20 from KennethEnevoldsen/pos_enc
+
+Add makefile with static type checking, testing, and linting commands; refactor positional encoding calculation; add positional embedding to SNPEmbedder ([`b614fb0`](https://github.com/KennethEnevoldsen/snp-transformer/commit/b614fb052a1cdf23a72e7683b2d13ed5d1c187e6))
+
+* Merge pull request #21 from KennethEnevoldsen/update-cruft
+
+ci - update cruft ([`29790b4`](https://github.com/KennethEnevoldsen/snp-transformer/commit/29790b44b546909cbca4a9537dc0902290f5adca))
+
+* Merge branch &#39;pos_enc&#39; of https://github.com/KennethEnevoldsen/snp-transformer into pos_enc ([`a4cedfc`](https://github.com/KennethEnevoldsen/snp-transformer/commit/a4cedfc515abdeb41701f5b2e8508213e2e21ee7))
+
+* Add positional embedding to SNPEmbedder ([`092482d`](https://github.com/KennethEnevoldsen/snp-transformer/commit/092482de861c977b073916ccba01350de7b1815a))
+
+* Refactor positional encoding calculation ([`86cfafc`](https://github.com/KennethEnevoldsen/snp-transformer/commit/86cfafc825355ca27e34898a992e006668686507))
+
+* Add makefile with static type checking, testing,
+and linting commands ([`160da71`](https://github.com/KennethEnevoldsen/snp-transformer/commit/160da71a290a73e34588cabe9df7bccb7c7d0c74))
+
+* Added SNPTransformer presentation key ([`6917091`](https://github.com/KennethEnevoldsen/snp-transformer/commit/6917091aa8282849d592e185f8d1da0e2bf45f35))
+
+* Merge branch &#39;main&#39; of https://github.com/KennethEnevoldsen/snp-transformer into main ([`bb70af0`](https://github.com/KennethEnevoldsen/snp-transformer/commit/bb70af07bddcc6026d7353aa1a6a50006c32a747))
+
+* Add absolute and relative positional encodings for
+SNP transformer model ([`a07b5f7`](https://github.com/KennethEnevoldsen/snp-transformer/commit/a07b5f74b0637b086b6d9eaed37e0f3ef8e84f73))
+
+
 ## v0.3.0 (2023-10-15)
 
 ### Feature
