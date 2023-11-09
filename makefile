@@ -10,3 +10,6 @@ test:
 
 lint:
 	pre-commit run --all-files
+
+pretrain:
+	python src/pretrain/pretrain.py
