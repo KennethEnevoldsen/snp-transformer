@@ -2,7 +2,6 @@ from pathlib import Path
 
 import pytest
 import torch
-
 from snp_transformer.model.embedders import Embedder, Embeddings, InputIds, SNPEmbedder
 from snp_transformer.model.positional_embeddings import AbsolutePositionalEncoding
 
@@ -18,7 +17,7 @@ from snp_transformer.model.positional_embeddings import AbsolutePositionalEncodi
                 "max_sequence_length": 128,
                 "positonal_embedding": AbsolutePositionalEncoding(d_model=32),
             },
-        )
+        ),
     ],
 )
 def test_embedding(
@@ -70,7 +69,7 @@ def test_embedding(
                 "max_sequence_length": 128,
                 "positonal_embedding": AbsolutePositionalEncoding(d_model=32),
             },
-        )
+        ),
     ],
 )
 def test_saving_and_loading(
