@@ -192,6 +192,7 @@ class EncoderForMaskedLM(TrainableModule):
         masked_sequence_ids = InputIds(
             domain_ids=padded_sequence_ids.domain_ids,
             snp_value_ids=snp_ids_masked,
+            snp_position_ids=padded_sequence_ids.snp_position_ids,
             phenotype_value_ids=pheno_ids_masked,
             phenotype_type_ids=padded_sequence_ids.phenotype_type_ids,
             is_padding=is_padding,
