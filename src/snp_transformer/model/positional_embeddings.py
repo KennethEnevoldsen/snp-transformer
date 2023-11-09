@@ -20,7 +20,7 @@ class AbsolutePositionalEncoding(nn.Module):
         """
         div_term = torch.exp(
             torch.arange(0, self.d_model, 2)
-            * (-math.log(self.w_k_const) / self.d_model)
+            * (-math.log(self.w_k_const) / self.d_model),
         )
         pe = torch.zeros(positions.size(0), 1, self.d_model)
         pe[:, 0, 0::2] = torch.sin(positions * div_term)
@@ -30,15 +30,16 @@ class AbsolutePositionalEncoding(nn.Module):
     def forward(self, positions: Tensor) -> Tensor:
         """
         Arguments:
-            x: Tensor, shape ``[batch_size, seq_len]``, where ``seq_len`` is the position ids.
+            positions: Tensor, shape ``[batch_size, seq_len]``, where ``seq_len`` is the position ids.
         """
-        # x = x + self.pe[: x.size(0)]
-        # return self.dropout(x)
-
+        batch_size, seq_len = positions.shape
         # view as batch_size x seq_len -> seq_len x batch_size
-        positions = positions.view(-1, 1)
+        positions = positions.view(seq_len, batch_size)
         pe = self.calculate_pe(positions)
-        return self.dropout(pe)
+        # view as batch_size x seq_len again
+        pe = pe.view(batch_size, seq_len, -1)
+        pe = self.dropout(pe)
+        return pe
 
 
 class tAPE(nn.Module):
@@ -60,7 +61,7 @@ class tAPE(nn.Module):
         self.length_sequence = length_sequence
         self.w_k_const = w_k_const
 
-    def calculate_pe1(self, positions: Tensor) -> Tensor:
+    def calculate_pe(self, positions: Tensor) -> Tensor:
         """
         Calculates the positional encoding for the given positions on
         the fly. This is more memory efficient than pre-calculating
@@ -69,7 +70,7 @@ class tAPE(nn.Module):
         """
         div_term = torch.exp(
             torch.arange(0, self.d_model, 2)
-            * (-math.log(self.w_k_const) / self.d_model)
+            * (-math.log(self.w_k_const) / self.d_model),
         )
         pe = torch.zeros(positions.size(0), 1, self.d_model)
         norm_const = self.d_model / self.length_sequence
@@ -80,11 +81,16 @@ class tAPE(nn.Module):
     def forward(self, positions: Tensor) -> Tensor:
         """
         Arguments:
-            x: Tensor, shape ``[batch_size, seq_len]``, where ``seq_len`` is the position ids.
+            positions: Tensor, shape ``[batch_size, seq_len]``, where ``seq_len`` is the position ids.
         """
-        positions = positions.view(-1, 1)
-        pe = self.calculate_pe1(positions)
-        return self.dropout(pe)
+        batch_size, seq_len = positions.shape
+        # view as batch_size x seq_len -> seq_len x batch_size
+        positions = positions.view(seq_len, batch_size)
+        pe = self.calculate_pe(positions)
+        # view as batch_size x seq_len again
+        pe = pe.view(batch_size, seq_len, -1)
+        pe = self.dropout(pe)
+        return pe
 
 
 if __name__ == "__main__":
@@ -127,37 +133,3 @@ if __name__ == "__main__":
     sim1 = sim1.squeeze().numpy()
 
     plt.plot(sim1, color="red")
-
-    # pos.pe.shape
-
-    # positions = torch.arange(2).unsqueeze(1)
-    # encoding = pos.pe[: positions.size(0)]
-    # encoding.unsqueeze(1)
-
-    # # # plot
-    # import matplotlib.pyplot as plt
-
-    # arr = pos.pe.squeeze().numpy()
-    # plt.matshow(arr)
-    # plt.colorbar()
-    # plt.show()
-
-    # from snp_transformer.dataset.dataset import IndividualsDataset
-
-    # dataset = IndividualsDataset(
-    #     path=Path("/data-big-projects/snp-transformer/transfer/mhc")
-    # )
-
-    # ind = dataset[0]
-    # min_bp = min(ind.snps.bp)
-    # max_bp = max(ind.snps.bp)
-
-    # diff = max_bp - min_bp
-    # diff
-
-    # pos = PositionalEncoding(d_model=384, max_len=8_482_506)
-    # # how big is the positional encoding in memory?
-    # dev = torch.device("cuda")
-    # pos.to(dev)
-
-    # pos.pe.shape
