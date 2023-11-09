@@ -14,6 +14,6 @@ train(path)
 #   [x] run a model training to convergence
 #   fine-tune the model
 #     add phenotype prediction
-#       [ ] add pheno to dataset
-#       [ ] add pheno to model
-#   add positional encoding
+#       [ ] add pheno to dataset (is pheno in the dataset? - No)
+#       [x] add pheno to model
+#   [x] add positional encoding

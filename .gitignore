@@ -19,6 +19,8 @@ _build/
 
 # test data
 tests/data/snp_embedder_checkpoint.pt/*
+test.pt
 
 # training logs
 logs/
+
