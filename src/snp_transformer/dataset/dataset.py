@@ -39,12 +39,12 @@ class IndividualsDataset(Dataset):
 
         self.idx2snp = sparse.partition_by("Individual", as_dict=True)
 
-        pheno_folder = path.parent / "pheno"
+        pheno_folder = path.parent / "phenos"
         if pheno_folder.exists():
             self.iid2pheno = self.load_phenos(pheno_folder)
         else:
             self.iid2pheno = None
-            logger.warning(f"No pheno folder found in {path.parent}")
+            logger.warning(f"No phenos folder found in {path.parent}")
 
     def load_phenos(self, path: Path) -> dict[str, dict[str, int]]:
         pheno2iid = load_pheno_folder(path)
