@@ -88,7 +88,6 @@ class EncoderForMaskedLM(TrainableModule):
             targets.snp_targets.view(-1),
         )
 
-
         snp_preds = torch.argmax(logits_snp, dim=-1)
         snp_acc = self.accuracy_snp(snp_preds, targets.snp_targets)
 
@@ -197,8 +196,8 @@ class EncoderForMaskedLM(TrainableModule):
             )
 
         else:
-            pheno_ids_masked = padded_sequence_ids.phenotype_value_ids
-            pheno_masked_label = padded_sequence_ids.phenotype_value_ids
+            pheno_ids_masked = copy(padded_sequence_ids.phenotype_value_ids)
+            pheno_masked_label = copy(padded_sequence_ids.phenotype_value_ids)
 
         # Make sure to ignore padding when calculating loss and token from other domains
         is_pheno_or_padding = ~is_snp_mask | is_padding

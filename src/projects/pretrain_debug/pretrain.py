@@ -9,3 +9,7 @@ import torch
 
 torch.arange(0, 32, 2, device=torch.device("cuda"))
 train(path)
+
+
+# Test på en anden GPU!
+# hmm der er måske noget med indexing af phenotype_value_ids som er -1?
