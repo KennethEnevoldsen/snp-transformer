@@ -88,6 +88,7 @@ class EncoderForMaskedLM(TrainableModule):
             targets.snp_targets.view(-1),
         )
 
+
         snp_preds = torch.argmax(logits_snp, dim=-1)
         snp_acc = self.accuracy_snp(snp_preds, targets.snp_targets)
 
@@ -112,6 +113,10 @@ class EncoderForMaskedLM(TrainableModule):
             result["loss"] += loss_pheno  # assumes equal weighting of domains
             result["Phenotype Loss"] = loss_pheno
             result["Phenotype Accuracy"] = pheno_acc
+
+        # check if loss is nan (this happens when there are no snps)
+        if torch.isnan(result["loss"]):
+            raise ValueError("Loss is nan")
 
         return result
 
@@ -152,6 +157,14 @@ class EncoderForMaskedLM(TrainableModule):
         )
 
         # -> rest 10% of the time, keep the original word
+
+        # ensure that at least one token is masked to avoid a nan loss
+        if torch.all(masked_lm_labels == -1):
+            # select a random token to mask
+            i = torch.randint(0, masked_lm_labels.shape[0], (1,))
+            masked_lm_labels[i] = domain_ids_tensor[i]
+            domain_ids_tensor[i] = mask_token_id
+
         return domain_ids_tensor, masked_lm_labels
 
     def masking_fn(
