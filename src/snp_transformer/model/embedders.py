@@ -6,11 +6,12 @@ from pathlib import Path
 from typing import Any, Union
 
 import torch
+from torch import nn
+from torch.nn.utils.rnn import pad_sequence
+
 from snp_transformer.data_objects import Individual
 from snp_transformer.dataset.dataset import IndividualsDataset
 from snp_transformer.registry import Registry
-from torch import nn
-from torch.nn.utils.rnn import pad_sequence
 
 logger = logging.getLogger(__name__)
 
@@ -462,5 +463,4 @@ def create_snp_embedder(
     if checkpoint_path is not None:
         emb.to_disk(checkpoint_path)
 
-    return emb
     return emb

@@ -39,6 +39,11 @@
 # Methods
 
 
+## Absolute vs relative positional Encodings
+
+While the original transformer [vaswani_2017] model utilizes absolute positional encodings, multiple works
+have since found relative positional encodings [alibi, rotary_embeddings] to be better for language modelling as the encoding of a word is relative to the encoding of the context. This is however not the case for our sparse encoding of base-pairs, which require absolute positional encoding to denote the global position of the SNP. 
+
 # Results
 
 # Discussion
