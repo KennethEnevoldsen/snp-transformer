@@ -6,12 +6,11 @@ from pathlib import Path
 from typing import Any, Union
 
 import torch
-from torch import nn
-from torch.nn.utils.rnn import pad_sequence
-
 from snp_transformer.data_objects import Individual
 from snp_transformer.dataset.dataset import IndividualsDataset
 from snp_transformer.registry import Registry
+from torch import nn
+from torch.nn.utils.rnn import pad_sequence
 
 from .positional_embeddings import PositionalEncodingModule
 
@@ -114,7 +113,7 @@ class Embedder(nn.Module):
     vocab: Vocab
     is_fitted: bool
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):  # noqa
         super().__init__()
 
     @abstractmethod

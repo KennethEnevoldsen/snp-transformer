@@ -1,12 +1,11 @@
 import pytest
-from torch import nn
-from torch.utils.data import DataLoader
-
 from snp_transformer import IndividualsDataset
 from snp_transformer.model.embedders import SNPEmbedder
 from snp_transformer.model.positional_embeddings import AbsolutePositionalEncoding
 from snp_transformer.model.task_modules import EncoderForMaskedLM
 from snp_transformer.registry import OptimizerFn
+from torch import nn
+from torch.utils.data import DataLoader
 
 from .conftest import TEST_DATA_FOLDER
 

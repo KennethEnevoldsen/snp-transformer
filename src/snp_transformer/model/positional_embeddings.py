@@ -4,9 +4,8 @@ from pathlib import Path
 from typing import Union
 
 import torch
-from torch import Tensor, nn
-
 from snp_transformer.registry import Registry
+from torch import Tensor, nn
 
 
 class PositionalEncodingModule(nn.Module):
@@ -16,7 +15,7 @@ class PositionalEncodingModule(nn.Module):
 
     d_model: int
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):  # noqa
         super().__init__()
 
     @abstractmethod
@@ -49,7 +48,10 @@ class PositionalEncodingModule(nn.Module):
 
 class AbsolutePositionalEncoding(PositionalEncodingModule):
     def __init__(
-        self, d_model: int, dropout_prob: float = 0.1, w_k_constant: float = 10000.0
+        self,
+        d_model: int,
+        dropout_prob: float = 0.1,
+        w_k_constant: float = 10000.0,
     ):
         super().__init__()
         self.dropout = nn.Dropout(p=dropout_prob)
@@ -163,10 +165,14 @@ class tAPE(PositionalEncodingModule):
 
 @Registry.embedders.register("absolute_positional_embedding")
 def create_absolute_positional_encoding(
-    d_model: int, dropout_prob: float = 0.1, w_k_constant: float = 100_000.0
+    d_model: int,
+    dropout_prob: float = 0.1,
+    w_k_constant: float = 100_000.0,
 ) -> AbsolutePositionalEncoding:
     return AbsolutePositionalEncoding(
-        d_model=d_model, dropout_prob=dropout_prob, w_k_constant=w_k_constant
+        d_model=d_model,
+        dropout_prob=dropout_prob,
+        w_k_constant=w_k_constant,
     )
 
 
@@ -203,7 +209,9 @@ if __name__ == "__main__":
     # 2000 to all other positional encodings from 0-2000
 
     pos = AbsolutePositionalEncoding(
-        d_model=1024, dropout_prob=0.0, w_k_constant=100_000.0
+        d_model=1024,
+        dropout_prob=0.0,
+        w_k_constant=100_000.0,
     )
     factor = 1000
     idx = 100 * factor
@@ -219,7 +227,10 @@ if __name__ == "__main__":
     plt.plot(sim)
 
     pos1 = tAPE(
-        d_model=512, length_sequence=1000, dropout_prob=0.0, w_k_constant=100_000.0
+        d_model=512,
+        length_sequence=1000,
+        dropout_prob=0.0,
+        w_k_constant=100_000.0,
     )
     y1 = pos1(torch.arange(start, end).unsqueeze(0))
 
