@@ -4,8 +4,9 @@ from pathlib import Path
 from typing import Union
 
 import torch
-from snp_transformer.registry import Registry
 from torch import Tensor, nn
+
+from snp_transformer.registry import Registry
 
 
 class PositionalEncodingModule(nn.Module):
@@ -70,12 +71,13 @@ class AbsolutePositionalEncoding(PositionalEncodingModule):
         the positional encoding for all positions which is unfeasable
         given the maximum length.
         """
+        device = positions.device
         batch_size = positions.size(1)
         div_term = torch.exp(
-            torch.arange(0, self.d_model, 2)
+            torch.arange(0, self.d_model, 2, device=device)
             * (-math.log(self.w_k_constant) / self.d_model),
         )
-        pe = torch.zeros(positions.size(0), batch_size, self.d_model)
+        pe = torch.zeros(positions.size(0), batch_size, self.d_model, device=device)
 
         # make the positional broadcastable
         positions = positions.unsqueeze(-1)
@@ -133,12 +135,13 @@ class tAPE(PositionalEncodingModule):
         the positional encoding for all positions which is unfeasable
         given the maximum length.
         """
+        device = positions.device
         batch_size = positions.size(1)
         div_term = torch.exp(
-            torch.arange(0, self.d_model, 2)
+            torch.arange(0, self.d_model, 2, device=device)
             * (-math.log(self.w_k_constant) / self.d_model),
         )
-        pe = torch.zeros(positions.size(0), batch_size, self.d_model)
+        pe = torch.zeros(positions.size(0), batch_size, self.d_model, device=device)
         norm_const = self.d_model / self.length_sequence
 
         # make the positional broadcastable
