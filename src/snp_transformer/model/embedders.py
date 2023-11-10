@@ -18,7 +18,6 @@ from .positional_embeddings import PositionalEncodingModule
 logger = logging.getLogger(__name__)
 
 
-@dataclass
 class InputIds:
     """
 
@@ -28,12 +27,32 @@ class InputIds:
         is_padding: Boolean tensor indicating which values are padding
     """
 
-    domain_ids: torch.Tensor
-    snp_value_ids: torch.Tensor
-    snp_position_ids: torch.Tensor
-    phenotype_value_ids: torch.Tensor
-    phenotype_type_ids: torch.Tensor
-    is_padding: torch.Tensor
+    def __init__(
+        self,
+        domain_ids: torch.Tensor,
+        snp_value_ids: torch.Tensor,
+        snp_position_ids: torch.Tensor,
+        phenotype_value_ids: torch.Tensor,
+        phenotype_type_ids: torch.Tensor,
+        is_padding: torch.Tensor,
+    ) -> None:
+        self.domain_ids = domain_ids
+        self.snp_value_ids = snp_value_ids
+        self.snp_position_ids = snp_position_ids
+        self.phenotype_value_ids = phenotype_value_ids
+        self.phenotype_type_ids = phenotype_type_ids
+        self.is_padding = is_padding
+
+        self.validate()
+
+    def validate(self) -> None:
+        """
+        Validated the dataclass. Ensures that phenotype_value_ids are not all -1 and that snp_value_ids are not all -1
+        """
+        if torch.all(self.phenotype_value_ids == -1):
+            raise ValueError("All phenotype values are -1")
+        if torch.all(self.snp_value_ids == -1):
+            raise ValueError("All snp values are -1")
 
     def get_batch_size(self) -> int:
         return self.is_padding.shape[0]
