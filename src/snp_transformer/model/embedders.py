@@ -17,7 +17,7 @@ from .positional_embeddings import PositionalEncodingModule
 
 logger = logging.getLogger(__name__)
 
-
+@dataclass
 class InputIds:
     """
 
@@ -26,23 +26,14 @@ class InputIds:
         value_indexes: Indexes of the values (e.g. snp values, phenotype values)
         is_padding: Boolean tensor indicating which values are padding
     """
+    domain_ids: torch.Tensor
+    snp_value_ids: torch.Tensor
+    snp_position_ids: torch.Tensor
+    phenotype_value_ids: torch.Tensor
+    phenotype_type_ids: torch.Tensor
+    is_padding: torch.Tensor
 
-    def __init__(
-        self,
-        domain_ids: torch.Tensor,
-        snp_value_ids: torch.Tensor,
-        snp_position_ids: torch.Tensor,
-        phenotype_value_ids: torch.Tensor,
-        phenotype_type_ids: torch.Tensor,
-        is_padding: torch.Tensor,
-    ) -> None:
-        self.domain_ids = domain_ids
-        self.snp_value_ids = snp_value_ids
-        self.snp_position_ids = snp_position_ids
-        self.phenotype_value_ids = phenotype_value_ids
-        self.phenotype_type_ids = phenotype_type_ids
-        self.is_padding = is_padding
-
+    def __post_init__(self) -> None:
         self.validate()
 
     def validate(self) -> None:

@@ -74,6 +74,7 @@ class EncoderForMaskedLM(TrainableModule):
         inputs: InputIds,
         targets: Targets,
     ) -> dict[str, Union[torch.Tensor, dict[str, torch.Tensor]]]:
+
         embeddings = self.embedding_module(inputs)
 
         encoded_individuals = self.encoder_module(
@@ -108,7 +109,10 @@ class EncoderForMaskedLM(TrainableModule):
 
             # check if loss is nan (this happens when there are no phenotype values)
             if torch.isnan(loss_pheno):
-                loss_pheno = torch.tensor(0.0, device=self.device)
+                if torch.all(targets.is_phenotype_mask == False):
+                    loss_pheno = torch.tensor(0.0, device=self.device)
+                else:
+                    raise ValueError("Pheno loss is nan")
             result["loss"] += loss_pheno  # assumes equal weighting of domains
             result["Phenotype Loss"] = loss_pheno
             result["Phenotype Accuracy"] = pheno_acc
@@ -124,6 +128,7 @@ class EncoderForMaskedLM(TrainableModule):
         domain_ids_tensor: torch.Tensor,
         domain_vocab_size: int,
         mask_token_id: int,
+        is_padding: torch.Tensor,
         masking_prob: float = 0.15,
         replace_with_mask_prob: float = 0.8,
         replace_with_random_prob: float = 0.1,
@@ -158,9 +163,10 @@ class EncoderForMaskedLM(TrainableModule):
         # -> rest 10% of the time, keep the original word
 
         # ensure that at least one token is masked to avoid a nan loss
-        if torch.all(masked_lm_labels == -1):
-            # select a random token to mask
-            i = torch.randint(0, masked_lm_labels.shape[0], (1,))
+        no_pad_labels = masked_lm_labels[~is_padding]
+        if torch.all(no_pad_labels == -1):
+            # mask the first token (safe but not random)
+            i = 0
             masked_lm_labels[i] = domain_ids_tensor[i]
             domain_ids_tensor[i] = mask_token_id
 
@@ -184,6 +190,7 @@ class EncoderForMaskedLM(TrainableModule):
             snp_value_ids,
             domain_vocab_size=vocab.vocab_size_snps,
             mask_token_id=snp_mask_token_id,
+            is_padding=is_padding,
         )
 
         if self.mask_phenotype:
@@ -193,11 +200,12 @@ class EncoderForMaskedLM(TrainableModule):
                 pheno_value_ids,
                 domain_vocab_size=vocab.vocab_size_phenotype_value,
                 mask_token_id=phenotype_mask_token_id,
+                is_padding=is_padding,
             )
 
         else:
-            pheno_ids_masked = copy(padded_sequence_ids.phenotype_value_ids)
-            pheno_masked_label = copy(padded_sequence_ids.phenotype_value_ids)
+            pheno_ids_masked = torch.clone(padded_sequence_ids.phenotype_value_ids)
+            pheno_masked_label = torch.clone(padded_sequence_ids.phenotype_value_ids)
 
         # Make sure to ignore padding when calculating loss and token from other domains
         is_pheno_or_padding = ~is_snp_mask | is_padding
