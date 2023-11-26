@@ -22,3 +22,4 @@ tests/data/snp_embedder_checkpoint.pt/*
 
 # training logs
 logs/
+test.pt
