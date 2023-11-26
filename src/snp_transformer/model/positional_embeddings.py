@@ -4,9 +4,8 @@ from pathlib import Path
 from typing import Union
 
 import torch
-from torch import Tensor, nn
-
 from snp_transformer.registry import Registry
+from torch import Tensor, nn
 
 
 class PositionalEncodingModule(nn.Module):

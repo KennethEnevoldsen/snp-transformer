@@ -1,6 +1,7 @@
 import logging
 import os
 from pathlib import Path
+
 os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
 
 from snp_transformer.train import train
@@ -20,5 +21,5 @@ train(path)
 #   [x] add positional encoding
 
 
-# [ ] get training to work using bf16
+# [ ] get training to work using bf16
 #
