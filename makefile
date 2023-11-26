@@ -17,7 +17,7 @@ pretrain:
 install:
 	pip install -e ".[tests, docs, dev]"
 
-install_on_ucloud
+install_on_ucloud:
 	# does not work with just:
 	pip install -e ".[tests, docs, dev]"
 	# get import error (seems like an error of installation)
