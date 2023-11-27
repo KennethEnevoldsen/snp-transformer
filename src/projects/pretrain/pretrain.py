@@ -1,9 +1,11 @@
 import logging
-import os
 from pathlib import Path
-os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
 
 from snp_transformer.train import train
+
+# import os
+# os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
+
 
 logging.basicConfig(level=logging.INFO)
 path = Path(__file__).parent / "config.cfg"
@@ -15,10 +17,9 @@ train(path)
 #   [x] run a model training to convergence
 #   fine-tune the model
 #     add phenotype prediction
-#       [ ] add pheno to dataset (is pheno in the dataset? - No)
+#       [x] add pheno to dataset (is pheno in the dataset? - yes)
 #       [x] add pheno to model
 #   [x] add positional encoding
 
 
-# [ ] get training to work using bf16
-#
+# [ ] get training to work using bf16 (current device does not support bf16, but we might get it to work on a different device) or using fp16
