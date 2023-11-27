@@ -110,7 +110,7 @@ class EncoderForMaskedLM(TrainableModule):
 
             # check if loss is nan (this happens when there are no phenotype values)
             if torch.isnan(loss_pheno):
-                if torch.all(targets.is_phenotype_mask == False):
+                if torch.all(targets.is_phenotype_mask is False):
                     loss_pheno = torch.tensor(0.0, device=self.device)
                 else:
                     raise ValueError("Pheno loss is nan")
