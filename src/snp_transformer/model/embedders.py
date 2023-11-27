@@ -16,6 +16,7 @@ from .positional_embeddings import PositionalEncodingModule
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class InputIds:
     """
@@ -25,6 +26,7 @@ class InputIds:
         value_indexes: Indexes of the values (e.g. snp values, phenotype values)
         is_padding: Boolean tensor indicating which values are padding
     """
+
     domain_ids: torch.Tensor
     snp_value_ids: torch.Tensor
     snp_position_ids: torch.Tensor
@@ -261,8 +263,8 @@ class SNPEmbedder(Embedder):
 
         # Add padding for SNPs and Phenotypes
         # we want a vector on the length of the concatenated snps and phenotypes
-        # with the padding tokens at the end for snps
-        # and at the beginning for phenotypes
+        # with the padding tokens at the beginning for snps
+        # and at the end for phenotypes
         snp_padding_id = self.vocab.snp2idx[self.pad_token]
         phenotype_padding_id = self.vocab.phenotype_value2idx[self.pad_token]
 
@@ -270,8 +272,8 @@ class SNPEmbedder(Embedder):
         phenotype_padding = (
             torch.ones_like(snp_ids, dtype=torch.long) * phenotype_padding_id
         )
-        snp_ids = torch.cat([snp_ids, snp_padding])
-        phenotype_ids = torch.cat([phenotype_padding, phenotype_ids])
+        snp_ids = torch.cat([snp_padding, snp_ids])
+        phenotype_ids = torch.cat([phenotype_ids, phenotype_padding])
 
         # Phenotype Types
         phenotype_types_ = [
@@ -283,12 +285,12 @@ class SNPEmbedder(Embedder):
         phenotype_type_padding = (
             torch.ones_like(snp_ids, dtype=torch.long) * phenotype_type_padding_id
         )
-        phenotype_types = torch.cat([phenotype_type_padding, phenotype_types])
+        phenotype_types = torch.cat([phenotype_types, phenotype_type_padding])
 
         # Domain
         snp_idx = self.vocab.domain2idx["snp"]
         pheno_idx = self.vocab.domain2idx["phenotype"]
-        domain_ids_: list[int] = [snp_idx] * len(snps) + [pheno_idx] * len(phenotypes)
+        domain_ids_: list[int] = [pheno_idx] * len(phenotypes) + [snp_idx] * len(snps)
         domain_ids = torch.tensor(domain_ids_, dtype=torch.long)
 
         # Padding (for masking)

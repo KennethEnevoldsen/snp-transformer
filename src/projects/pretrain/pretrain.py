@@ -3,8 +3,8 @@ from pathlib import Path
 
 from snp_transformer.train import train
 
-# import os
-# os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
+# import os  # noqa
+# os.environ["CUDA_LAUNCH_BLOCKING"] = "1"  # noqa
 
 
 logging.basicConfig(level=logging.INFO)
@@ -22,4 +22,4 @@ train(path)
 #   [x] add positional encoding
 
 
-# [ ] get training to work using bf16 (current device does not support bf16, but we might get it to work on a different device) or using fp16
+# [ ] get training to work using bf16 (current device does not support bf16, but we might get it to work on a different device) or using fp16

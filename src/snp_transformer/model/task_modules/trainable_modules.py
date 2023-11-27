@@ -4,7 +4,6 @@ from dataclasses import dataclass
 
 import lightning.pytorch as pl
 import torch
-
 from snp_transformer.data_objects import Individual
 
 from ..embedders import Embedder
