@@ -75,7 +75,6 @@ class EncoderForMaskedLM(TrainableModule):
         inputs: InputIds,
         targets: Targets,
     ) -> dict[str, Union[torch.Tensor, dict[str, torch.Tensor]]]:
-
         embeddings = self.embedding_module(inputs)
 
         encoded_individuals = self.encoder_module(
@@ -110,7 +109,7 @@ class EncoderForMaskedLM(TrainableModule):
 
             # check if loss is nan (this happens when there are no phenotype values)
             if torch.isnan(loss_pheno):
-                if torch.all(targets.is_phenotype_mask is False):
+                if torch.all(targets.is_phenotype_mask == False):
                     loss_pheno = torch.tensor(0.0, device=self.device)
                 else:
                     raise ValueError("Pheno loss is nan")
