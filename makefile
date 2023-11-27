@@ -4,9 +4,8 @@ static-type-check:
 
 test:
 	# Run pytest with 
-	# verbose output (-v) and 
-	# automatically determine the number of worker processes to use (-n auto)
-	pytest -v -n auto
+	# verbose output (-v)
+	pytest -v
 
 lint:
 	pre-commit run --all-files
