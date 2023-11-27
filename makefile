@@ -4,9 +4,8 @@ static-type-check:
 
 test:
 	# Run pytest with 
-	# verbose output (-v) and 
-	# automatically determine the number of worker processes to use (-n auto)
-	pytest -v -n auto
+	# verbose output (-v)
+	pytest -v
 
 lint:
 	pre-commit run --all-files
@@ -17,7 +16,7 @@ pretrain:
 install:
 	pip install -e ".[tests, docs, dev]"
 
-install_on_ucloud
+install_on_ucloud:
 	# does not work with just:
 	pip install -e ".[tests, docs, dev]"
 	# get import error (seems like an error of installation)
