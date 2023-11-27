@@ -154,7 +154,9 @@ def load_pheno(path: Path) -> dict[str, int]:
         has_header=False,
         dtypes={"iid": pl.Int64, "fid": pl.Int64, "phenotype": pl.Int64},
     )
-    return {iid: phenotype for iid, phenotype in zip(pheno["iid"], pheno["phenotype"])}
+    return {  # noqa
+        iid: phenotype for iid, phenotype in zip(pheno["iid"], pheno["phenotype"])
+    }
 
 
 def load_pheno_folder(path: Path) -> dict[str, dict[str, int]]:
