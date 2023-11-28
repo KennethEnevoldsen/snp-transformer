@@ -5,15 +5,19 @@ A dataset for loading in patients
 import logging
 import random
 from collections import defaultdict
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable, Optional, Sequence
-
-from torch.utils.data import Dataset
+from typing import Optional
 
 from snp_transformer.data_objects import Individual, SNPs
-from snp_transformer.dataset.loaders import (load_details, load_fam,
-                                             load_pheno_folder, load_sparse)
+from snp_transformer.dataset.loaders import (
+    load_details,
+    load_fam,
+    load_pheno_folder,
+    load_sparse,
+)
 from snp_transformer.registry import Registry
+from torch.utils.data import Dataset
 
 logger = logging.getLogger(__name__)
 

@@ -1,11 +1,9 @@
 import logging
 from abc import abstractmethod
 from dataclasses import dataclass
-from typing import Callable
 
 import lightning.pytorch as pl
 import torch
-
 from snp_transformer.data_objects import Individual
 from snp_transformer.dataset.dataset import IndividualsDataset
 from snp_transformer.registry import OptimizerFn

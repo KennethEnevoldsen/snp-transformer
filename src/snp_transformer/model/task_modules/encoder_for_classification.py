@@ -3,11 +3,10 @@ from copy import copy
 from typing import Literal, Union
 
 import torch
-from torch import nn
-from torchmetrics.classification import MulticlassAccuracy
-
 from snp_transformer import IndividualsDataset
 from snp_transformer.data_objects import Individual
+from torch import nn
+from torchmetrics.classification import MulticlassAccuracy
 
 from ...registry import OptimizerFn, Registry
 from ..embedders import Embedder, InputIds, Vocab
@@ -95,14 +94,14 @@ class EncoderForClassification(TrainableModule):
         vocab = self.embedding_module.vocab
         mask_id = vocab.phenotype_value2idx[vocab.mask_token]
         pheno_ids_to_mask = torch.tensor(
-            [vocab.phenotype_type2idx[pheno] for pheno in self.phenotypes_to_predict]
+            [vocab.phenotype_type2idx[pheno] for pheno in self.phenotypes_to_predict],
         )
 
         values_to_mask = torch.isin(
-            padded_sequence_ids.phenotype_type_ids, pheno_ids_to_mask
+            padded_sequence_ids.phenotype_type_ids, pheno_ids_to_mask,
         )
         values = torch.where(
-            values_to_mask, mask_id, padded_sequence_ids.phenotype_value_ids
+            values_to_mask, mask_id, padded_sequence_ids.phenotype_value_ids,
         )
 
         masked_sequence_ids = InputIds(
@@ -177,7 +176,7 @@ class EncoderForClassification(TrainableModule):
         return result
 
     def _metrics_pr_phenotype(
-        self, targets: Targets, inputs: InputIds, logits: torch.Tensor
+        self, targets: Targets, inputs: InputIds, logits: torch.Tensor,
     ) -> dict[str, torch.Tensor]:
         """
         computes the metrics (loss, and accuracy) for each phenotype
@@ -234,7 +233,6 @@ class EncoderForClassification(TrainableModule):
             self.log(f"{mode} {key}", output[key], **log_kwargs)
 
 
-
 @Registry.tasks.register("classification")
 def classification_task(
     phenotypes_to_predict: list[str],
@@ -248,6 +246,7 @@ def classification_task(
         encoder_module=encoder_module,
         create_optimizer_fn=create_optimizer_fn,
     )
+
 
 @Registry.tasks.register("classification_from_masked_lm")
 def classification_task_from_masked_lm(

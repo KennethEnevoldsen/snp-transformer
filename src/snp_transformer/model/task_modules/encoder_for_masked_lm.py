@@ -3,10 +3,9 @@ from copy import copy
 from typing import Literal, Union
 
 import torch
+from snp_transformer.dataset.dataset import IndividualsDataset
 from torch import nn
 from torchmetrics.classification import MulticlassAccuracy
-
-from snp_transformer.dataset.dataset import IndividualsDataset
 
 from ...registry import OptimizerFn, Registry
 from ..embedders import Embedder, InputIds, Vocab
