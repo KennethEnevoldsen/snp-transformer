@@ -98,10 +98,13 @@ class EncoderForClassification(TrainableModule):
         )
 
         values_to_mask = torch.isin(
-            padded_sequence_ids.phenotype_type_ids, pheno_ids_to_mask,
+            padded_sequence_ids.phenotype_type_ids,
+            pheno_ids_to_mask,
         )
         values = torch.where(
-            values_to_mask, mask_id, padded_sequence_ids.phenotype_value_ids,
+            values_to_mask,
+            mask_id,
+            padded_sequence_ids.phenotype_value_ids,
         )
 
         masked_sequence_ids = InputIds(
@@ -176,7 +179,10 @@ class EncoderForClassification(TrainableModule):
         return result
 
     def _metrics_pr_phenotype(
-        self, targets: Targets, inputs: InputIds, logits: torch.Tensor,
+        self,
+        targets: Targets,
+        inputs: InputIds,
+        logits: torch.Tensor,
     ) -> dict[str, torch.Tensor]:
         """
         computes the metrics (loss, and accuracy) for each phenotype
