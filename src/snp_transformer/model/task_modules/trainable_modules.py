@@ -4,6 +4,7 @@ from dataclasses import dataclass
 
 import lightning.pytorch as pl
 import torch
+
 from snp_transformer.data_objects import Individual
 
 from ..embedders import Embedder
@@ -43,4 +44,10 @@ class TrainableModule(pl.LightningModule):
 
     @abstractmethod
     def collate_fn(self, individual: list[Individual]) -> Targets:
+        ...
+
+    def filter_dataset(self, dataset: pl.LightningDataModule) -> None:
+        """
+        Filter individuals that does not have the specified requirements
+        """
         ...

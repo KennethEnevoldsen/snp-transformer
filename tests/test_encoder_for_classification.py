@@ -62,7 +62,7 @@ def test_model(
 
     assert len(training_dataset) < n_individuals
     individuals = [training_dataset[i] for i in range(len(training_dataset))]
-    assert all(individual.phenotype == "pheno1" for individual in individuals)
+    assert all("pheno1" in ind.phenotype for ind in individuals)
     assert len(training_dataset) == 2
 
     # create dataloader:

@@ -6,6 +6,8 @@ import torch
 from torch import nn
 from torchmetrics.classification import MulticlassAccuracy
 
+from snp_transformer.dataset.dataset import IndividualsDataset
+
 from ...registry import OptimizerFn, Registry
 from ..embedders import Embedder, InputIds, Vocab
 from .trainable_modules import Targets, TrainableModule
@@ -272,6 +274,12 @@ class EncoderForMaskedLM(TrainableModule):
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
         return self.create_optimizer_fn(self.parameters())
+
+    def filter_dataset(self, dataset: IndividualsDataset) -> None:
+        """
+        placeholder function to filter dataset
+        """
+        return
 
 
 @Registry.tasks.register("masked_lm")
