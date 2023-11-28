@@ -1,20 +1,22 @@
 
+install:
+	@echo "--- 📦 Installing dependencies ---\n"
+	pip install -e ".[dev, docs, tests]"
+
 static-type-check:
+	@echo "--- 🔍 Running static type checks ---\n"
 	pyright src/.
 
 test:
-	# Run pytest with 
-	# verbose output (-v)
+	@echo "--- 🧪 Running tests ---\n"
+	@echo "Arguments:"
+	@echo "  -v: verbose output\n"
+	@echo ""
 	pytest -v
-
-lint:
-	pre-commit run --all-files
 
 pretrain:
 	python src/pretrain/pretrain.py
 
-install:
-	pip install -e ".[tests, docs, dev]"
 
 install_on_ucloud:
 	# does not work with just:
@@ -32,3 +34,14 @@ install_on_ucloud:
 	python -m pip install torch==2.0.1
 	# seems to work, but now I have problems with torchmetrics (probably due to torchvision not matching)
 	# uninstall it seems to do the trick!
+
+lint:
+	@echo "--- 🔧 Running linters ---\n"
+	pre-commit run --all-files
+
+pr:
+	@echo "--- 📦 Running pre-commit checks ---\n"
+	make install
+	make static-type-check
+	make lint
+	make test
