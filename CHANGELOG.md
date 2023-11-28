@@ -2,6 +2,90 @@
 
 
 
+## v0.3.2 (2023-11-28)
+
+### Chore
+
+* chore: remove unused code from pr ([`d457b43`](https://github.com/KennethEnevoldsen/snp-transformer/commit/d457b43b98c4e7fa66105b7c03a05d9711646348))
+
+* chore: clean up ([`2aba044`](https://github.com/KennethEnevoldsen/snp-transformer/commit/2aba044d09e33fe24fa907f4809b81f3622d8a0f))
+
+### Fix
+
+* fix: Updated pre-commit hooks ([`1f80415`](https://github.com/KennethEnevoldsen/snp-transformer/commit/1f8041549a27a442c2e3febed2c1ca8b9d667e26))
+
+* fix: comparison operator in EncoderForMaskedLM ([`8c6f3b4`](https://github.com/KennethEnevoldsen/snp-transformer/commit/8c6f3b425ce33f6a2ce447d8bf45b317dc9cbcdf))
+
+* fix: set phenotypes to be first in the masked prediction ([`7db01f9`](https://github.com/KennethEnevoldsen/snp-transformer/commit/7db01f94108f3ff9427293d7415be986274a1f39))
+
+* fix: errors in tests ([`7a1149b`](https://github.com/KennethEnevoldsen/snp-transformer/commit/7a1149bc00f313bad0835081626ad40403d80c13))
+
+* fix: fix invalid syntax in makefile ([`aa4c551`](https://github.com/KennethEnevoldsen/snp-transformer/commit/aa4c551bb047ab70f51a523681d324f4a8113111))
+
+* fix: updated test to only run on cpu ([`dd142ec`](https://github.com/KennethEnevoldsen/snp-transformer/commit/dd142ec08bdb9a58d6aa58815bf8c78713edd87d))
+
+* fix: Convert path from pheno to phenos when looking for dataset ([`4643b62`](https://github.com/KennethEnevoldsen/snp-transformer/commit/4643b62f769c15bbc858d85e580fca4991c47e60))
+
+### Style
+
+* style: linting ([`27aef42`](https://github.com/KennethEnevoldsen/snp-transformer/commit/27aef42d9f5c863e1fcd0cb682a60ed9efa8577c))
+
+* style: linting ([`dddeabe`](https://github.com/KennethEnevoldsen/snp-transformer/commit/dddeabeee1ba4655d1f6fc6575f1c6c72947bccd))
+
+* style: linting ([`b9c9bea`](https://github.com/KennethEnevoldsen/snp-transformer/commit/b9c9bea6148219b88cf0b757a117b9b91c69a54b))
+
+* style: linting ([`b1321f0`](https://github.com/KennethEnevoldsen/snp-transformer/commit/b1321f0798bbc83a3bdab45799fd091c79040265))
+
+* style: linting ([`b95dc59`](https://github.com/KennethEnevoldsen/snp-transformer/commit/b95dc59f9ff04bd6a8febfd85a9757d54c8b62fa))
+
+### Unknown
+
+* Merge pull request #22 from KennethEnevoldsen/pretraining_w_pos
+
+Pretraining w pos ([`afe5b04`](https://github.com/KennethEnevoldsen/snp-transformer/commit/afe5b049ec1e76c386685db265ea204f4f6d0039))
+
+* Merge branch &#39;main&#39; into pretraining_w_pos ([`e4377ab`](https://github.com/KennethEnevoldsen/snp-transformer/commit/e4377ab7dd1133edd3d10d40a8f71332ed3487c5))
+
+* Merge pull request #27 from KennethEnevoldsen/add-train-test-split
+
+Add train/test split functionality to IndividualsDataset ([`ec9a24b`](https://github.com/KennethEnevoldsen/snp-transformer/commit/ec9a24b1480facfde6773cfd416a869acdee8073))
+
+* Added train/test split to dataset ([`1f57d9f`](https://github.com/KennethEnevoldsen/snp-transformer/commit/1f57d9f88fbc8ab1491e82e81f6599a4e0354c44))
+
+* merge ([`1ccf494`](https://github.com/KennethEnevoldsen/snp-transformer/commit/1ccf494de806c79caeba579e8a4f423584dfdbf1))
+
+* Fix nan loss calculation in EncoderForMaskedLM ([`8086139`](https://github.com/KennethEnevoldsen/snp-transformer/commit/8086139fb08b6775dfd5acb7b53d9fc2f61681a4))
+
+* Merge branch &#39;pretraining_w_pos&#39; of https://github.com/KennethEnevoldsen/snp-transformer into pretraining_w_pos ([`6852ccc`](https://github.com/KennethEnevoldsen/snp-transformer/commit/6852ccc1b090910d4564cd504f5879aec7a66044))
+
+* Merge branch &#39;pretraining_w_pos&#39; of https://github.com/KennethEnevoldsen/snp-transformer into pretraining_w_pos ([`6ea9419`](https://github.com/KennethEnevoldsen/snp-transformer/commit/6ea941925a4a51f37a11d2d526e4f2c6df53c8ce))
+
+* Update config.cfg with new values ([`d940374`](https://github.com/KennethEnevoldsen/snp-transformer/commit/d94037450c75b5c651fab28a990ea4a44889f0aa))
+
+* Merge branch &#39;pretraining_w_pos&#39; of https://github.com/KennethEnevoldsen/snp-transformer into pretraining_w_pos ([`cafb663`](https://github.com/KennethEnevoldsen/snp-transformer/commit/cafb66302eebabe765d7f38ee12e3e6abce5352b))
+
+* Merge branch &#39;main&#39; into pretraining_w_pos ([`242b096`](https://github.com/KennethEnevoldsen/snp-transformer/commit/242b096d8601aa8e7505432b9f54170addf05753))
+
+* Update configuration and model modules ([`d3da163`](https://github.com/KennethEnevoldsen/snp-transformer/commit/d3da163b9bbc6edbaa29db1d80ea210988240264))
+
+* Merge branch &#39;main&#39; into pretraining_w_pos ([`9cdaf6d`](https://github.com/KennethEnevoldsen/snp-transformer/commit/9cdaf6de54a4868b32f94b35bc58db6b09eeccec))
+
+* Refactor InputIds dataclass constructor to include
+data validation. ([`8011bde`](https://github.com/KennethEnevoldsen/snp-transformer/commit/8011bdea22e01d9a59bd7cc8a4efed2c4ca76b95))
+
+* Merge branch &#39;pretraining_w_pos&#39; of https://github.com/KennethEnevoldsen/snp-transformer into pretraining_w_pos ([`fc17006`](https://github.com/KennethEnevoldsen/snp-transformer/commit/fc170066ffef2854a106f1ab56b14cc6690f99c4))
+
+* debugging ([`381eb6e`](https://github.com/KennethEnevoldsen/snp-transformer/commit/381eb6e289a63a4a5a82a8eca4384ba4e98ca0eb))
+
+* still debugging ([`02f1f20`](https://github.com/KennethEnevoldsen/snp-transformer/commit/02f1f20646e980c54e2a00f0f2cb4fcc57838f84))
+
+* still debugging ([`ab835f0`](https://github.com/KennethEnevoldsen/snp-transformer/commit/ab835f0d36756f8231923b06fa07acb1c1ff993f))
+
+* started to debug ([`988363c`](https://github.com/KennethEnevoldsen/snp-transformer/commit/988363c608dba978356770636590d76bfdb9307c))
+
+* Added pretrain command to makefile ([`dadf983`](https://github.com/KennethEnevoldsen/snp-transformer/commit/dadf9838db7cc32749496064ec8d1a3877584266))
+
+
 ## v0.3.1 (2023-11-09)
 
 ### Ci
