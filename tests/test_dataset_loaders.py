@@ -15,5 +15,5 @@ def test_load_pheno_folder(test_data_folder: Path):
     phenos = load_pheno_folder(test_data_folder / "phenos")
 
     assert isinstance(phenos, dict)
-    assert isinstance(list(phenos.values())[0], dict)
+    assert isinstance(list(phenos.values())[0], dict)  # noqa
     assert len(phenos.items()) == 2

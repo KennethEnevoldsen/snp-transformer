@@ -57,7 +57,7 @@ def test_snps(
     snp_indices = ind1["SNP"].values
     snp_details = details.iloc[snp_indices]  # type: ignore
     ind_fam = fam.loc[iid]
-    ind_fam.sex
+    assert hasattr(ind_fam, "sex")
     snps = SNPs(
         values=list(snp_values),
         chromosomes=snp_details["chr"].values,

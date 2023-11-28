@@ -20,7 +20,7 @@ import platform
 import re
 import shutil
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional  # noqa
 
 from invoke import Context, Result, task
 
@@ -343,7 +343,6 @@ def test(
     if not pytest_args:
         pytest_args = [
             "tests",
-            "-n auto",
             "-rfE",
             "--failed-first",
             "-p no:cov",
@@ -382,7 +381,7 @@ def test(
 
 def test_for_rej():
     # Get all paths in current directory or subdirectories that end in .rej
-    rej_files = list(Path(".").rglob("*.rej"))
+    rej_files = list(Path().rglob("*.rej"))
 
     if len(rej_files) > 0:
         print(f"\n{msg_type.FAIL} Found .rej files leftover from cruft update.\n")
