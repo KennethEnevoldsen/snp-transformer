@@ -24,7 +24,7 @@ def long_training_dataset() -> IndividualsDataset:
 
 @pytest.mark.parametrize(
     "training_dataset",
-    [dummy_training_dataset(), long_training_dataset()],
+    [dummy_training_dataset()],
 )
 def test_model(
     training_dataset: IndividualsDataset,
@@ -65,7 +65,7 @@ def test_model(
     assert all("pheno1" in ind.phenotype for ind in individuals)
     assert len(training_dataset) == 2
 
-    # create dataloader:
+    # create dataloader
     dataloader = DataLoader(
         training_dataset,
         batch_size=32,

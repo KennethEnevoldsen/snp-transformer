@@ -60,60 +60,47 @@ class EncoderForClassification(EncoderForMaskedLM):
         self,
         padded_sequence_ids: InputIds,
     ) -> tuple[InputIds, Targets]:
+        """
+        mask phenotypes and return the masked sequence ids and the targets
+        """
         vocab = self.embedding_module.vocab
+        mask_id = vocab.phenotype_value2idx[vocab.mask_token]
+        pheno_ids_to_mask = torch.tensor(
+            [vocab.phenotype_type2idx[pheno] for pheno in self.phenotypes]
+        )
+
+        values_to_mask = torch.isin(
+            padded_sequence_ids.phenotype_type_ids, pheno_ids_to_mask
+        )
+        values = torch.where(
+            values_to_mask, mask_id, padded_sequence_ids.phenotype_value_ids
+        )
+
+        masked_sequence_ids = InputIds(
+            domain_ids=padded_sequence_ids.domain_ids,
+            snp_value_ids=padded_sequence_ids.snp_value_ids,
+            snp_position_ids=padded_sequence_ids.snp_position_ids,
+            phenotype_value_ids=values,
+            phenotype_type_ids=padded_sequence_ids.phenotype_type_ids,
+            is_padding=padded_sequence_ids.is_padding,
+        )
+
+        # creating targets
         is_padding = padded_sequence_ids.is_padding
+        is_snp_mask = (
+            padded_sequence_ids.domain_ids == vocab.domain2idx[vocab.snp_token]
+        )
+        is_pheno_or_padding = ~is_snp_mask | is_padding
+        is_snp_or_padding = is_snp_mask | is_padding
 
-    #     snp_mask_token_id = vocab.snp2idx[vocab.mask_token]
-    #     snp_value_ids = copy(padded_sequence_ids.snp_value_ids)
+        targets = Targets(
+            snp_targets=padded_sequence_ids.snp_value_ids,
+            phenotype_targets=padded_sequence_ids.phenotype_value_ids,
+            is_snp_mask=~is_pheno_or_padding,
+            is_phenotype_mask=~is_snp_or_padding,
+        )
+        return masked_sequence_ids, targets
 
-    #     is_snp_mask = (
-    #         padded_sequence_ids.domain_ids == vocab.domain2idx[vocab.snp_token]
-    #     )
-
-    #     snp_ids_masked, snp_masked_label = self.mask(
-    #         snp_value_ids,
-    #         domain_vocab_size=vocab.vocab_size_snps,
-    #         mask_token_id=snp_mask_token_id,
-    #         is_padding=is_padding,
-    #     )
-
-    #     if self.mask_phenotype:
-    #         phenotype_mask_token_id = vocab.phenotype_value2idx[vocab.mask_token]
-    #         pheno_value_ids = copy(padded_sequence_ids.phenotype_value_ids)
-    #         pheno_ids_masked, pheno_masked_label = self.mask(
-    #             pheno_value_ids,
-    #             domain_vocab_size=vocab.vocab_size_phenotype_value,
-    #             mask_token_id=phenotype_mask_token_id,
-    #             is_padding=is_padding,
-    #         )
-
-    #     else:
-    #         pheno_ids_masked = torch.clone(padded_sequence_ids.phenotype_value_ids)
-    #         pheno_masked_label = torch.clone(padded_sequence_ids.phenotype_value_ids)
-
-    #     # Make sure to ignore padding when calculating loss and token from other domains
-    #     is_pheno_or_padding = ~is_snp_mask | is_padding
-    #     is_snp_or_padding = is_snp_mask | is_padding
-    #     snp_masked_label[is_padding] = self.ignore_index
-    #     pheno_masked_label[is_snp_or_padding] = self.ignore_index
-
-    #     masked_sequence_ids = InputIds(
-    #         domain_ids=padded_sequence_ids.domain_ids,
-    #         snp_value_ids=snp_ids_masked,
-    #         snp_position_ids=padded_sequence_ids.snp_position_ids,
-    #         phenotype_value_ids=pheno_ids_masked,
-    #         phenotype_type_ids=padded_sequence_ids.phenotype_type_ids,
-    #         is_padding=is_padding,
-    #     )
-
-    #     targets = Targets(
-    #         snp_targets=snp_masked_label,
-    #         phenotype_targets=pheno_masked_label,
-    #         is_snp_mask=~is_pheno_or_padding,
-    #         is_phenotype_mask=~is_snp_or_padding,
-    #     )
-
-    #     return masked_sequence_ids, targets
 
     def collate_fn(self, individuals: list[Individual]) -> tuple[InputIds, Targets]:
         """
