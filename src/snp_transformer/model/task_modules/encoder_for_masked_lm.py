@@ -66,11 +66,7 @@ class EncoderForMaskedLM(TrainableModule):
                 vocab.vocab_size_phenotype_value,
             )
 
-        self.loss = nn.CrossEntropyLoss(ignore_index=-1)
-
-    @property
-    def device(self) -> torch.device:
-        return next(self.parameters()).device
+        self.loss = nn.CrossEntropyLoss(ignore_index=self.ignore_index)
 
     def forward(
         self,
@@ -272,9 +268,6 @@ class EncoderForMaskedLM(TrainableModule):
         for key in output:
             self.log(f"{mode} {key}", output[key], **log_kwargs)
 
-    def configure_optimizers(self) -> torch.optim.Optimizer:
-        return self.create_optimizer_fn(self.parameters())
-
     def filter_dataset(self, dataset: IndividualsDataset) -> None:
         """
         placeholder function to filter dataset
@@ -296,3 +289,11 @@ def create_encoder_for_masked_lm(
         create_optimizer_fn=create_optimizer_fn,
         mask_phenotype=mask_phenotype,
     )
+
+
+@Registry.tasks.register("masked_lm_from_disk")
+def create_encoder_for_masked_lm_from_disk(
+    path: str,
+) -> EncoderForMaskedLM:
+    mdl = EncoderForMaskedLM.load_from_checkpoint(path)
+    return mdl

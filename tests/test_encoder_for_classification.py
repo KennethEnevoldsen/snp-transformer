@@ -53,7 +53,7 @@ def test_model(
         embedding_module=emb,
         encoder_module=encoder,
         create_optimizer_fn=optimizer_fn,
-        phenotypes=["pheno1"],
+        phenotypes_to_predict=["pheno1"],
     )
 
     # filter dataset to remove individuals without the specified phenotypes:

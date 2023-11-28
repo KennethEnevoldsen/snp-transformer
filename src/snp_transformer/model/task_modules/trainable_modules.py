@@ -1,11 +1,14 @@
 import logging
 from abc import abstractmethod
 from dataclasses import dataclass
+from typing import Callable
 
 import lightning.pytorch as pl
 import torch
 
 from snp_transformer.data_objects import Individual
+from snp_transformer.dataset.dataset import IndividualsDataset
+from snp_transformer.registry import OptimizerFn
 
 from ..embedders import Embedder
 
@@ -41,13 +44,21 @@ class TrainableModule(pl.LightningModule):
     """
 
     embedding_module: Embedder
+    create_optimizer_fn: OptimizerFn
 
     @abstractmethod
     def collate_fn(self, individual: list[Individual]) -> Targets:
         ...
 
-    def filter_dataset(self, dataset: pl.LightningDataModule) -> None:
+    def filter_dataset(self, dataset: IndividualsDataset) -> None:
         """
         Filter individuals that does not have the specified requirements
         """
         ...
+
+    @property
+    def device(self) -> torch.device:
+        return next(self.parameters()).device
+
+    def configure_optimizers(self) -> torch.optim.Optimizer:
+        return self.create_optimizer_fn(self.parameters())

@@ -46,7 +46,7 @@ class InputIds:
             raise ValueError("All phenotype values are -1")
         if torch.all(self.snp_value_ids == -1):
             raise ValueError("All snp values are -1")
-        
+
         shape = self.domain_ids.shape
         for tensor in [
             self.domain_ids,
@@ -57,7 +57,6 @@ class InputIds:
             self.is_padding,
         ]:
             assert tensor.shape == shape, f"Shape mismatch: {tensor.shape} != {shape}"
-
 
     def get_batch_size(self) -> int:
         return self.is_padding.shape[0]
@@ -87,7 +86,7 @@ class Vocab:
     """
 
     snp2idx: dict[str, int]
-    phenotype_value2idx: dict[Union[str, int], int]
+    phenotype_value2idx: dict[str, int]
     phenotype_type2idx: dict[str, int]
     domain2idx: dict[str, int]
     mask_token: str = "MASK"
@@ -253,7 +252,9 @@ class SNPEmbedder(Embedder):
 
         # Only update the positional embeddings for the SNPs
         is_snps = inputs.domain_ids == self.vocab.domain2idx[self.vocab.snp_token]
-        embeddings[is_snps] += self.positional_embedding(inputs.snp_position_ids)[is_snps]
+        embeddings[is_snps] += self.positional_embedding(inputs.snp_position_ids)[
+            is_snps
+        ]
 
         embeddings = self.LayerNorm(embeddings)
         embeddings = self.dropout(embeddings)
@@ -276,7 +277,7 @@ class SNPEmbedder(Embedder):
         # Phenotypes Values
         phenotypes = list(individual.phenotype.values())
         phenotypes_ids = [
-            self.vocab.phenotype_value2idx[phenotype] for phenotype in phenotypes
+            self.vocab.phenotype_value2idx[str(phenotype)] for phenotype in phenotypes
         ]
         phenotype_ids = torch.tensor(phenotypes_ids, dtype=torch.long)
 
@@ -285,11 +286,13 @@ class SNPEmbedder(Embedder):
         # with the padding tokens at the beginning for snps
         # and at the end for phenotypes
         snp_padding_id = self.vocab.snp2idx[self.pad_token]
-        snp_pos_padding_id = 0 # is ignored in the forward pass
+        snp_pos_padding_id = 0  # is ignored in the forward pass
         phenotype_padding_id = self.vocab.phenotype_value2idx[self.pad_token]
 
         snp_padding = torch.ones_like(phenotype_ids, dtype=torch.long) * snp_padding_id
-        snp_pos_padding = torch.ones_like(phenotype_ids, dtype=torch.long) * snp_pos_padding_id
+        snp_pos_padding = (
+            torch.ones_like(phenotype_ids, dtype=torch.long) * snp_pos_padding_id
+        )
         phenotype_padding = (
             torch.ones_like(snp_ids, dtype=torch.long) * phenotype_padding_id
         )
@@ -394,7 +397,7 @@ class SNPEmbedder(Embedder):
             "snp": 1,
             "phenotype": 2,
         }
-        phenotype_value2idx: dict[Union[int, str], int] = {
+        phenotype_value2idx: dict[str, int] = {
             self.pad_token: 0,
             self.mask_token: 1,
         }
@@ -407,7 +410,7 @@ class SNPEmbedder(Embedder):
                 if pheno_type not in phenotype_type2idx:
                     phenotype_type2idx[pheno_type] = len(phenotype_type2idx)
                 if value not in phenotype_value2idx:
-                    phenotype_value2idx[value] = len(phenotype_value2idx)
+                    phenotype_value2idx[str(value)] = len(phenotype_value2idx)
 
         vocab: Vocab = Vocab(
             snp2idx=snp2idx,
