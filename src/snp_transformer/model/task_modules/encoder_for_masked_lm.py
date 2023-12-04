@@ -29,7 +29,9 @@ class EncoderForMaskedLM(TrainableModule):
     ):
         super().__init__()
         self.mask_phenotype = mask_phenotype
-        self.save_hyperparameters(ignore=["encoder_module", "embedding_module"])
+        self.save_hyperparameters(
+            # ignore=["encoder_module", "embedding_module"]
+        )
         self.initialize_model(embedding_module, encoder_module)
 
         self.loss = nn.CrossEntropyLoss(ignore_index=self.ignore_index)
@@ -171,7 +173,7 @@ class EncoderForMaskedLM(TrainableModule):
             # mask a random non-padding token
             indices = torch.where(~ignore_mask)
             # select a random index form the indices
-            idx = torch.randint(0, len(indices[0]), size= (1,))
+            idx = torch.randint(0, len(indices[0]), size=(1,))
             idx = tuple([i[idx] for i in indices])
             masked_lm_labels[idx] = domain_ids_tensor[idx]
 
@@ -304,5 +306,6 @@ def create_encoder_for_masked_lm(
 def create_encoder_for_masked_lm_from_disk(
     path: str,
 ) -> EncoderForMaskedLM:
+
     mdl = EncoderForMaskedLM.load_from_checkpoint(path)
     return mdl

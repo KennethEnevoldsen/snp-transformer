@@ -1,12 +1,13 @@
 import logging
 from copy import copy
-from typing import Literal, Union
+from typing import Literal, Optional, Union
 
 import torch
-from snp_transformer import IndividualsDataset
-from snp_transformer.data_objects import Individual
 from torch import nn
 from torchmetrics.classification import MulticlassAccuracy
+
+from snp_transformer.data_objects import Individual
+from snp_transformer.dataset import IndividualsDataset
 
 from ...registry import OptimizerFn, Registry
 from ..embedders import Embedder, InputIds, Vocab
@@ -67,13 +68,20 @@ class EncoderForClassification(TrainableModule):
         cls,
         phenotypes_to_predict: list[str],
         encoder_for_masked_lm: EncoderForMaskedLM,
+        create_optimizer_fn: OptimizerFn,
     ) -> "EncoderForClassification":
         mdl = cls(
             phenotypes_to_predict=phenotypes_to_predict,
             embedding_module=encoder_for_masked_lm.embedding_module,
             encoder_module=encoder_for_masked_lm.encoder_module,
-            create_optimizer_fn=encoder_for_masked_lm.create_optimizer_fn,
+            create_optimizer_fn=create_optimizer_fn,
         )
+        # check that heads are the same shape
+        assert (
+            mdl.phenotype_head.weight.shape
+            == encoder_for_masked_lm.phenotype_head.weight.shape
+        ), "The heads of the two models are not the same shape"
+
         # copy the phenotype head
         mdl.phenotype_head = copy(encoder_for_masked_lm.phenotype_head)
         return mdl
@@ -240,14 +248,18 @@ class EncoderForClassification(TrainableModule):
 
 
 @Registry.tasks.register("classification")
-def classification_task(
-    phenotypes_to_predict: list[str],
+def create_classification_task(
     embedding_module: Embedder,
     encoder_module: nn.TransformerEncoder,
     create_optimizer_fn: OptimizerFn,
+    phenotypes_to_predict: Optional[list[str]] = None,
 ) -> EncoderForClassification:
+    if phenotypes_to_predict is None:
+        pred_pheno = list(embedding_module.vocab.phenotype_type2idx.keys())
+    else:
+        pred_pheno = phenotypes_to_predict
     return EncoderForClassification(
-        phenotypes_to_predict=phenotypes_to_predict,
+        phenotypes_to_predict=pred_pheno,
         embedding_module=embedding_module,
         encoder_module=encoder_module,
         create_optimizer_fn=create_optimizer_fn,
@@ -255,11 +267,19 @@ def classification_task(
 
 
 @Registry.tasks.register("classification_from_masked_lm")
-def classification_task_from_masked_lm(
-    phenotypes_to_predict: list[str],
+def create_classification_task_from_masked_lm(
     encoder_for_masked_lm: EncoderForMaskedLM,
+    create_optimizer_fn: OptimizerFn,
+    phenotypes_to_predict: Optional[list[str]] = None,
 ) -> EncoderForClassification:
+    
+    if phenotypes_to_predict is None:
+        pred_pheno = list(encoder_for_masked_lm.embedding_module.vocab.phenotype_type2idx.keys())
+    else:
+        pred_pheno = phenotypes_to_predict
+    
     return EncoderForClassification.from_encoder_for_masked_lm(
-        phenotypes_to_predict=phenotypes_to_predict,
+        phenotypes_to_predict=pred_pheno,
         encoder_for_masked_lm=encoder_for_masked_lm,
+        create_optimizer_fn=create_optimizer_fn,
     )
