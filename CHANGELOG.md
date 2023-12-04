@@ -2,6 +2,73 @@
 
 
 
+## v0.4.0 (2023-12-04)
+
+### Feature
+
+* feat: fixed bug for pheno embedding, added masking
+for clf model ([`981ea37`](https://github.com/KennethEnevoldsen/snp-transformer/commit/981ea37144974005aff368f972a37c530b004b09))
+
+### Fix
+
+* fix: Minor fixes in phenotype logging ([`bb21908`](https://github.com/KennethEnevoldsen/snp-transformer/commit/bb219080e1a747c8adf224e8c24b41f67596b078))
+
+* fix: ran linters ([`89aa4ed`](https://github.com/KennethEnevoldsen/snp-transformer/commit/89aa4ede1eb5bac611cd88845c0b8c8b49b1e936))
+
+* fix: Added test for encoder for clf ([`f10863f`](https://github.com/KennethEnevoldsen/snp-transformer/commit/f10863fc7ebfd6d480dcaef321766cf7bb790ab9))
+
+* fix: Added dataset filtering ([`5bf0a06`](https://github.com/KennethEnevoldsen/snp-transformer/commit/5bf0a067309f08e150aff322dc62d2865411fe8e))
+
+### Style
+
+* style: linting ([`6a877b4`](https://github.com/KennethEnevoldsen/snp-transformer/commit/6a877b4974522ed15e2bc74add0b8a697c94fca6))
+
+* style: linting ([`bab895a`](https://github.com/KennethEnevoldsen/snp-transformer/commit/bab895a6e672c9e653ab73fa6b34d0e5782bfe03))
+
+* style: linting ([`b2f5cc7`](https://github.com/KennethEnevoldsen/snp-transformer/commit/b2f5cc7037d8932e9dc282fbb53f5461d63d181e))
+
+* style: linting ([`2d3876a`](https://github.com/KennethEnevoldsen/snp-transformer/commit/2d3876ab900276370e0d653dfa0724aaa3830e8c))
+
+### Unknown
+
+* Merge pull request #28 from KennethEnevoldsen/KennethEnevoldsen/issue-Add-fine-tuning-task-based-on-a-pre-trained-model
+
+Add fine-tuning task ([`872a4cf`](https://github.com/KennethEnevoldsen/snp-transformer/commit/872a4cfbfdc16aa452180cd148a3cc65a5572c4e))
+
+* Merge branch &#39;KennethEnevoldsen/issue-Add-fine-tuning-task-based-on-a-pre-trained-model&#39; of https://github.com/KennethEnevoldsen/snp-transformer into KennethEnevoldsen/issue-Add-fine-tuning-task-based-on-a-pre-trained-model ([`d52cd10`](https://github.com/KennethEnevoldsen/snp-transformer/commit/d52cd107de3fd241d74cc658f098d83dc0483bba))
+
+* Ran linter ([`31efba8`](https://github.com/KennethEnevoldsen/snp-transformer/commit/31efba808c511b85745ea8a5477a9c195a9eb5bf))
+
+* Merge branch &#39;KennethEnevoldsen/issue-Add-fine-tuning-task-based-on-a-pre-trained-model&#39; of https://github.com/KennethEnevoldsen/snp-transformer into KennethEnevoldsen/issue-Add-fine-tuning-task-based-on-a-pre-trained-model ([`9d581f8`](https://github.com/KennethEnevoldsen/snp-transformer/commit/9d581f8e4f069eaf5ad08568be09a0cbd891264e))
+
+* Refactor code and fix validation bug in
+TrainableModule ([`52be6a3`](https://github.com/KennethEnevoldsen/snp-transformer/commit/52be6a3075b73156a8795b4244eaa42863fafb3a))
+
+* Merge pull request #29 from KennethEnevoldsen/dependabot/pip/torch-2.1.1
+
+deps:(deps-dev): bump torch from 2.0.1 to 2.1.1 ([`da29d90`](https://github.com/KennethEnevoldsen/snp-transformer/commit/da29d9016c42ba288c7409a7f31e1cac00454d62))
+
+* deps:(deps-dev): bump torch from 2.0.1 to 2.1.1
+
+Bumps [torch](https://github.com/pytorch/pytorch) from 2.0.1 to 2.1.1.
+- [Release notes](https://github.com/pytorch/pytorch/releases)
+- [Changelog](https://github.com/pytorch/pytorch/blob/main/RELEASE.md)
+- [Commits](https://github.com/pytorch/pytorch/compare/v2.0.1...v2.1.1)
+
+---
+updated-dependencies:
+- dependency-name: torch
+  dependency-type: direct:production
+  update-type: version-update:semver-minor
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt; ([`3f5eb5f`](https://github.com/KennethEnevoldsen/snp-transformer/commit/3f5eb5ffed8ca1f3f39bc78f63d59a9991a648b1))
+
+* started bugfixing ([`59c9b29`](https://github.com/KennethEnevoldsen/snp-transformer/commit/59c9b298a51def3597107df44690407bfa360c02))
+
+* Add tests for fine-tuning task ([`1221bb5`](https://github.com/KennethEnevoldsen/snp-transformer/commit/1221bb5f37d05fae1a9b6c4065b02736368dc7fa))
+
+
 ## v0.3.2 (2023-11-28)
 
 ### Chore
