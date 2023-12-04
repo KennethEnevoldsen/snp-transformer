@@ -3,10 +3,11 @@ from copy import copy
 from typing import Literal, Optional, Union
 
 import torch
-from snp_transformer.data_objects import Individual
-from snp_transformer.dataset import IndividualsDataset
 from torch import nn
 from torchmetrics.classification import MulticlassAccuracy
+
+from snp_transformer.data_objects import Individual
+from snp_transformer.dataset import IndividualsDataset
 
 from ...registry import OptimizerFn, Registry
 from ..embedders import Embedder, InputIds, Vocab
@@ -246,6 +247,15 @@ class EncoderForClassification(TrainableModule):
             self.log(f"{mode} {key}", output[key], **log_kwargs)
 
 
+def get_phenotypes_to_predict(Embedder: Embedder) -> list[str]:
+    vocab: Vocab = Embedder.vocab
+    pred = []
+    for pheno in vocab.phenotype_type2idx:
+        if pheno != vocab.mask_token and pheno != vocab.pad_token:
+            pred.append(pheno)
+    return pred
+
+
 @Registry.tasks.register("classification")
 def create_classification_task(
     embedding_module: Embedder,
@@ -254,7 +264,7 @@ def create_classification_task(
     phenotypes_to_predict: Optional[list[str]] = None,
 ) -> EncoderForClassification:
     if phenotypes_to_predict is None:
-        pred_pheno = list(embedding_module.vocab.phenotype_type2idx.keys())
+        pred_pheno = get_phenotypes_to_predict(embedding_module)
     else:
         pred_pheno = phenotypes_to_predict
     return EncoderForClassification(
@@ -272,9 +282,7 @@ def create_classification_task_from_masked_lm(
     phenotypes_to_predict: Optional[list[str]] = None,
 ) -> EncoderForClassification:
     if phenotypes_to_predict is None:
-        pred_pheno = list(
-            encoder_for_masked_lm.embedding_module.vocab.phenotype_type2idx.keys(),
-        )
+        pred_pheno = get_phenotypes_to_predict(encoder_for_masked_lm.embedding_module)
     else:
         pred_pheno = phenotypes_to_predict
 
