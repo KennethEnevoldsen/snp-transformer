@@ -37,7 +37,7 @@ class IndividualsDataset(Dataset):
         self.subset_path = split_path
 
         # ensure that they all exist
-        error = f"does not exist in {path}, the following files exist: {list(path.glob('*'))}"
+        error = f"does not exist in {path}, the following files exist: {[p.name for p in path.parent.glob('*')]}"
         assert self.fam_path.exists(), f"{self.fam_path} {error}"
         assert self.psparse_path.exists(), f"{self.psparse_path} {error}"
         assert self.details_path.exists(), f"{self.details_path} {error}"
@@ -62,9 +62,8 @@ class IndividualsDataset(Dataset):
             logger.warning(f"No phenos folder found in {path.parent}")
 
     def filter_individuals(self) -> None:
-        self.idx2iid = {
-            i: iid for i, iid in self.idx2iid.items() if iid in self.valid_iids
-        }
+        valid_iids = set(self.valid_iids)
+        self.idx2iid = {i: iid for i, iid in self.idx2iid.items() if iid in valid_iids}
 
     def filter_phenotypes(self, phenotypes: Iterable[str]) -> None:
         """
@@ -84,7 +83,7 @@ class IndividualsDataset(Dataset):
         if path is None:
             return self.all_iids
         with path.open("r") as f:
-            iids = f.read().split("\n")
+            iids: list[str] = f.read().split("\n")
         return iids
 
     def load_phenos(self, path: Path) -> dict[str, dict[str, int]]:
@@ -170,6 +169,8 @@ class IndividualsDataset(Dataset):
 
 
 @Registry.datasets.register("individuals_dataset")
-def create_individuals_dataset(path: Path) -> IndividualsDataset:
+def create_individuals_dataset(
+    path: Path, split_path: Optional[Path] = None
+) -> IndividualsDataset:
     logger.info("Creating dataset")
-    return IndividualsDataset(path)
+    return IndividualsDataset(path, split_path=split_path)
