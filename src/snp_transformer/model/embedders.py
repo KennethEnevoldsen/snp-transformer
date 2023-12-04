@@ -3,14 +3,15 @@ import logging
 from abc import abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Union
+from typing import Any, Mapping, Union
 
 import torch
+from torch import nn
+from torch.nn.utils.rnn import pad_sequence
+
 from snp_transformer.data_objects import Individual
 from snp_transformer.dataset.dataset import IndividualsDataset
 from snp_transformer.registry import Registry
-from torch import nn
-from torch.nn.utils.rnn import pad_sequence
 
 from .positional_embeddings import PositionalEncodingModule
 
@@ -125,6 +126,27 @@ class Vocab:
     @classmethod
     def from_dict(cls: type["Vocab"], vocab_dict: dict[str, Any]) -> "Vocab":
         return cls(**vocab_dict)
+
+    def __post_init__(self) -> None:
+        self.validate()
+
+    def validate(self) -> None:
+        """
+        Ensure that no values are overlapping
+        """
+        self.check_no_duplicate_idx(self.snp2idx)
+        self.check_no_duplicate_idx(self.domain2idx)
+        self.check_no_duplicate_idx(self.phenotype_value2idx)
+        self.check_no_duplicate_idx(self.phenotype_type2idx)
+
+    @staticmethod
+    def check_no_duplicate_idx(value2idx: Mapping) -> None:
+        """
+        Check that no values are overlapping
+        """
+        values = set(value2idx.values())
+        if len(values) != len(value2idx):
+            raise ValueError("Duplicate values in vocab.")
 
 
 class Embedder(nn.Module):
@@ -408,8 +430,9 @@ class SNPEmbedder(Embedder):
             for pheno_type, value in ind.phenotype.items():
                 if pheno_type not in phenotype_type2idx:
                     phenotype_type2idx[pheno_type] = len(phenotype_type2idx)
-                if value not in phenotype_value2idx:
-                    phenotype_value2idx[str(value)] = len(phenotype_value2idx)
+                value_ = str(value)
+                if value_ not in phenotype_value2idx:
+                    phenotype_value2idx[value_] = len(phenotype_value2idx)
 
         vocab: Vocab = Vocab(
             snp2idx=snp2idx,
