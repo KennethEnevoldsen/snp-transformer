@@ -2,7 +2,9 @@ import pytest
 from snp_transformer import IndividualsDataset
 from snp_transformer.model.embedders import SNPEmbedder
 from snp_transformer.model.positional_embeddings import AbsolutePositionalEncoding
-from snp_transformer.model.task_modules import EncoderForMaskedLM
+from snp_transformer.model.task_modules.encoder_for_classification import (
+    EncoderForClassification,
+)
 from snp_transformer.registry import OptimizerFn
 from torch import nn
 from torch.utils.data import DataLoader
@@ -20,7 +22,7 @@ def long_training_dataset() -> IndividualsDataset:
 
 @pytest.mark.parametrize(
     "training_dataset",
-    [dummy_training_dataset(), long_training_dataset()],
+    [dummy_training_dataset()],
 )
 def test_model(
     training_dataset: IndividualsDataset,
@@ -45,13 +47,23 @@ def test_model(
     individuals = [training_dataset[i] for i in range(len(training_dataset))]
     emb.fit(individuals)
 
-    mdl = EncoderForMaskedLM(
+    mdl = EncoderForClassification(
         embedding_module=emb,
         encoder_module=encoder,
         create_optimizer_fn=optimizer_fn,
+        phenotypes_to_predict=["pheno1"],
     )
 
-    # create dataloader:
+    # filter dataset to remove individuals without the specified phenotypes:
+    n_individuals = len(training_dataset)
+    mdl.filter_dataset(training_dataset)
+
+    assert len(training_dataset) < n_individuals
+    individuals = [training_dataset[i] for i in range(len(training_dataset))]
+    assert all("pheno1" in ind.phenotype for ind in individuals)
+    assert len(training_dataset) == 2
+
+    # create dataloader
     dataloader = DataLoader(
         training_dataset,
         batch_size=32,

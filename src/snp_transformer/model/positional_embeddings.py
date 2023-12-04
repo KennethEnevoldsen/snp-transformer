@@ -98,6 +98,7 @@ class AbsolutePositionalEncoding(PositionalEncodingModule):
         # view as batch_size x seq_len again
         pe = pe.view(batch_size, seq_len, -1)
         pe = self.dropout(pe)
+
         return pe
 
 

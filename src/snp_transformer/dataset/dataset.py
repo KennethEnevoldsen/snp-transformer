@@ -5,8 +5,11 @@ A dataset for loading in patients
 import logging
 import random
 from collections import defaultdict
+from collections.abc import Iterable
 from pathlib import Path
 from typing import Optional
+
+from torch.utils.data import Dataset
 
 from snp_transformer.data_objects import Individual, SNPs
 from snp_transformer.dataset.loaders import (
@@ -16,7 +19,6 @@ from snp_transformer.dataset.loaders import (
     load_sparse,
 )
 from snp_transformer.registry import Registry
-from torch.utils.data import Dataset
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +35,6 @@ class IndividualsDataset(Dataset):
         self.psparse_path = path.with_suffix(".sparse")
         self.details_path = path.with_suffix(".details")
         self.subset_path = split_path
-        self.valid_individuals = self._read_split(self.subset_path)
 
         # ensure that they all exist
         error = f"does not exist in {path}, the following files exist: {list(path.glob('*'))}"
@@ -44,7 +45,12 @@ class IndividualsDataset(Dataset):
         self.fam = load_fam(self.fam_path)
         self.snp_details = load_details(self.details_path)
         sparse = load_sparse(self.psparse_path)
-        self.idx2iid = {i: iid for i, iid in enumerate(self.fam.index.values)}
+        self.idx2iid = {i: str(iid) for i, iid in enumerate(self.fam.index.values)}
+
+        # Apply split if it exists
+        self.all_iids = [str(iid) for iid in self.fam.index.values]
+        self.valid_iids: list[str] = self._read_split(self.subset_path)
+        self.filter_individuals()
 
         self.idx2snp = sparse.partition_by("Individual", as_dict=True)
 
@@ -52,21 +58,31 @@ class IndividualsDataset(Dataset):
         if pheno_folder.exists():
             self.iid2pheno = self.load_phenos(pheno_folder)
         else:
-            self.iid2pheno = None
+            self.iid2pheno = {str(iid): {} for iid in self.fam.index.values}
             logger.warning(f"No phenos folder found in {path.parent}")
 
-        self.filter_individuals()
-
     def filter_individuals(self) -> None:
-        if self.valid_individuals is None:
-            return
         self.idx2iid = {
-            i: iid for i, iid in self.idx2iid.items() if iid in self.valid_individuals
+            i: iid for i, iid in self.idx2iid.items() if iid in self.valid_iids
         }
 
-    def _read_split(self, path: Optional[Path]) -> Optional[list[str]]:
+    def filter_phenotypes(self, phenotypes: Iterable[str]) -> None:
+        """
+        Filter individuals that does not have the specified phenotypes
+        """
+        valid_iids = set()
+        valid_phenos = set(phenotypes)
+        iid2pheno = self.iid2pheno
+        for iid, pheno in iid2pheno.items():
+            if valid_phenos.intersection(pheno):
+                valid_iids.add(iid)
+
+        self.valid_iids = list(valid_iids)
+        self.filter_individuals()
+
+    def _read_split(self, path: Optional[Path]) -> list[str]:
         if path is None:
-            return None
+            return self.all_iids
         with path.open("r") as f:
             iids = f.read().split("\n")
         return iids
@@ -76,7 +92,7 @@ class IndividualsDataset(Dataset):
         iid2pheno: dict[str, dict[str, int]] = defaultdict(dict)
         for pheno, iid_map in pheno2iid.items():
             for iid, value in iid_map.items():
-                iid2pheno[iid][pheno] = value
+                iid2pheno[str(iid)][pheno] = value
         return iid2pheno
 
     def get_individuals(self) -> list[Individual]:

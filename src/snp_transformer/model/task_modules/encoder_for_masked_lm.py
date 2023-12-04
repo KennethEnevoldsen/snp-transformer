@@ -3,6 +3,7 @@ from copy import copy
 from typing import Literal, Union
 
 import torch
+from snp_transformer.dataset.dataset import IndividualsDataset
 from torch import nn
 from torchmetrics.classification import MulticlassAccuracy
 
@@ -27,7 +28,7 @@ class EncoderForMaskedLM(TrainableModule):
     ):
         super().__init__()
         self.mask_phenotype = mask_phenotype
-        self.save_hyperparameters(ignore=["encoder_module", "embedding_module"])
+        self.save_hyperparameters()
         self.initialize_model(embedding_module, encoder_module)
 
         self.loss = nn.CrossEntropyLoss(ignore_index=self.ignore_index)
@@ -64,11 +65,7 @@ class EncoderForMaskedLM(TrainableModule):
                 vocab.vocab_size_phenotype_value,
             )
 
-        self.loss = nn.CrossEntropyLoss(ignore_index=-1)
-
-    @property
-    def device(self) -> torch.device:
-        return next(self.parameters()).device
+        self.loss = nn.CrossEntropyLoss(ignore_index=self.ignore_index)
 
     def forward(
         self,
@@ -128,13 +125,24 @@ class EncoderForMaskedLM(TrainableModule):
         domain_ids_tensor: torch.Tensor,
         domain_vocab_size: int,
         mask_token_id: int,
-        is_padding: torch.Tensor,
+        ignore_mask: torch.Tensor,
         masking_prob: float = 0.15,
         replace_with_mask_prob: float = 0.8,
         replace_with_random_prob: float = 0.1,
+        ignore_index: int = -1,
     ) -> tuple[torch.Tensor, torch.Tensor]:
         """
         Masking function for the task
+
+        Args:
+            domain_ids_tensor: A tensor of domain ids
+            domain_vocab_size: The size of the domain vocabulary
+            mask_token_id: The id of the mask token
+            ignore_mask: A boolean tensor that indicates which tokens to ignore e.g. padding tokens.
+            masking_prob: The probability of masking a token
+            replace_with_mask_prob: The probability of replacing a token with the mask token
+            replace_with_random_prob: The probability of replacing a token with a random token
+            ignore_index: The index to ignore in the loss function
         """
         masked_lm_labels = domain_ids_tensor.clone()
 
@@ -142,7 +150,7 @@ class EncoderForMaskedLM(TrainableModule):
         prob = torch.rand(domain_ids_tensor.shape)
         mask = prob < masking_prob
 
-        masked_lm_labels[~mask] = -1  # -1 will be ignored in loss function
+        masked_lm_labels[~mask] = ignore_index  # will be ignored in loss function
 
         prob /= masking_prob
 
@@ -163,12 +171,16 @@ class EncoderForMaskedLM(TrainableModule):
         # -> rest 10% of the time, keep the original word
 
         # ensure that at least one token is masked to avoid a nan loss
-        no_pad_labels = masked_lm_labels[~is_padding]
-        if torch.all(no_pad_labels == -1):
-            # mask the first token (safe but not random)
-            i = 0
-            masked_lm_labels[i] = domain_ids_tensor[i]
-            domain_ids_tensor[i] = mask_token_id
+        no_pad_labels = masked_lm_labels[~ignore_mask]
+        if torch.all(no_pad_labels == ignore_index):
+            # mask a random non-padding token
+            indices = torch.where(~ignore_mask)
+            # select a random index form the indices
+            idx = torch.randint(0, len(indices[0]), size=(1,))
+            idx = tuple([i[idx] for i in indices])
+            masked_lm_labels[idx] = domain_ids_tensor[idx]
+
+        assert not torch.all(masked_lm_labels[~ignore_mask] == ignore_index)
 
         return domain_ids_tensor, masked_lm_labels
 
@@ -185,12 +197,14 @@ class EncoderForMaskedLM(TrainableModule):
         is_snp_mask = (
             padded_sequence_ids.domain_ids == vocab.domain2idx[vocab.snp_token]
         )
+        is_pheno_or_padding = ~is_snp_mask | is_padding
+        is_snp_or_padding = is_snp_mask | is_padding
 
         snp_ids_masked, snp_masked_label = self.mask(
             snp_value_ids,
             domain_vocab_size=vocab.vocab_size_snps,
             mask_token_id=snp_mask_token_id,
-            is_padding=is_padding,
+            ignore_mask=is_pheno_or_padding,
         )
 
         if self.mask_phenotype:
@@ -200,7 +214,7 @@ class EncoderForMaskedLM(TrainableModule):
                 pheno_value_ids,
                 domain_vocab_size=vocab.vocab_size_phenotype_value,
                 mask_token_id=phenotype_mask_token_id,
-                is_padding=is_padding,
+                ignore_mask=is_snp_or_padding,
             )
 
         else:
@@ -208,8 +222,6 @@ class EncoderForMaskedLM(TrainableModule):
             pheno_masked_label = torch.clone(padded_sequence_ids.phenotype_value_ids)
 
         # Make sure to ignore padding when calculating loss and token from other domains
-        is_pheno_or_padding = ~is_snp_mask | is_padding
-        is_snp_or_padding = is_snp_mask | is_padding
         snp_masked_label[is_padding] = self.ignore_index
         pheno_masked_label[is_snp_or_padding] = self.ignore_index
 
@@ -270,8 +282,11 @@ class EncoderForMaskedLM(TrainableModule):
         for key in output:
             self.log(f"{mode} {key}", output[key], **log_kwargs)
 
-    def configure_optimizers(self) -> torch.optim.Optimizer:
-        return self.create_optimizer_fn(self.parameters())
+    def filter_dataset(self, dataset: IndividualsDataset) -> None:  # noqa: ARG002
+        """
+        placeholder function to filter dataset
+        """
+        return
 
 
 @Registry.tasks.register("masked_lm")
@@ -288,3 +303,11 @@ def create_encoder_for_masked_lm(
         create_optimizer_fn=create_optimizer_fn,
         mask_phenotype=mask_phenotype,
     )
+
+
+@Registry.tasks.register("masked_lm_from_disk")
+def create_encoder_for_masked_lm_from_disk(
+    path: str,
+) -> EncoderForMaskedLM:
+    mdl = EncoderForMaskedLM.load_from_checkpoint(path)
+    return mdl

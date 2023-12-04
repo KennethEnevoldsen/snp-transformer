@@ -1,6 +1,7 @@
 import json
 import logging
 from abc import abstractmethod
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Union
@@ -46,6 +47,17 @@ class InputIds:
         if torch.all(self.snp_value_ids == -1):
             raise ValueError("All snp values are -1")
 
+        shape = self.domain_ids.shape
+        for tensor in [
+            self.domain_ids,
+            self.snp_value_ids,
+            self.snp_position_ids,
+            self.phenotype_value_ids,
+            self.phenotype_type_ids,
+            self.is_padding,
+        ]:
+            assert tensor.shape == shape, f"Shape mismatch: {tensor.shape} != {shape}"
+
     def get_batch_size(self) -> int:
         return self.is_padding.shape[0]
 
@@ -74,7 +86,7 @@ class Vocab:
     """
 
     snp2idx: dict[str, int]
-    phenotype_value2idx: dict[Union[str, int], int]
+    phenotype_value2idx: dict[str, int]
     phenotype_type2idx: dict[str, int]
     domain2idx: dict[str, int]
     mask_token: str = "MASK"
@@ -114,6 +126,27 @@ class Vocab:
     @classmethod
     def from_dict(cls: type["Vocab"], vocab_dict: dict[str, Any]) -> "Vocab":
         return cls(**vocab_dict)
+
+    def __post_init__(self) -> None:
+        self.validate()
+
+    def validate(self) -> None:
+        """
+        Ensure that no values are overlapping
+        """
+        self.check_no_duplicate_idx(self.snp2idx)
+        self.check_no_duplicate_idx(self.domain2idx)
+        self.check_no_duplicate_idx(self.phenotype_value2idx)
+        self.check_no_duplicate_idx(self.phenotype_type2idx)
+
+    @staticmethod
+    def check_no_duplicate_idx(value2idx: Mapping) -> None:
+        """
+        Check that no values are overlapping
+        """
+        values = set(value2idx.values())
+        if len(values) != len(value2idx):
+            raise ValueError("Duplicate values in vocab.")
 
 
 class Embedder(nn.Module):
@@ -238,7 +271,11 @@ class SNPEmbedder(Embedder):
         # add the phenotype type embeddings only to the phenotype embeddings
         embeddings += self.phenotype_type_embedding(inputs.phenotype_type_ids)
 
-        embeddings += self.positional_embedding(inputs.snp_position_ids)
+        # Only update the positional embeddings for the SNPs
+        is_snps = inputs.domain_ids == self.vocab.domain2idx[self.vocab.snp_token]
+        embeddings[is_snps] += self.positional_embedding(inputs.snp_position_ids)[
+            is_snps
+        ]
 
         embeddings = self.LayerNorm(embeddings)
         embeddings = self.dropout(embeddings)
@@ -254,30 +291,39 @@ class SNPEmbedder(Embedder):
         """
         # SNP Values
         snps = individual.snps
-        snp_ids = torch.tensor(snps.values, dtype=torch.long)
+        snp_ids = [self.vocab.snp2idx[str(snp)] for snp in snps.values]
+        snp_ids = torch.tensor(snp_ids, dtype=torch.long)
         snp_pos_ids = torch.tensor(snps.bp, dtype=torch.long)
 
         # Phenotypes Values
         phenotypes = list(individual.phenotype.values())
-        phenotype_ids = torch.tensor(phenotypes, dtype=torch.long)
+        phenotypes_ids = [
+            self.vocab.phenotype_value2idx[str(phenotype)] for phenotype in phenotypes
+        ]
+        phenotype_ids = torch.tensor(phenotypes_ids, dtype=torch.long)
 
         # Add padding for SNPs and Phenotypes
         # we want a vector on the length of the concatenated snps and phenotypes
         # with the padding tokens at the beginning for snps
         # and at the end for phenotypes
         snp_padding_id = self.vocab.snp2idx[self.pad_token]
+        snp_pos_padding_id = 0  # is ignored in the forward pass
         phenotype_padding_id = self.vocab.phenotype_value2idx[self.pad_token]
 
         snp_padding = torch.ones_like(phenotype_ids, dtype=torch.long) * snp_padding_id
+        snp_pos_padding = (
+            torch.ones_like(phenotype_ids, dtype=torch.long) * snp_pos_padding_id
+        )
         phenotype_padding = (
             torch.ones_like(snp_ids, dtype=torch.long) * phenotype_padding_id
         )
-        snp_ids = torch.cat([snp_padding, snp_ids])
+        _snp_ids = torch.cat([snp_padding, snp_ids])
+        snp_pos_ids = torch.cat([snp_pos_padding, snp_pos_ids])
         phenotype_ids = torch.cat([phenotype_ids, phenotype_padding])
 
         # Phenotype Types
         phenotype_types_ = [
-            self.vocab.domain2idx[ptype] for ptype in individual.phenotype
+            self.vocab.phenotype_type2idx[ptype] for ptype in individual.phenotype
         ]
         phenotype_types = torch.tensor(phenotype_types_, dtype=torch.long)
 
@@ -297,7 +343,7 @@ class SNPEmbedder(Embedder):
         is_padding = torch.zeros_like(domain_ids, dtype=torch.bool)
 
         inputs_ids = {
-            "snp_value_ids": snp_ids,
+            "snp_value_ids": _snp_ids,
             "snp_position_ids": snp_pos_ids,
             "phenotype_value_ids": phenotype_ids,
             "phenotype_type_ids": phenotype_types,
@@ -372,7 +418,7 @@ class SNPEmbedder(Embedder):
             "snp": 1,
             "phenotype": 2,
         }
-        phenotype_value2idx: dict[Union[int, str], int] = {
+        phenotype_value2idx: dict[str, int] = {
             self.pad_token: 0,
             self.mask_token: 1,
         }
@@ -384,8 +430,9 @@ class SNPEmbedder(Embedder):
             for pheno_type, value in ind.phenotype.items():
                 if pheno_type not in phenotype_type2idx:
                     phenotype_type2idx[pheno_type] = len(phenotype_type2idx)
-                if value not in phenotype_value2idx:
-                    phenotype_value2idx[value] = len(phenotype_value2idx)
+                value_ = str(value)
+                if value_ not in phenotype_value2idx:
+                    phenotype_value2idx[value_] = len(phenotype_value2idx)
 
         vocab: Vocab = Vocab(
             snp2idx=snp2idx,
