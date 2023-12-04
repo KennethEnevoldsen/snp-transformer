@@ -9,6 +9,7 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Optional
 
+import polars as pl
 from torch.utils.data import Dataset
 
 from snp_transformer.data_objects import Individual, SNPs
@@ -47,13 +48,8 @@ class IndividualsDataset(Dataset):
         sparse = load_sparse(self.psparse_path)
         self.idx2iid = {i: str(iid) for i, iid in enumerate(self.fam.index.values)}
 
-        # Apply split if it exists
-        self.all_iids = [str(iid) for iid in self.fam.index.values]
-        self.valid_iids: list[str] = self._read_split(self.subset_path)
-        self.filter_individuals()
-
-        self.idx2snp = sparse.partition_by("Individual", as_dict=True)
-
+        # self.idx2snp = sparse.partition_by("Individual", as_dict=True)
+        self.iid2snp = self._sparse_to_iid2snp(sparse)
         pheno_folder = path.parent / "phenos"
         if pheno_folder.exists():
             self.iid2pheno = self.load_phenos(pheno_folder)
@@ -61,9 +57,20 @@ class IndividualsDataset(Dataset):
             self.iid2pheno = {str(iid): {} for iid in self.fam.index.values}
             logger.warning(f"No phenos folder found in {path.parent}")
 
+        # Apply split if it exists
+        self.all_iids = [str(iid) for iid in self.fam.index.values]
+        self.valid_iids = self._read_split(self.subset_path)
+        self.filter_individuals()
+
+    def _sparse_to_iid2snp(self, sparse: pl.DataFrame) -> dict[str, pl.DataFrame]:
+        idx2snp = sparse.partition_by("Individual", as_dict=True)
+        iid2snp: dict[str, pl.DataFrame] = {}
+        for idx, iid in self.idx2iid.items():
+            iid2snp[iid] = idx2snp[idx + 1]
+        return iid2snp
+
     def filter_individuals(self) -> None:
-        valid_iids = set(self.valid_iids)
-        self.idx2iid = {i: iid for i, iid in self.idx2iid.items() if iid in valid_iids}
+        self.idx2iid = {i: iid for i, iid in enumerate(self.valid_iids)}
 
     def filter_phenotypes(self, phenotypes: Iterable[str]) -> None:
         """
@@ -79,12 +86,12 @@ class IndividualsDataset(Dataset):
         self.valid_iids = list(valid_iids)
         self.filter_individuals()
 
-    def _read_split(self, path: Optional[Path]) -> list[str]:
+    def _read_split(self, path: Optional[Path]) -> set[str]:
         if path is None:
-            return self.all_iids
+            return set(self.all_iids)
         with path.open("r") as f:
             iids: list[str] = f.read().split("\n")
-        return iids
+        return set(iids)
 
     def load_phenos(self, path: Path) -> dict[str, dict[str, int]]:
         pheno2iid = load_pheno_folder(path)
@@ -107,7 +114,7 @@ class IndividualsDataset(Dataset):
 
     def __getitem__(self, idx: int) -> Individual:
         iid = self.idx2iid[idx]
-        ind = self.idx2snp[idx + 1]  # sparse is 1-indexed
+        ind = self.iid2snp[iid]
         phenos = self.get_pheno(iid)
 
         snp_values = ind["Value"].to_numpy()
