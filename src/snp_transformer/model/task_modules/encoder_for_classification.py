@@ -3,11 +3,10 @@ from copy import copy
 from typing import Literal, Optional, Union
 
 import torch
-from torch import nn
-from torchmetrics.classification import MulticlassAccuracy
-
 from snp_transformer.data_objects import Individual
 from snp_transformer.dataset import IndividualsDataset
+from torch import nn
+from torchmetrics.classification import MulticlassAccuracy
 
 from ...registry import OptimizerFn, Registry
 from ..embedders import Embedder, InputIds, Vocab
@@ -272,12 +271,13 @@ def create_classification_task_from_masked_lm(
     create_optimizer_fn: OptimizerFn,
     phenotypes_to_predict: Optional[list[str]] = None,
 ) -> EncoderForClassification:
-    
     if phenotypes_to_predict is None:
-        pred_pheno = list(encoder_for_masked_lm.embedding_module.vocab.phenotype_type2idx.keys())
+        pred_pheno = list(
+            encoder_for_masked_lm.embedding_module.vocab.phenotype_type2idx.keys(),
+        )
     else:
         pred_pheno = phenotypes_to_predict
-    
+
     return EncoderForClassification.from_encoder_for_masked_lm(
         phenotypes_to_predict=pred_pheno,
         encoder_for_masked_lm=encoder_for_masked_lm,

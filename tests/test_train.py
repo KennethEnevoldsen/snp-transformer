@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import pytest
-
 from snp_transformer.train import train
 
 encoder_for_masked_lm_cfg = Path("tests") / "test_configs" / "encoder_for_masked_lm.cfg"

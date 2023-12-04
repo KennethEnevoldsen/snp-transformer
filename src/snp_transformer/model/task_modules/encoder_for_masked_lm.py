@@ -3,10 +3,9 @@ from copy import copy
 from typing import Literal, Union
 
 import torch
+from snp_transformer.dataset.dataset import IndividualsDataset
 from torch import nn
 from torchmetrics.classification import MulticlassAccuracy
-
-from snp_transformer.dataset.dataset import IndividualsDataset
 
 from ...registry import OptimizerFn, Registry
 from ..embedders import Embedder, InputIds, Vocab
@@ -306,6 +305,5 @@ def create_encoder_for_masked_lm(
 def create_encoder_for_masked_lm_from_disk(
     path: str,
 ) -> EncoderForMaskedLM:
-
     mdl = EncoderForMaskedLM.load_from_checkpoint(path)
     return mdl
