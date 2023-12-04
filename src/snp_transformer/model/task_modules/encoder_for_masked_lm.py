@@ -3,10 +3,9 @@ from copy import copy
 from typing import Literal, Union
 
 import torch
+from snp_transformer.dataset.dataset import IndividualsDataset
 from torch import nn
 from torchmetrics.classification import MulticlassAccuracy
-
-from snp_transformer.dataset.dataset import IndividualsDataset
 
 from ...registry import OptimizerFn, Registry
 from ..embedders import Embedder, InputIds, Vocab
@@ -29,9 +28,7 @@ class EncoderForMaskedLM(TrainableModule):
     ):
         super().__init__()
         self.mask_phenotype = mask_phenotype
-        self.save_hyperparameters(
-            # ignore=["encoder_module", "embedding_module"]
-        )
+        self.save_hyperparameters()
         self.initialize_model(embedding_module, encoder_module)
 
         self.loss = nn.CrossEntropyLoss(ignore_index=self.ignore_index)
@@ -138,8 +135,14 @@ class EncoderForMaskedLM(TrainableModule):
         Masking function for the task
 
         Args:
-            ignore_mask: A boolean tensor that indicates which tokens to ignore
-                e.g. padding tokens.
+            domain_ids_tensor: A tensor of domain ids
+            domain_vocab_size: The size of the domain vocabulary
+            mask_token_id: The id of the mask token
+            ignore_mask: A boolean tensor that indicates which tokens to ignore e.g. padding tokens.
+            masking_prob: The probability of masking a token
+            replace_with_mask_prob: The probability of replacing a token with the mask token
+            replace_with_random_prob: The probability of replacing a token with a random token
+            ignore_index: The index to ignore in the loss function
         """
         masked_lm_labels = domain_ids_tensor.clone()
 
@@ -279,7 +282,7 @@ class EncoderForMaskedLM(TrainableModule):
         for key in output:
             self.log(f"{mode} {key}", output[key], **log_kwargs)
 
-    def filter_dataset(self, dataset: IndividualsDataset) -> None:
+    def filter_dataset(self, dataset: IndividualsDataset) -> None:  # noqa: ARG002
         """
         placeholder function to filter dataset
         """
@@ -306,6 +309,5 @@ def create_encoder_for_masked_lm(
 def create_encoder_for_masked_lm_from_disk(
     path: str,
 ) -> EncoderForMaskedLM:
-
     mdl = EncoderForMaskedLM.load_from_checkpoint(path)
     return mdl
