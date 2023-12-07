@@ -3,10 +3,11 @@ from copy import copy
 from typing import Literal, Optional, Union
 
 import torch
-from snp_transformer.data_objects import Individual
-from snp_transformer.dataset import IndividualsDataset
 from torch import nn
 from torchmetrics.classification import MulticlassAccuracy
+
+from snp_transformer.data_objects import Individual
+from snp_transformer.dataset import IndividualsDataset
 
 from ...registry import OptimizerFn, Registry
 from ..embedders import Embedder, InputIds, Vocab
@@ -29,6 +30,7 @@ class EncoderForClassification(TrainableModule):
         create_optimizer_fn: OptimizerFn,
     ):
         super().__init__()
+        assert len(phenotypes_to_predict) > 0, "No phenotypes to predict"
         self.phenotypes_to_predict = set(phenotypes_to_predict)
         self.save_hyperparameters()
         self.initialize_model(embedding_module, encoder_module)
@@ -146,7 +148,7 @@ class EncoderForClassification(TrainableModule):
         assert all(
             self.phenotypes_to_predict.intersection(ind.phenotype)
             for ind in individuals
-        ), "Not all individuals have the specified phenotypes"
+        ), "Some individuals does not have any of the specified phenotypes"
 
         padded_sequence_ids = self.embedding_module.collate_individuals(individuals)
         masked_sequence_ids, masked_labels = self.mask_phenotypes(padded_sequence_ids)

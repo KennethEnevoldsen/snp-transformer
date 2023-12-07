@@ -74,7 +74,7 @@ class IndividualsDataset(Dataset):
 
     def filter_phenotypes(self, phenotypes: Iterable[str]) -> None:
         """
-        Filter individuals that does not have the specified phenotypes
+        Filter individuals that does not have any of the specified phenotypes (logical OR)
         """
         valid_iids = set()
         valid_phenos = set(phenotypes)

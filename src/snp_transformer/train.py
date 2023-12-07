@@ -25,6 +25,11 @@ def train(config_path: Optional[Path] = None) -> None:
     logger = training_cfg.trainer.logger  # assumes only one logger
     trainer_kwargs = training_cfg.trainer.to_dict()
 
+    # filter datasets
+    model.filter_dataset(training_dataset)
+    model.filter_dataset(validation_dataset)
+    
+
     # update config
     flat_config = flatten_nested_dict(config_dict)
 

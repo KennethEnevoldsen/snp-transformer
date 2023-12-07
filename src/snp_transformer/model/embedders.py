@@ -526,7 +526,8 @@ def create_snp_embedder(
         logger.warning(
             "Embedder kwargs do not match checkpoint kwargs, ignoring checkpoint",
         )
-
+    
+    logger.info("Creating new embedder")
     emb = SNPEmbedder(
         d_model=d_model,
         dropout_prob=dropout_prob,
