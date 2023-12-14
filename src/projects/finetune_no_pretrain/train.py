@@ -11,3 +11,4 @@ logging.basicConfig(level=logging.INFO)
 path = Path(__file__).parent / "config.cfg"
 
 train(path)
+
