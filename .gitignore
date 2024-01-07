@@ -24,4 +24,5 @@ test.pt
 # training logs
 logs/
 embedder/*
-
+*.ckpt
+logs-pretrain/*
