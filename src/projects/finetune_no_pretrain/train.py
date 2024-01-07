@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 
-from snp_transformer.train import train
+from snp_transformer.runner import run_from_config_path
 
 # import os  # noqa
 # os.environ["CUDA_LAUNCH_BLOCKING"] = "1"  # noqa
@@ -10,5 +10,5 @@ from snp_transformer.train import train
 logging.basicConfig(level=logging.INFO)
 path = Path(__file__).parent / "config.cfg"
 
-train(path)
+run_from_config_path(path)
 

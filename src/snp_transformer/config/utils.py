@@ -10,9 +10,7 @@ from snp_transformer.config.config_schemas import ResolvedConfigSchema
 default_config_path = Path(__file__).parent / "default_config.cfg"
 
 
-def load_config(config_path: Optional[Path] = None) -> Config:
-    if config_path is None:
-        config_path = default_config_path
+def load_config(config_path: Path) -> Config:
     cfg = Config().from_disk(config_path)
     return cfg
 

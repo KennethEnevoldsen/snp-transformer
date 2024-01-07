@@ -43,21 +43,29 @@ class TrainerConfigSchema(BaseModel):
 
 
 class TrainingConfigSchema(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     batch_size: int
     num_workers_for_dataloader: int = 8
     trainer: TrainerConfigSchema
+    training_dataset: IndividualsDataset
+    validation_dataset: IndividualsDataset
 
 
-class DatasetsConfigSchema(BaseModel):
+class ApplyConfigSchema(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    training: IndividualsDataset
-    validation: IndividualsDataset
+    batch_size: int
+    num_workers_for_dataloader: int = 8
+    trainer: TrainerConfigSchema
+    dataset: IndividualsDataset
+    output_path: Path
 
 
 class ResolvedConfigSchema(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    dataset: DatasetsConfigSchema
     model: TrainableModule
-    training: TrainingConfigSchema
+    train: TrainingConfigSchema | None = None
+    apply: ApplyConfigSchema | None = None
+    logger: WandbLogger
