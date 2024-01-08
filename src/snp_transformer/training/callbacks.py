@@ -35,6 +35,7 @@ def create_early_stopping(
         mode=mode,
     )
 
+
 @Registry.callbacks.register("model_checkpoint")
 def create_model_checkpoint(
     save_dir: Path,
@@ -51,7 +52,6 @@ def create_model_checkpoint(
         mode=mode,
         monitor=monitor,
     )
-
 
 
 @Registry.callbacks.register("learning_rate_monitor")

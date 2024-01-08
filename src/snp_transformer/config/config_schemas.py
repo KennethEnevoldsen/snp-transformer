@@ -1,9 +1,7 @@
-from gc import callbacks
 from pathlib import Path
 from typing import Any, Optional, Union
 
 from lightning.pytorch.callbacks.callback import Callback
-from lightning.pytorch.callbacks.early_stopping import EarlyStopping
 from lightning.pytorch.loggers.wandb import WandbLogger
 from pydantic import BaseModel, ConfigDict
 
