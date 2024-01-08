@@ -20,8 +20,13 @@ _build/
 # test data
 tests/data/snp_embedder_checkpoint.pt/*
 test.pt
+tests/data/pred_probas.csv
 
 # training logs
 logs/
 embedder/*
-
+*.ckpt
+logs-pretrain/*
+wandb/*
+tests/model_checkpoints/tmp_logs/*
+tests/data/pred_probas.csv

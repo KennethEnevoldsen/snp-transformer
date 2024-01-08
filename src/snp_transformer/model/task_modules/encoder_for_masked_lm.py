@@ -38,11 +38,11 @@ class EncoderForMaskedLM(TrainableModule):
     def initialize_metrics(self):
         vocab: Vocab = self.embedding_module.vocab
         self.accuracy_pheno = MulticlassAccuracy(
-            num_classes=vocab.vocab_size_phenotype_value,
+            num_classes=len(vocab.phenotype_values),
             ignore_index=self.ignore_index,
         )
         self.accuracy_snp = MulticlassAccuracy(
-            num_classes=vocab.vocab_size_snps,
+            num_classes=len(vocab.snp_values),
             ignore_index=self.ignore_index,
         )
 
@@ -57,17 +57,17 @@ class EncoderForMaskedLM(TrainableModule):
         self.d_model = self.embedding_module.d_model
         vocab: Vocab = self.embedding_module.vocab
 
-        self.snp_head = nn.Linear(self.d_model, vocab.vocab_size_snps)
+        self.snp_head = nn.Linear(self.d_model, len(vocab.snp_values))
 
         if self.mask_phenotype:
             self.phenotype_head = nn.Linear(
                 self.d_model,
-                vocab.vocab_size_phenotype_value,
+                len(vocab.phenotype_values),
             )
 
         self.loss = nn.CrossEntropyLoss(ignore_index=self.ignore_index)
 
-    def forward(
+    def forward(  # type: ignore
         self,
         inputs: InputIds,
         targets: Targets,
@@ -197,7 +197,8 @@ class EncoderForMaskedLM(TrainableModule):
         is_snp_mask = (
             padded_sequence_ids.domain_ids == vocab.domain2idx[vocab.snp_token]
         )
-        is_pheno_or_padding = ~is_snp_mask | is_padding
+        is_pheno = ~is_snp_mask
+        is_pheno_or_padding = is_pheno | is_padding
         is_snp_or_padding = is_snp_mask | is_padding
 
         snp_ids_masked, snp_masked_label = self.mask(
@@ -220,9 +221,10 @@ class EncoderForMaskedLM(TrainableModule):
         else:
             pheno_ids_masked = torch.clone(padded_sequence_ids.phenotype_value_ids)
             pheno_masked_label = torch.clone(padded_sequence_ids.phenotype_value_ids)
+            phenotype_mask_token_id = None
 
         # Make sure to ignore padding when calculating loss and token from other domains
-        snp_masked_label[is_padding] = self.ignore_index
+        snp_masked_label[is_pheno_or_padding] = self.ignore_index
         pheno_masked_label[is_snp_or_padding] = self.ignore_index
 
         masked_sequence_ids = InputIds(
@@ -239,11 +241,13 @@ class EncoderForMaskedLM(TrainableModule):
             phenotype_targets=pheno_masked_label,
             is_snp_mask=~is_pheno_or_padding,
             is_phenotype_mask=~is_snp_or_padding,
+            pheno_mask_id=phenotype_mask_token_id,
+            snp_mask_id=snp_mask_token_id,
         )
 
         return masked_sequence_ids, targets
 
-    def collate_fn(self, individuals: list) -> tuple[InputIds, Targets]:
+    def collate_fn(self, individuals: list) -> tuple[InputIds, Targets]:  # type: ignore
         """
         Takes a list of individuals and returns a dictionary of padded sequence ids.
         """
@@ -251,7 +255,7 @@ class EncoderForMaskedLM(TrainableModule):
         masked_sequence_ids, masked_labels = self.masking_fn(padded_sequence_ids)
         return masked_sequence_ids, masked_labels
 
-    def training_step(
+    def training_step(  # type: ignore
         self,
         batch: tuple[InputIds, Targets],
         batch_idx: int,  # noqa: ARG002
@@ -261,7 +265,7 @@ class EncoderForMaskedLM(TrainableModule):
         self.log_step(output, batch_size=x.get_batch_size(), mode="Training")
         return output["loss"]
 
-    def validation_step(
+    def validation_step(  # type: ignore
         self,
         batch: tuple[InputIds, Targets],
         batch_idx: int,  # noqa: ARG002

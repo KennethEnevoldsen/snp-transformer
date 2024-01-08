@@ -95,6 +95,20 @@ class Vocab:
     phenotype_token: str = "phenotype"
 
     @property
+    def phenotype_values(self) -> set[str]:
+        return {
+            val
+            for val in self.phenotype_value2idx
+            if val not in {self.pad_token, self.mask_token}
+        }
+
+    @property
+    def snp_values(self) -> set[str]:
+        return {
+            val for val in self.snp2idx if val not in {self.pad_token, self.mask_token}
+        }
+
+    @property
     def vocab_size_phenotype_value(self) -> int:
         return len(self.phenotype_value2idx)
 
@@ -245,7 +259,7 @@ class SNPEmbedder(Embedder):
 
         self.is_fitted = True
 
-    def forward(self, inputs: InputIds) -> Embeddings:
+    def forward(self, inputs: InputIds) -> Embeddings:  # type: ignore
         self.check_if_fitted()
 
         batch_size = inputs.get_batch_size()
@@ -406,22 +420,19 @@ class SNPEmbedder(Embedder):
         output["is_padding"] = is_padding_w_padding
         return output
 
-    def fit(
+    def fit(  # type: ignore
         self,
         individuals: list[Individual],
     ) -> None:
         # could also be estimated from the data but there is no need for that
-        snp2idx = {self.pad_token: 0, self.mask_token: 1, "1": 2, "2": 3}
+        snp2idx = {self.pad_token: 2, self.mask_token: 3, "1": 0, "2": 1}
 
         domain2idx: dict[str, int] = {
             self.pad_token: 0,
             "snp": 1,
             "phenotype": 2,
         }
-        phenotype_value2idx: dict[str, int] = {
-            self.pad_token: 0,
-            self.mask_token: 1,
-        }
+        phenotype_value2idx: dict[str, int] = {}
         phenotype_type2idx: dict[str, int] = {
             self.pad_token: 0,
         }
@@ -433,6 +444,10 @@ class SNPEmbedder(Embedder):
                 value_ = str(value)
                 if value_ not in phenotype_value2idx:
                     phenotype_value2idx[value_] = len(phenotype_value2idx)
+
+        # add the mask and pad tokens at the end to avoid them in the prediction
+        phenotype_value2idx[self.mask_token] = len(phenotype_value2idx)
+        phenotype_value2idx[self.pad_token] = len(phenotype_value2idx)
 
         vocab: Vocab = Vocab(
             snp2idx=snp2idx,
@@ -527,6 +542,7 @@ def create_snp_embedder(
             "Embedder kwargs do not match checkpoint kwargs, ignoring checkpoint",
         )
 
+    logger.info("Creating new embedder")
     emb = SNPEmbedder(
         d_model=d_model,
         dropout_prob=dropout_prob,

@@ -1,6 +1,6 @@
 import logging
 from copy import copy
-from typing import Literal, Optional, Union
+from typing import Literal, Optional
 
 import torch
 from snp_transformer.data_objects import Individual
@@ -16,6 +16,11 @@ from .trainable_modules import Targets, TrainableModule
 logger = logging.getLogger(__name__)
 
 
+Logits = torch.Tensor
+Loss = torch.Tensor
+IndividualPrediction = dict[str, float]
+
+
 class EncoderForClassification(TrainableModule):
     """A LM head wrapper for masked language modeling."""
 
@@ -29,6 +34,7 @@ class EncoderForClassification(TrainableModule):
         create_optimizer_fn: OptimizerFn,
     ):
         super().__init__()
+        assert len(phenotypes_to_predict) > 0, "No phenotypes to predict"
         self.phenotypes_to_predict = set(phenotypes_to_predict)
         self.save_hyperparameters()
         self.initialize_model(embedding_module, encoder_module)
@@ -40,7 +46,7 @@ class EncoderForClassification(TrainableModule):
     def initialize_metrics(self):
         vocab: Vocab = self.embedding_module.vocab
         self.accuracy_pheno = MulticlassAccuracy(
-            num_classes=vocab.vocab_size_phenotype_value,
+            num_classes=len(vocab.phenotype_values),
             ignore_index=self.ignore_index,
         )
 
@@ -57,7 +63,7 @@ class EncoderForClassification(TrainableModule):
 
         self.phenotype_head = nn.Linear(
             self.d_model,
-            vocab.vocab_size_phenotype_value,
+            len(vocab.phenotype_values),
         )
 
         self.loss = nn.CrossEntropyLoss(ignore_index=self.ignore_index)
@@ -98,7 +104,7 @@ class EncoderForClassification(TrainableModule):
         """
         mask phenotypes and return the masked sequence ids and the targets
         """
-        vocab = self.embedding_module.vocab
+        vocab: Vocab = self.embedding_module.vocab
         mask_id = vocab.phenotype_value2idx[vocab.mask_token]
         pheno_ids_to_mask = torch.tensor(
             [vocab.phenotype_type2idx[pheno] for pheno in self.phenotypes_to_predict],
@@ -131,32 +137,36 @@ class EncoderForClassification(TrainableModule):
         is_pheno_or_padding = ~is_snp_mask | is_padding
         is_snp_or_padding = is_snp_mask | is_padding
 
+        phenotype_targets = padded_sequence_ids.phenotype_value_ids.clone()
+        phenotype_targets[is_snp_or_padding] = self.ignore_index
+
         targets = Targets(
-            snp_targets=padded_sequence_ids.snp_value_ids,
-            phenotype_targets=padded_sequence_ids.phenotype_value_ids,
+            snp_targets=torch.Tensor(),
+            phenotype_targets=phenotype_targets,
             is_snp_mask=~is_pheno_or_padding,
             is_phenotype_mask=~is_snp_or_padding,
+            pheno_mask_id=mask_id,
+            snp_mask_id=None,
         )
         return masked_sequence_ids, targets
 
-    def collate_fn(self, individuals: list[Individual]) -> tuple[InputIds, Targets]:
+    def collate_fn(self, individuals: list[Individual]) -> tuple[InputIds, Targets]:  # type: ignore
         """
         Takes a list of individuals and returns a dictionary of padded sequence ids.
         """
         assert all(
             self.phenotypes_to_predict.intersection(ind.phenotype)
             for ind in individuals
-        ), "Not all individuals have the specified phenotypes"
+        ), "Some individuals does not have any of the specified phenotypes"
 
         padded_sequence_ids = self.embedding_module.collate_individuals(individuals)
         masked_sequence_ids, masked_labels = self.mask_phenotypes(padded_sequence_ids)
         return masked_sequence_ids, masked_labels
 
-    def forward(
+    def forward(  # type: ignore
         self,
         inputs: InputIds,
-        targets: Targets,
-    ) -> dict[str, Union[torch.Tensor, dict[str, torch.Tensor]]]:
+    ) -> Logits:
         embeddings = self.embedding_module(inputs)
 
         encoded_individuals = self.encoder_module(
@@ -165,6 +175,16 @@ class EncoderForClassification(TrainableModule):
         )
 
         logits_pheno = self.phenotype_head(encoded_individuals)
+        return logits_pheno
+
+    def _step(
+        self,
+        inputs: InputIds,
+        targets: Targets,
+        mode: Literal["Training", "Validation"],
+    ) -> Loss:
+        logits_pheno = self.forward(inputs)
+
         loss_pheno = self.loss(
             logits_pheno.view(-1, logits_pheno.size(-1)),
             targets.phenotype_targets.view(-1),
@@ -183,7 +203,8 @@ class EncoderForClassification(TrainableModule):
 
         result.update(self._metrics_pr_phenotype(targets, inputs, logits_pheno))
 
-        return result
+        self.log_step(result, batch_size=inputs.get_batch_size(), mode=mode)
+        return result["loss"]
 
     def _metrics_pr_phenotype(
         self,
@@ -214,26 +235,23 @@ class EncoderForClassification(TrainableModule):
 
         return result
 
-    def training_step(
+    def training_step(  # type: ignore
         self,
         batch: tuple[InputIds, Targets],
         batch_idx: int,  # noqa: ARG002
-    ) -> Union[torch.Tensor, dict[str, torch.Tensor]]:
+    ) -> Loss:
         x, y = batch
-        output = self.forward(x, y)
-        self.log_step(output, batch_size=x.get_batch_size(), mode="Training")
-        return output["loss"]
+        loss = self._step(x, y, mode="Training")
+        return loss
 
-    def validation_step(
+    def validation_step(  # type: ignore
         self,
         batch: tuple[InputIds, Targets],
         batch_idx: int,  # noqa: ARG002
-    ) -> Union[torch.Tensor, dict[str, torch.Tensor]]:
+    ) -> Loss:
         x, y = batch
-        output = self.forward(x, y)
-
-        self.log_step(output, x.get_batch_size(), mode="Validation")
-        return output["loss"]
+        loss = self._step(x, y, mode="Validation")
+        return loss
 
     def log_step(
         self,
@@ -244,6 +262,41 @@ class EncoderForClassification(TrainableModule):
         log_kwargs = {"batch_size": batch_size, "sync_dist": True}
         for key in output:
             self.log(f"{mode} {key}", output[key], **log_kwargs)
+
+    def predict_step(  # type: ignore
+        self,
+        batch: tuple[InputIds, Targets],
+        batch_idx: int,  # noqa: ARG002
+    ) -> list[IndividualPrediction]:
+        vocab = self.embedding_module.vocab
+
+        x, y = batch
+        n_individuals = x.get_batch_size()
+        logits = self.forward(x)
+        # convert to probabilities
+        probs = torch.softmax(logits, dim=-1)
+
+        individual_probs: list[IndividualPrediction] = [
+            {} for _ in range(n_individuals)
+        ]
+        for pheno in self.phenotypes_to_predict:
+            pheno_idx: int = vocab.phenotype_type2idx[pheno]
+            outcome = "1"  # assuming binary predictions
+            outcome_idx = vocab.phenotype_value2idx[outcome]
+            is_target_pheno = x.phenotype_type_ids == pheno_idx
+
+            for i in range(n_individuals):
+                mask = is_target_pheno[i]
+
+                pred_is_made_for_pheno = torch.any(mask)
+
+                if not pred_is_made_for_pheno:
+                    continue
+
+                _logits = probs[i, mask, outcome_idx]
+                assert _logits.shape == torch.Size([1])
+                individual_probs[i][pheno] = float(_logits[0])
+        return individual_probs
 
 
 def get_phenotypes_to_predict(Embedder: Embedder) -> list[str]:

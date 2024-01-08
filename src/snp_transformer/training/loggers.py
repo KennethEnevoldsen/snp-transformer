@@ -10,7 +10,7 @@ def create_wandb_logger(
     name: Optional[str] = None,
     save_dir: Union[Path, str] = ".",
     version: Optional[str] = None,
-    offline: bool = False,
+    offline: bool = True,
     dir: Optional[Path] = None,  # noqa: A002
     id: Optional[str] = None,  # noqa: A002
     anonymous: Optional[bool] = None,

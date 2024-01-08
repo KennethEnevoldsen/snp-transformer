@@ -1,18 +1,18 @@
 from collections.abc import MutableMapping
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Union
 
 from confection import Config
 
 from snp_transformer import Registry
-from snp_transformer.config.config_schemas import ResolvedConfigSchema
+from snp_transformer.config.config_schemas import (
+    ResolvedConfigSchema,
+)
 
 default_config_path = Path(__file__).parent / "default_config.cfg"
 
 
-def load_config(config_path: Optional[Path] = None) -> Config:
-    if config_path is None:
-        config_path = default_config_path
+def load_config(config_path: Path) -> Config:
     cfg = Config().from_disk(config_path)
     return cfg
 
@@ -34,13 +34,13 @@ def flatten_nested_dict(
     {"level1.level2.level3.level4": 5}.
 
     Args:
-        d (Union[Dict, MutableMapping]): Dict to flatten.
-        parent_key (str): The parent key for the current dict, e.g. "level1" for the
+        d: Dict to flatten.
+        parent_key: The parent key for the current dict, e.g. "level1" for the
             first iteration. Defaults to "".
-        sep (str): How to separate each level in the dict. Defaults to ".".
+        sep: How to separate each level in the dict. Defaults to ".".
 
     Returns:
-        Dict: The flattened dict.
+        The flattened dict.
     """
 
     items: list[tuple[str, Any]] = []
