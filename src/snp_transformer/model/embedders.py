@@ -259,7 +259,7 @@ class SNPEmbedder(Embedder):
 
         self.is_fitted = True
 
-    def forward(self, inputs: InputIds) -> Embeddings:
+    def forward(self, inputs: InputIds) -> Embeddings:  # type: ignore
         self.check_if_fitted()
 
         batch_size = inputs.get_batch_size()
@@ -420,7 +420,7 @@ class SNPEmbedder(Embedder):
         output["is_padding"] = is_padding_w_padding
         return output
 
-    def fit(
+    def fit(  # type: ignore
         self,
         individuals: list[Individual],
     ) -> None:
