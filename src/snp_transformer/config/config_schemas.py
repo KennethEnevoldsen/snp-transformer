@@ -66,6 +66,6 @@ class ResolvedConfigSchema(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     model: TrainableModule
+    logger: dict[str, WandbLogger]
     train: TrainingConfigSchema | None = None
     apply: ApplyConfigSchema | None = None
-    logger: WandbLogger

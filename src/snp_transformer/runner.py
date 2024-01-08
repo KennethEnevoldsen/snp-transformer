@@ -1,10 +1,7 @@
-"""
-"""
 
 
 import logging
 from pathlib import Path
-from typing import Any, Optional
 
 import lightning.pytorch as pl
 from confection import Config
@@ -16,39 +13,20 @@ from snp_transformer.config import (
     parse_config,
 )
 from snp_transformer.config.config_schemas import (
-    ApplyConfigSchema,
     ResolvedConfigSchema,
     TrainingConfigSchema,
 )
 from snp_transformer.model.task_modules.trainable_modules import TrainableModule
 
+from .apply import apply
+
 std_logger = logging.getLogger(__name__)
-
-
-def apply(model: TrainableModule, config: ApplyConfigSchema) -> None:
-
-    trainer = pl.Trainer(**config.trainer.to_dict())
-    dataset = config.dataset
-
-    model.filter_dataset(dataset)
-
-    dataloader = DataLoader(
-        dataset,
-        batch_size=config.batch_size,
-        shuffle=False,
-        collate_fn=model.collate_fn,
-        num_workers=config.num_workers_for_dataloader,
-    )
-
-    output = trainer.predict(model=model, dataloaders=dataloader)
-    raise NotImplementedError
-    # convert to polars --> save to disk
 
 
 def run_from_config(config: Config) -> None:
     resolved_cfg: ResolvedConfigSchema = parse_config(config)
 
-    logger = resolved_cfg.logger
+    logger = resolved_cfg.logger["logger"]
 
     # update config
     flat_config = flatten_nested_dict(config)

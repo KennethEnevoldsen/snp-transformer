@@ -1,11 +1,13 @@
 from collections.abc import MutableMapping
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Union
 
 from confection import Config
 
 from snp_transformer import Registry
-from snp_transformer.config.config_schemas import ResolvedConfigSchema
+from snp_transformer.config.config_schemas import (
+    ResolvedConfigSchema,
+)
 
 default_config_path = Path(__file__).parent / "default_config.cfg"
 

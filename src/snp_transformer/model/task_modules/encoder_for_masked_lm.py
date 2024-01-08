@@ -62,7 +62,7 @@ class EncoderForMaskedLM(TrainableModule):
         if self.mask_phenotype:
             self.phenotype_head = nn.Linear(
                 self.d_model,
-                vocab.vocab_size_phenotype_value,
+                len(vocab.phenotype_values),
             )
 
         self.loss = nn.CrossEntropyLoss(ignore_index=self.ignore_index)

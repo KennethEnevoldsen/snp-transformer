@@ -35,6 +35,7 @@ class InputIds:
     phenotype_type_ids: torch.Tensor
     is_padding: torch.Tensor
 
+
     def __post_init__(self) -> None:
         self.validate()
 
@@ -93,6 +94,10 @@ class Vocab:
     pad_token: str = "PAD"
     snp_token: str = "snp"
     phenotype_token: str = "phenotype"
+
+    @property
+    def phenotype_values(self) -> set[str]:
+        return {val for val in self.phenotype_value2idx if val != self.pad_token or val != self.mask_token}
 
     @property
     def vocab_size_phenotype_value(self) -> int:
@@ -526,7 +531,7 @@ def create_snp_embedder(
         logger.warning(
             "Embedder kwargs do not match checkpoint kwargs, ignoring checkpoint",
         )
-    
+
     logger.info("Creating new embedder")
     emb = SNPEmbedder(
         d_model=d_model,

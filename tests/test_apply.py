@@ -9,6 +9,8 @@ from snp_transformer.model.task_modules.encoder_for_classification import (
     EncoderForClassification,
 )
 
+from snp_transformer.config import ApplyConfigSchema
+
 test_folder = Path(__file__).parent
 
 def create_new_model_checkpoint_for_test():
@@ -38,4 +40,4 @@ def test_apply(model_path: Path, data_path: Path, create_new_model_checkpoint: b
 
     dataset = IndividualsDataset(data_path)
 
-    apply(model, dataset)
+    apply(model, ApplyConfigSchema())
