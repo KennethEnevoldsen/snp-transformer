@@ -247,7 +247,7 @@ class EncoderForMaskedLM(TrainableModule):
 
         return masked_sequence_ids, targets
 
-    def collate_fn(self, individuals: list) -> tuple[InputIds, Targets]:
+    def collate_fn(self, individuals: list) -> tuple[InputIds, Targets]:  # type: ignore
         """
         Takes a list of individuals and returns a dictionary of padded sequence ids.
         """
@@ -255,7 +255,7 @@ class EncoderForMaskedLM(TrainableModule):
         masked_sequence_ids, masked_labels = self.masking_fn(padded_sequence_ids)
         return masked_sequence_ids, masked_labels
 
-    def training_step(
+    def training_step(  # type: ignore
         self,
         batch: tuple[InputIds, Targets],
         batch_idx: int,  # noqa: ARG002
@@ -265,7 +265,7 @@ class EncoderForMaskedLM(TrainableModule):
         self.log_step(output, batch_size=x.get_batch_size(), mode="Training")
         return output["loss"]
 
-    def validation_step(
+    def validation_step(  # type: ignore
         self,
         batch: tuple[InputIds, Targets],
         batch_idx: int,  # noqa: ARG002

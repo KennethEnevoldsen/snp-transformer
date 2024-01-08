@@ -150,7 +150,7 @@ class EncoderForClassification(TrainableModule):
         )
         return masked_sequence_ids, targets
 
-    def collate_fn(self, individuals: list[Individual]) -> tuple[InputIds, Targets]:
+    def collate_fn(self, individuals: list[Individual]) -> tuple[InputIds, Targets]:  # type: ignore
         """
         Takes a list of individuals and returns a dictionary of padded sequence ids.
         """
@@ -235,7 +235,7 @@ class EncoderForClassification(TrainableModule):
 
         return result
 
-    def training_step(
+    def training_step(  # type: ignore
         self,
         batch: tuple[InputIds, Targets],
         batch_idx: int,  # noqa: ARG002
@@ -244,7 +244,7 @@ class EncoderForClassification(TrainableModule):
         loss = self._step(x, y, mode="Training")
         return loss
 
-    def validation_step(
+    def validation_step(  # type: ignore
         self,
         batch: tuple[InputIds, Targets],
         batch_idx: int,  # noqa: ARG002
@@ -263,7 +263,7 @@ class EncoderForClassification(TrainableModule):
         for key in output:
             self.log(f"{mode} {key}", output[key], **log_kwargs)
 
-    def predict_step(
+    def predict_step(  # type: ignore
         self,
         batch: tuple[InputIds, Targets],
         batch_idx: int,  # noqa: ARG002
