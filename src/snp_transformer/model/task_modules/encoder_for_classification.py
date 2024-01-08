@@ -163,7 +163,7 @@ class EncoderForClassification(TrainableModule):
         masked_sequence_ids, masked_labels = self.mask_phenotypes(padded_sequence_ids)
         return masked_sequence_ids, masked_labels
 
-    def forward(
+    def forward( # type: ignore
         self,
         inputs: InputIds,
     ) -> Logits:

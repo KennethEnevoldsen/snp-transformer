@@ -67,7 +67,7 @@ class EncoderForMaskedLM(TrainableModule):
 
         self.loss = nn.CrossEntropyLoss(ignore_index=self.ignore_index)
 
-    def forward(
+    def forward( # type: ignore
         self,
         inputs: InputIds,
         targets: Targets,
