@@ -48,7 +48,6 @@ class IndividualsDataset(Dataset):
         sparse = load_sparse(self.psparse_path)
         self.idx2iid = {i: str(iid) for i, iid in enumerate(self.fam.index.values)}
 
-        # self.idx2snp = sparse.partition_by("Individual", as_dict=True)
         self.iid2snp = self._sparse_to_iid2snp(sparse)
         pheno_folder = path.parent / "phenos"
         if pheno_folder.exists():
@@ -180,7 +179,8 @@ class IndividualsDataset(Dataset):
 
 @Registry.datasets.register("individuals_dataset")
 def create_individuals_dataset(
-    path: Path, split_path: Optional[Path] = None,
+    path: Path,
+    split_path: Optional[Path] = None,
 ) -> IndividualsDataset:
     logger.info("Creating dataset")
     return IndividualsDataset(path, split_path=split_path)

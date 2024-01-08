@@ -35,7 +35,6 @@ class InputIds:
     phenotype_type_ids: torch.Tensor
     is_padding: torch.Tensor
 
-
     def __post_init__(self) -> None:
         self.validate()
 
@@ -97,11 +96,17 @@ class Vocab:
 
     @property
     def phenotype_values(self) -> set[str]:
-        return {val for val in self.phenotype_value2idx if val not in {self.pad_token, self.mask_token}}
+        return {
+            val
+            for val in self.phenotype_value2idx
+            if val not in {self.pad_token, self.mask_token}
+        }
 
     @property
     def snp_values(self) -> set[str]:
-        return {val for val in self.snp2idx if val not in {self.pad_token, self.mask_token}}
+        return {
+            val for val in self.snp2idx if val not in {self.pad_token, self.mask_token}
+        }
 
     @property
     def vocab_size_phenotype_value(self) -> int:

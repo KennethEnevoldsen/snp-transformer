@@ -6,7 +6,10 @@ data_path = Path("/data-big-projects/snp-transformer/transfer")
 dataset = IndividualsDataset(data_path / "mhc")
 n_ind = len(dataset)
 dataset.train_test_split(
-    prob=0.8, train_path_prefix="train", test_path_prefix="test", seed=42
+    prob=0.8,
+    train_path_prefix="train",
+    test_path_prefix="test",
+    seed=42,
 )
 
 # Testing that the split is correct:

@@ -1,7 +1,6 @@
 import logging
-from collections import defaultdict
 from copy import copy
-from typing import Literal, Optional, Union
+from typing import Literal, Optional
 
 import torch
 from snp_transformer.data_objects import Individual
@@ -20,6 +19,7 @@ logger = logging.getLogger(__name__)
 Logits = torch.Tensor
 Loss = torch.Tensor
 IndividualPrediction = dict[str, float]
+
 
 class EncoderForClassification(TrainableModule):
     """A LM head wrapper for masked language modeling."""
@@ -137,7 +137,6 @@ class EncoderForClassification(TrainableModule):
         is_pheno_or_padding = ~is_snp_mask | is_padding
         is_snp_or_padding = is_snp_mask | is_padding
 
-
         phenotype_targets = padded_sequence_ids.phenotype_value_ids.clone()
         phenotype_targets[is_snp_or_padding] = self.ignore_index
 
@@ -179,10 +178,10 @@ class EncoderForClassification(TrainableModule):
         return logits_pheno
 
     def _step(
-            self,
-            inputs: InputIds,
-            targets: Targets,
-            mode: Literal["Training", "Validation"],
+        self,
+        inputs: InputIds,
+        targets: Targets,
+        mode: Literal["Training", "Validation"],
     ) -> Loss:
         logits_pheno = self.forward(inputs)
 
@@ -244,6 +243,7 @@ class EncoderForClassification(TrainableModule):
         x, y = batch
         loss = self._step(x, y, mode="Training")
         return loss
+
     def validation_step(
         self,
         batch: tuple[InputIds, Targets],
@@ -263,7 +263,6 @@ class EncoderForClassification(TrainableModule):
         for key in output:
             self.log(f"{mode} {key}", output[key], **log_kwargs)
 
-
     def predict_step(
         self,
         batch: tuple[InputIds, Targets],
@@ -277,14 +276,14 @@ class EncoderForClassification(TrainableModule):
         # convert to probabilities
         probs = torch.softmax(logits, dim=-1)
 
-
-        individual_probs: list[IndividualPrediction] = [defaultdict(dict) for _ in range(n_individuals)]
+        individual_probs: list[IndividualPrediction] = [
+            {} for _ in range(n_individuals)
+        ]
         for pheno in self.phenotypes_to_predict:
             pheno_idx: int = vocab.phenotype_type2idx[pheno]
-            outcome = "1" # assuming binary predictions
+            outcome = "1"  # assuming binary predictions
             outcome_idx = vocab.phenotype_value2idx[outcome]
             is_target_pheno = x.phenotype_type_ids == pheno_idx
-
 
             for i in range(n_individuals):
                 mask = is_target_pheno[i]
@@ -300,7 +299,6 @@ class EncoderForClassification(TrainableModule):
         return individual_probs
 
 
-
 def get_phenotypes_to_predict(Embedder: Embedder) -> list[str]:
     vocab: Vocab = Embedder.vocab
     pred = []
@@ -308,9 +306,6 @@ def get_phenotypes_to_predict(Embedder: Embedder) -> list[str]:
         if pheno != vocab.mask_token and pheno != vocab.pad_token:
             pred.append(pheno)
     return pred
-
-
-
 
 
 @Registry.tasks.register("classification")

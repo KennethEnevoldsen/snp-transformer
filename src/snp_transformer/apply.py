@@ -1,10 +1,7 @@
-
-
 import logging
 
 import lightning.pytorch as pl
 import polars  # noqa: ICN001
-import torch
 from torch.utils.data import DataLoader
 
 from snp_transformer.config.config_schemas import (
@@ -18,8 +15,8 @@ from snp_transformer.model.task_modules.trainable_modules import TrainableModule
 
 std_logger = logging.getLogger(__name__)
 
-def apply(model: TrainableModule, config: ApplyConfigSchema) -> None:
 
+def apply(model: TrainableModule, config: ApplyConfigSchema) -> None:
     trainer = pl.Trainer(**config.trainer.to_dict())
     dataset: IndividualsDataset = config.dataset
 
@@ -34,7 +31,7 @@ def apply(model: TrainableModule, config: ApplyConfigSchema) -> None:
     )
 
     std_logger.info("Applying model to dataset")
-    batch_predictions: list[list[IndividualPrediction]] = trainer.predict(model, dataloader) # type: ignore
+    batch_predictions: list[list[IndividualPrediction]] = trainer.predict(model, dataloader)  # type: ignore
     predictions = [ind for batch in batch_predictions for ind in batch]
     iids = dataset.get_iids()
 

@@ -9,6 +9,8 @@ config_path = Path(__file__).parent / "config.cfg"
 config_dict = load_config(config_path)
 config = parse_config(config_dict)
 
-training_dataset = config.dataset.training
+assert config.train is not None
+
+training_dataset = config.train.training_dataset
 
 # How many ones vs twos?

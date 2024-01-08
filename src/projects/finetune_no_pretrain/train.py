@@ -11,4 +11,3 @@ logging.basicConfig(level=logging.INFO)
 path = Path(__file__).parent / "config.cfg"
 
 run_from_config_path(path)
-

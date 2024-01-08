@@ -1,4 +1,3 @@
-
 import shutil
 from pathlib import Path
 
@@ -13,6 +12,7 @@ from snp_transformer.model.task_modules.encoder_for_classification import (
 from snp_transformer.training.loggers import create_wandb_logger
 
 test_folder = Path(__file__).parent
+
 
 def create_new_model_checkpoint_for_test():
     config = test_folder / "test_configs" / "encoder_for_clf.cfg"
@@ -33,23 +33,39 @@ def create_new_model_checkpoint_for_test():
     checkpoint.rename(new_checkpoint_path)
 
 
-@pytest.mark.parametrize("model_path", [test_folder / "model_checkpoints" / "encoder_for_clf.ckpt"])
-@pytest.mark.parametrize("data_path", [test_folder / "data" /"data"])
-def test_apply(model_path: Path, data_path: Path, tmp_path: Path, create_new_model_checkpoint: bool = False):
+@pytest.mark.parametrize(
+    "model_path",
+    [test_folder / "model_checkpoints" / "encoder_for_clf.ckpt"],
+)
+@pytest.mark.parametrize("data_path", [test_folder / "data" / "data"])
+def test_apply(
+    model_path: Path,
+    data_path: Path,
+    tmp_path: Path,
+    create_new_model_checkpoint: bool = False,
+):
     """Test that the model can be applied to a unseen dataset"""
 
     if create_new_model_checkpoint:
         create_new_model_checkpoint_for_test()
 
-    model =EncoderForClassification.load_from_checkpoint(model_path)
+    model = EncoderForClassification.load_from_checkpoint(model_path)
 
     dataset = IndividualsDataset(data_path)
 
-    logger = create_wandb_logger(offline = True)
+    logger = create_wandb_logger(offline=True)
     trainer_cfg = TrainerConfigSchema(logger=logger, accelerator="cpu")
 
     save_path = tmp_path / "pred_proba.csv"
-    apply(model, ApplyConfigSchema(batch_size=2, dataset=dataset, output_path=save_path, trainer = trainer_cfg))
+    apply(
+        model,
+        ApplyConfigSchema(
+            batch_size=2,
+            dataset=dataset,
+            output_path=save_path,
+            trainer=trainer_cfg,
+        ),
+    )
 
     assert save_path.exists()
 

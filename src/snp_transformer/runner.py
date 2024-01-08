@@ -1,5 +1,3 @@
-
-
 import logging
 from pathlib import Path
 
@@ -37,11 +35,12 @@ def run_from_config(config: Config) -> None:
     model = resolved_cfg.model
 
     if resolved_cfg.train:
-        _train(model, config = resolved_cfg.train)
+        _train(model, config=resolved_cfg.train)
 
     if resolved_cfg.apply is not None:
         std_logger.info("Applying model")
         apply(model, resolved_cfg.apply)
+
 
 def _train(model: TrainableModule, config: TrainingConfigSchema):
     training_cfg = config
@@ -74,6 +73,7 @@ def _train(model: TrainableModule, config: TrainingConfigSchema):
     std_logger.info("Starting training")
     trainer.fit(model=model, train_dataloaders=train_loader, val_dataloaders=val_loader)
     std_logger.info("Finished training")
+
 
 def run_from_config_path(config_path: Path) -> None:
     config_dict = load_config(config_path)

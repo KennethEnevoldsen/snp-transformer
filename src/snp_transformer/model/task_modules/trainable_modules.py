@@ -31,7 +31,9 @@ class Targets:
         """
         if self.pheno_mask_id is not None:
             pheno_targets = self.phenotype_targets[self.is_phenotype_mask]
-            if pheno_targets.numel() != 0 and torch.all(pheno_targets == self.pheno_mask_id):
+            if pheno_targets.numel() != 0 and torch.all(
+                pheno_targets == self.pheno_mask_id,
+            ):
                 raise ValueError("No phenotype targets are masked")
 
         if self.snp_mask_id is not None:
