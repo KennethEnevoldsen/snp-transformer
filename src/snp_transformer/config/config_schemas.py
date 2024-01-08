@@ -67,5 +67,5 @@ class ResolvedConfigSchema(BaseModel):
 
     model: TrainableModule
     logger: dict[str, WandbLogger]
-    train: TrainingConfigSchema | None = None
-    apply: ApplyConfigSchema | None = None
+    train: Optional[TrainingConfigSchema] = None
+    apply: Optional[ApplyConfigSchema] = None

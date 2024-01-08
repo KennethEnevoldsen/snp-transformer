@@ -1,6 +1,7 @@
 import logging
 from abc import abstractmethod
 from dataclasses import dataclass
+from typing import Optional
 
 import lightning.pytorch as pl
 import torch
@@ -19,8 +20,8 @@ class Targets:
     phenotype_targets: torch.Tensor
     is_snp_mask: torch.Tensor
     is_phenotype_mask: torch.Tensor
-    pheno_mask_id: int | None
-    snp_mask_id: int | None
+    pheno_mask_id: Optional[int]
+    snp_mask_id: Optional[int]
 
     def __post_init__(self) -> None:
         self.validate()
