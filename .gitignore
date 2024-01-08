@@ -26,3 +26,4 @@ logs/
 embedder/*
 *.ckpt
 logs-pretrain/*
+wandb/*

@@ -19,7 +19,8 @@ class Targets:
     phenotype_targets: torch.Tensor
     is_snp_mask: torch.Tensor
     is_phenotype_mask: torch.Tensor
-    mask_id = -1
+    pheno_mask_id: int | None
+    snp_mask_id: int | None
 
     def __post_init__(self) -> None:
         self.validate()
@@ -28,13 +29,15 @@ class Targets:
         """
         Ensures that some targets are masked abd
         """
-        pheno_targets = self.phenotype_targets[self.is_phenotype_mask]
-        if pheno_targets.numel() != 0 and torch.all(pheno_targets == self.mask_id):
-            raise ValueError("No phenotype targets are masked")
+        if self.pheno_mask_id is not None:
+            pheno_targets = self.phenotype_targets[self.is_phenotype_mask]
+            if pheno_targets.numel() != 0 and torch.all(pheno_targets == self.pheno_mask_id):
+                raise ValueError("No phenotype targets are masked")
 
-        snp_targets = self.snp_targets[self.is_snp_mask]
-        if torch.all(snp_targets == self.mask_id):
-            raise ValueError("No SNP targets are masked")
+        if self.snp_mask_id is not None:
+            snp_targets = self.snp_targets[self.is_snp_mask]
+            if torch.all(snp_targets == self.snp_mask_id):
+                raise ValueError("No SNP targets are masked")
 
 
 class TrainableModule(pl.LightningModule):

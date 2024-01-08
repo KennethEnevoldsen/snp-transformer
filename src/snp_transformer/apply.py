@@ -11,6 +11,9 @@ from snp_transformer.config.config_schemas import (
     ApplyConfigSchema,
 )
 from snp_transformer.dataset.dataset import IndividualsDataset
+from snp_transformer.model.task_modules.encoder_for_classification import (
+    IndividualPrediction,
+)
 from snp_transformer.model.task_modules.trainable_modules import TrainableModule
 
 std_logger = logging.getLogger(__name__)
@@ -31,16 +34,16 @@ def apply(model: TrainableModule, config: ApplyConfigSchema) -> None:
     )
 
     std_logger.info("Applying model to dataset")
-    batch_predictions = trainer.predict(model, dataloader)
-    predictions = torch.cat(batch_predictions, dim=0).squeeze(-1)  # type: ignore
+    batch_predictions: list[list[IndividualPrediction]] = trainer.predict(model, dataloader) # type: ignore
+    predictions = [ind for batch in batch_predictions for ind in batch]
+    iids = dataset.get_iids()
 
-    individuals = dataset.get_individuals()
+    assert len(predictions) == len(iids)
 
-    df = polars.DataFrame(
-        {
-            "iid": [ind.iid for ind in individuals],
-            "pred_proba": predictions.numpy(),
-        },
-    )
-    df.write_csv(config.output_path)
+    df = polars.DataFrame(predictions)
+    df = df.with_columns([polars.Series("iid", iids)])
+
+    reorder_columns = ["iid", *sorted([col for col in df.columns if col != "iid"])]
+    df.select(reorder_columns).write_csv(config.output_path)
+
     std_logger.info(f"Saved predictions to {config.output_path}")

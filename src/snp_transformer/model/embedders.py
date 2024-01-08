@@ -97,7 +97,11 @@ class Vocab:
 
     @property
     def phenotype_values(self) -> set[str]:
-        return {val for val in self.phenotype_value2idx if val != self.pad_token or val != self.mask_token}
+        return {val for val in self.phenotype_value2idx if val not in {self.pad_token, self.mask_token}}
+
+    @property
+    def snp_values(self) -> set[str]:
+        return {val for val in self.snp2idx if val not in {self.pad_token, self.mask_token}}
 
     @property
     def vocab_size_phenotype_value(self) -> int:
@@ -416,17 +420,14 @@ class SNPEmbedder(Embedder):
         individuals: list[Individual],
     ) -> None:
         # could also be estimated from the data but there is no need for that
-        snp2idx = {self.pad_token: 0, self.mask_token: 1, "1": 2, "2": 3}
+        snp2idx = {self.pad_token: 2, self.mask_token: 3, "1": 0, "2": 1}
 
         domain2idx: dict[str, int] = {
             self.pad_token: 0,
             "snp": 1,
             "phenotype": 2,
         }
-        phenotype_value2idx: dict[str, int] = {
-            self.pad_token: 0,
-            self.mask_token: 1,
-        }
+        phenotype_value2idx: dict[str, int] = {}
         phenotype_type2idx: dict[str, int] = {
             self.pad_token: 0,
         }
@@ -438,6 +439,10 @@ class SNPEmbedder(Embedder):
                 value_ = str(value)
                 if value_ not in phenotype_value2idx:
                     phenotype_value2idx[value_] = len(phenotype_value2idx)
+
+        # add the mask and pad tokens at the end to avoid them in the prediction
+        phenotype_value2idx[self.mask_token] = len(phenotype_value2idx)
+        phenotype_value2idx[self.pad_token] = len(phenotype_value2idx)
 
         vocab: Vocab = Vocab(
             snp2idx=snp2idx,

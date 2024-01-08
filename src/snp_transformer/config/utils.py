@@ -34,13 +34,13 @@ def flatten_nested_dict(
     {"level1.level2.level3.level4": 5}.
 
     Args:
-        d (Union[Dict, MutableMapping]): Dict to flatten.
-        parent_key (str): The parent key for the current dict, e.g. "level1" for the
+        d: Dict to flatten.
+        parent_key: The parent key for the current dict, e.g. "level1" for the
             first iteration. Defaults to "".
-        sep (str): How to separate each level in the dict. Defaults to ".".
+        sep: How to separate each level in the dict. Defaults to ".".
 
     Returns:
-        Dict: The flattened dict.
+        The flattened dict.
     """
 
     items: list[tuple[str, Any]] = []

@@ -70,7 +70,7 @@ class IndividualsDataset(Dataset):
         return iid2snp
 
     def filter_individuals(self) -> None:
-        self.idx2iid = {i: iid for i, iid in enumerate(self.valid_iids)}
+        self.idx2iid = dict(enumerate(self.valid_iids))
 
     def filter_phenotypes(self, phenotypes: Iterable[str]) -> None:
         """
@@ -103,6 +103,9 @@ class IndividualsDataset(Dataset):
 
     def get_individuals(self) -> list[Individual]:
         return [self[i] for i in range(len(self))]
+
+    def get_iids(self) -> list[str]:
+        return [self.idx2iid[i] for i in range(len(self))]
 
     def __len__(self) -> int:
         return len(self.idx2iid)
@@ -177,7 +180,7 @@ class IndividualsDataset(Dataset):
 
 @Registry.datasets.register("individuals_dataset")
 def create_individuals_dataset(
-    path: Path, split_path: Optional[Path] = None
+    path: Path, split_path: Optional[Path] = None,
 ) -> IndividualsDataset:
     logger.info("Creating dataset")
     return IndividualsDataset(path, split_path=split_path)
