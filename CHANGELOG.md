@@ -2,6 +2,79 @@
 
 
 
+## v0.5.0 (2024-01-08)
+
+### Feature
+
+* feat: Added callbacks ([`8ea1878`](https://github.com/KennethEnevoldsen/snp-transformer/commit/8ea1878dabc3900bc957e8541c3ebe597d5be6c5))
+
+### Fix
+
+* fix: Updated pyright ([`9dfeb23`](https://github.com/KennethEnevoldsen/snp-transformer/commit/9dfeb23a66c40a2cccd8680de51900df1855c577))
+
+* fix: fixes type checks ([`bda6ace`](https://github.com/KennethEnevoldsen/snp-transformer/commit/bda6aced49b1201ed2e0ec5e691fc14ecd3cb555))
+
+* fix: Fixed static typing ([`3fe5aa2`](https://github.com/KennethEnevoldsen/snp-transformer/commit/3fe5aa2715feed96add686e0722569e31c3bf044))
+
+* fix: Update typing for 3.9 ([`1eb6c86`](https://github.com/KennethEnevoldsen/snp-transformer/commit/1eb6c8608ac01f4f8db5d873fd5407fdd699e8c0))
+
+* fix: lint and type check ([`064314b`](https://github.com/KennethEnevoldsen/snp-transformer/commit/064314b04c2546cc2adbb76a3841baeaeb56f63a))
+
+* fix: remove accidentally added newline to split ([`9cdde47`](https://github.com/KennethEnevoldsen/snp-transformer/commit/9cdde4723a8e76c51785613bdbf84d3be34af9ed))
+
+* fix: Added new logo ([`80e6a20`](https://github.com/KennethEnevoldsen/snp-transformer/commit/80e6a2071a6b883090ec10312922c4432ab554b3))
+
+### Style
+
+* style: lint ([`5c43095`](https://github.com/KennethEnevoldsen/snp-transformer/commit/5c430954affd2ef2027300a845b0830edef692f3))
+
+### Unknown
+
+* Merge pull request #32 from KennethEnevoldsen/fine-tune-mdl
+
+Added functionality for fine-tuning and applying model ([`bddf9f0`](https://github.com/KennethEnevoldsen/snp-transformer/commit/bddf9f001aaa8497d8479cc680e194f2a509ffe3))
+
+* clean: Removed outdated files and updated old configs ([`9f1bb41`](https://github.com/KennethEnevoldsen/snp-transformer/commit/9f1bb41ce0f29839db525275e9b9c6252b7ef476))
+
+* Added encoder checkpoint for tests ([`a4a3c1b`](https://github.com/KennethEnevoldsen/snp-transformer/commit/a4a3c1b2a66ef8f93b98bb1155bf2560ebe94290))
+
+* Test pass for apply ([`337d2eb`](https://github.com/KennethEnevoldsen/snp-transformer/commit/337d2eb606b945ea2968fd6767b5196b5c451169))
+
+* Fix model training and apply bugs ([`3e77844`](https://github.com/KennethEnevoldsen/snp-transformer/commit/3e77844ab70d55dcce5b14aa80baa39b91e65472))
+
+* refactored train to runner to include apply ([`82b9b32`](https://github.com/KennethEnevoldsen/snp-transformer/commit/82b9b32675c24f0dd26e0d697a8fee519278b968))
+
+* Added config ([`4641015`](https://github.com/KennethEnevoldsen/snp-transformer/commit/464101513e5f3b9574730ce109ae837fce3baeda))
+
+* Merge pull request #31 from KennethEnevoldsen/dependabot/pip/torch-2.1.2
+
+deps:(deps-dev): bump torch from 2.1.1 to 2.1.2 ([`0978251`](https://github.com/KennethEnevoldsen/snp-transformer/commit/09782519da7b43acd78a56d7d97d4bb861720778))
+
+* deps:(deps-dev): bump torch from 2.1.1 to 2.1.2
+
+Bumps [torch](https://github.com/pytorch/pytorch) from 2.1.1 to 2.1.2.
+- [Release notes](https://github.com/pytorch/pytorch/releases)
+- [Changelog](https://github.com/pytorch/pytorch/blob/main/RELEASE.md)
+- [Commits](https://github.com/pytorch/pytorch/compare/v2.1.1...v2.1.2)
+
+---
+updated-dependencies:
+- dependency-name: torch
+  dependency-type: direct:production
+  update-type: version-update:semver-patch
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt; ([`0d78696`](https://github.com/KennethEnevoldsen/snp-transformer/commit/0d78696023e19fdf3c406f47775a9a8637dd81ae))
+
+* fine-tune on icd 100 ([`0628e82`](https://github.com/KennethEnevoldsen/snp-transformer/commit/0628e82c3dd35363646f633497f530973af500c2))
+
+* training works ([`e5bfa5f`](https://github.com/KennethEnevoldsen/snp-transformer/commit/e5bfa5f951eaefa38db2452f82085fd81c59d247))
+
+* Refactor dataset filtering and sparse conversion ([`2467a1c`](https://github.com/KennethEnevoldsen/snp-transformer/commit/2467a1cbe55d1142e6ca37cfd5484a3a08a93659))
+
+* Added new splits ([`75c749f`](https://github.com/KennethEnevoldsen/snp-transformer/commit/75c749fff4fcebdbb0bb81d4a25708d93d42a794))
+
+
 ## v0.4.0 (2023-12-04)
 
 ### Feature
