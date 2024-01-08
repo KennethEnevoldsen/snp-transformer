@@ -1,6 +1,9 @@
+from gc import callbacks
 from pathlib import Path
 from typing import Any, Optional, Union
 
+from lightning.pytorch.callbacks.callback import Callback
+from lightning.pytorch.callbacks.early_stopping import EarlyStopping
 from lightning.pytorch.loggers.wandb import WandbLogger
 from pydantic import BaseModel, ConfigDict
 
@@ -37,6 +40,7 @@ class TrainerConfigSchema(BaseModel):
     gradient_clip_val: Optional[Union[int, float]] = None
     gradient_clip_algorithm: Optional[str] = None
     default_root_dir: Optional[Path] = None
+    callbacks: Optional[list[Callback]] = None
 
     def to_dict(self) -> dict[str, Any]:
         return self.model_dump()

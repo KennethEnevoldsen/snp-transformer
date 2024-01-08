@@ -10,6 +10,7 @@ from snp_transformer.model.positional_embeddings import (
 from snp_transformer.model.task_modules import create_encoder_for_masked_lm
 from snp_transformer.registry import Registry
 from snp_transformer.training.loggers import WandbLogger, create_wandb_logger
+from snp_transformer.training.callbacks import create_callback_list
 
 from .data_objects import Individual, SNPs
 from .dataset.dataset import IndividualsDataset
