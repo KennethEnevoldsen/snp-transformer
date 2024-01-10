@@ -25,11 +25,12 @@ logger = logging.getLogger(__name__)
 
 
 class IndividualsDataset(Dataset):
-    def __init__(self, path: Path, split_path: Optional[Path] = None) -> None:
+    def __init__(self, path: Path, split_path: Optional[Path] = None, pheno_dir: Optional[Path]=None) -> None:
         """
         Args:
             path: path to the dataset
             split_path: optional path to a dataframe of individuals to use e.g. for splitting the dataset into train/val/test
+            pheno_dir: Directory of phenotypes.
         """
         self.path = path
         self.fam_path = path.with_suffix(".fam")
@@ -49,7 +50,8 @@ class IndividualsDataset(Dataset):
         self.idx2iid = {i: str(iid) for i, iid in enumerate(self.fam.index.values)}
 
         self.iid2snp = self._sparse_to_iid2snp(sparse)
-        pheno_folder = path.parent / "phenos"
+        pheno_folder = path.parent / "phenos" if pheno_dir is None else pheno_dir
+
         if pheno_folder.exists():
             self.iid2pheno = self.load_phenos(pheno_folder)
         else:
@@ -181,6 +183,7 @@ class IndividualsDataset(Dataset):
 def create_individuals_dataset(
     path: Path,
     split_path: Optional[Path] = None,
+    pheno_dir: Optional[Path] = None,
 ) -> IndividualsDataset:
     logger.info("Creating dataset")
-    return IndividualsDataset(path, split_path=split_path)
+    return IndividualsDataset(path, split_path=split_path, pheno_dir=pheno_dir)
