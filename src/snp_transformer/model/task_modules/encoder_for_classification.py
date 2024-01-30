@@ -268,6 +268,8 @@ class EncoderForClassification(TrainableModule):
         batch: tuple[InputIds, Targets],
         batch_idx: int,  # noqa: ARG002
     ) -> list[IndividualPrediction]:
+        batch_size = batch[0].get_batch_size()
+
         vocab = self.embedding_module.vocab
 
         x, y = batch
@@ -296,6 +298,8 @@ class EncoderForClassification(TrainableModule):
                 _logits = probs[i, mask, outcome_idx]
                 assert _logits.shape == torch.Size([1])
                 individual_probs[i][pheno] = float(_logits[0])
+
+        assert len(individual_probs) == batch_size
         return individual_probs
 
 
@@ -343,3 +347,11 @@ def create_classification_task_from_masked_lm(
         encoder_for_masked_lm=encoder_for_masked_lm,
         create_optimizer_fn=create_optimizer_fn,
     )
+
+@Registry.tasks.register("classification_from_disk")
+def create_classification_from_disk(
+    path: str,
+    phenotypes_to_predict: list[str],
+) -> EncoderForClassification:
+    mdl = EncoderForClassification.load_from_checkpoint(path) #  phenotypes_to_predict=phenotypes_to_predict)
+    return mdl

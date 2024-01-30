@@ -10,11 +10,11 @@ from snp_transformer.runner import run_from_config_path
 logging.basicConfig(level=logging.INFO)
 path = Path(__file__).parent / "fine_tune_no_pretrain.cfg"
 
-run_from_config_path(path)
+# run_from_config_path(path)
 
 path = Path(__file__).parent / "fine_tune_no_pretrain_only_511.cfg"
 
-run_from_config_path(path)
+# run_from_config_path(path)
 
 path = Path(__file__).parent / "pretrain.cfg"
 

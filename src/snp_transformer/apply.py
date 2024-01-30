@@ -17,6 +17,7 @@ std_logger = logging.getLogger(__name__)
 
 
 def apply(model: TrainableModule, config: ApplyConfigSchema) -> None:
+    assert config.trainer.devices == 1, "Apply only works with a single device"
     trainer = pl.Trainer(**config.trainer.to_dict())
     dataset: IndividualsDataset = config.dataset
 
@@ -32,7 +33,7 @@ def apply(model: TrainableModule, config: ApplyConfigSchema) -> None:
 
     std_logger.info("Applying model to dataset")
     batch_predictions: list[list[IndividualPrediction]] = trainer.predict(model, dataloader)  # type: ignore
-    predictions = [ind for batch in batch_predictions for ind in batch]
+    predictions: list[IndividualPrediction] = [ind for batch in batch_predictions for ind in batch]
     iids = dataset.get_iids()
 
     assert len(predictions) == len(iids)

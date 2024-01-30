@@ -84,7 +84,7 @@ class IndividualsDataset(Dataset):
             if valid_phenos.intersection(pheno):
                 valid_iids.add(iid)
 
-        self.valid_iids = list(valid_iids)
+        self.valid_iids = valid_iids.intersection(self.valid_iids)
         self.filter_individuals()
 
     def _read_split(self, path: Optional[Path]) -> set[str]:
@@ -186,4 +186,5 @@ def create_individuals_dataset(
     pheno_dir: Optional[Path] = None,
 ) -> IndividualsDataset:
     logger.info("Creating dataset")
+
     return IndividualsDataset(path, split_path=split_path, pheno_dir=pheno_dir)

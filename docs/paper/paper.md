@@ -34,9 +34,20 @@
     - This reduction allow for more complex modelling and thus a more complex representation of the genetic predisposition
   - For example, exome data contains approximately 20M SNPs, and so conventional methods would have to deal with matrices containing n x 20M elements, where n is the number of individuals. By contrast, a sparse encoding considers only elements with non-zero value. As the average frequence of exome SNPs is less than 5%, sparse encodes need only consider matrices with fewer than n x 1M elements.
 
+## Overview of the field
+
+https://www.sciencedirect.com/science/article/abs/pii/S1568494620306566:
+
+- Outlines the curse of dimensionality of as one the main challenges of using ML on SNPs for phenotype prediction
+- unequal sample sizes
+- 
+
+
 
 
 # Methods
+
+
 
 
 ## Absolute vs relative positional Encodings
