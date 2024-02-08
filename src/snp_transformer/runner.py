@@ -31,10 +31,13 @@ def run_from_config(config: Config) -> None:
 
     # a hack to get the wandb logger to work
     logger._wandb_init["config"] = flat_config
+    resolved_cfg.logger["logger"] = logger
+    
 
     model = resolved_cfg.model
 
     if resolved_cfg.train:
+        resolved_cfg.train.trainer.logger = logger
         _train(model, config=resolved_cfg.train)
 
     if resolved_cfg.apply is not None:
@@ -52,20 +55,35 @@ def _train(model: TrainableModule, config: TrainingConfigSchema):
     model.filter_dataset(training_dataset)
     model.filter_dataset(validation_dataset)
 
+
     # create dataloader:
+    train_sampler = training_dataset.create_weighted_sampler()
+    if train_sampler is None:
+        shuffle = True
+    else:
+        shuffle = None
+
     train_loader = DataLoader(
         training_dataset,
         batch_size=training_cfg.batch_size,
-        shuffle=True,
         collate_fn=model.collate_fn,
+        shuffle=shuffle,
         num_workers=training_cfg.num_workers_for_dataloader,
+        sampler=train_sampler,
     )
+    val_sampler = validation_dataset.create_weighted_sampler()
+    if val_sampler is None:
+        shuffle = False
+    else:
+        shuffle = None
+        
     val_loader = DataLoader(
         validation_dataset,
         batch_size=training_cfg.batch_size,
-        shuffle=False,
+        shuffle=shuffle,
         collate_fn=model.collate_fn,
         num_workers=training_cfg.num_workers_for_dataloader,
+        sampler=val_sampler,
     )
 
     trainer = pl.Trainer(**trainer_kwargs)

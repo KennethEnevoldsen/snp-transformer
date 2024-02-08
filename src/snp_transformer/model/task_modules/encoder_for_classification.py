@@ -12,7 +12,7 @@ from ...registry import OptimizerFn, Registry
 from ..embedders import Embedder, InputIds, Vocab
 from .encoder_for_masked_lm import EncoderForMaskedLM
 from .trainable_modules import Targets, TrainableModule
-
+import wandb
 logger = logging.getLogger(__name__)
 
 
@@ -201,7 +201,7 @@ class EncoderForClassification(TrainableModule):
             "Phenotype (all) Accuracy": pheno_acc,
         }
 
-        result.update(self._metrics_pr_phenotype(targets, inputs, logits_pheno))
+        result.update(self._metrics_pr_phenotype(targets, inputs, logits_pheno, mode=mode))
 
         self.log_step(result, batch_size=inputs.get_batch_size(), mode=mode)
         return result["loss"]
@@ -211,6 +211,7 @@ class EncoderForClassification(TrainableModule):
         targets: Targets,
         inputs: InputIds,
         logits: torch.Tensor,
+        mode: Literal["Training", "Validation"],
     ) -> dict[str, torch.Tensor]:
         """
         computes the metrics (loss, and accuracy) for each phenotype
@@ -232,6 +233,12 @@ class EncoderForClassification(TrainableModule):
                 pheno_preds = torch.argmax(_logits, dim=-1)
                 pheno_acc = self.accuracy_pheno(pheno_preds, _targets)
                 result[f"Phenotype ({pheno}) Accuracy"] = pheno_acc
+
+                # log the distribution of predicitons:
+                if self.global_step % self.trainer.log_every_n_steps == 0:    # type: ignore
+                    self.logger.experiment.log({f"Phenotype ({pheno}) Preds ({mode})": wandb.Histogram(pheno_preds.cpu())})  # type: ignore
+                    self.logger.experiment.log({f"Phenotype ({pheno}) Targets ({mode})": wandb.Histogram(_targets.cpu())})  # type: ignore
+
 
         return result
 

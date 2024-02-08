@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Optional
 
 import polars as pl
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, WeightedRandomSampler
 
 from snp_transformer.data_objects import Individual, SNPs
 from snp_transformer.dataset.loaders import (
@@ -20,23 +20,31 @@ from snp_transformer.dataset.loaders import (
     load_sparse,
 )
 from snp_transformer.registry import Registry
+from collections import Counter
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
 
 class IndividualsDataset(Dataset):
-    def __init__(self, path: Path, split_path: Optional[Path] = None, pheno_dir: Optional[Path]=None) -> None:
+    def __init__(self, path: Path, split_path: Optional[Path] = None, pheno_dir: Optional[Path]=None, oversample_phenotypes: Optional[list[str]] = None, oversample_alpha: float = 1) -> None:
         """
         Args:
             path: path to the dataset
             split_path: optional path to a dataframe of individuals to use e.g. for splitting the dataset into train/val/test
             pheno_dir: Directory of phenotypes.
+            oversample_phenotypes: List of phenotypes to oversample based on
+            oversample_alpha: Hyperparameter for oversampling phenotypes. This follows the formula p(pheno) ∝ |pheno|^a, where |pheno| is the number
+                of individuals with the phenotype label (0/1) and a is a hyperparameter. a=1 is equivalent to no oversampling and a=0 is equivalent to
+                uniform sampling.
         """
         self.path = path
         self.fam_path = path.with_suffix(".fam")
         self.psparse_path = path.with_suffix(".sparse")
         self.details_path = path.with_suffix(".details")
         self.subset_path = split_path
+        self.oversample_phenotypes = oversample_phenotypes
+        self.oversample_alpha = oversample_alpha
 
         # ensure that they all exist
         error = f"does not exist in {path}, the following files exist: {[p.name for p in path.parent.glob('*')]}"
@@ -57,6 +65,7 @@ class IndividualsDataset(Dataset):
         else:
             self.iid2pheno = {str(iid): {} for iid in self.fam.index.values}
             logger.warning(f"No phenos folder found in {path.parent}")
+        self.unique_phenos = set(pheno for pheno_dict in self.iid2pheno.values() for pheno in pheno_dict.keys())
 
         # Apply split if it exists
         self.all_iids = [str(iid) for iid in self.fam.index.values]
@@ -178,13 +187,58 @@ class IndividualsDataset(Dataset):
         with path.open("w") as f:
             f.write("\n".join(iids))
 
+    def create_weighted_sampler(self) -> Optional[WeightedRandomSampler]:
+        # if self.oversample_alpha == 1:
+        #     return None
+        if self.oversample_phenotypes is None:
+            phenotypes = self.unique_phenos
+            if len(phenotypes) == 0:
+                return None
+        else:
+            phenotypes = self.oversample_phenotypes
+        
+        probs = []
+
+
+        
+        for pheno in phenotypes:
+            phenos = [self.get_pheno(iid).get(pheno, None) for iid in self.idx2iid.values()]
+            label_freq = Counter(phenos)
+            most_frequent_label = max(label_freq, key=label_freq.get) # type: ignore
+            # add None to most frequent label
+            label_freq[most_frequent_label] += label_freq.pop(None, 0)
+            # normalize
+            label_freq_norm = {label: freq ** self.oversample_alpha for label, freq in label_freq.items()}
+            # prob for each of the labels
+            total = sum(label_freq_norm.values())
+            label2prob = {label: freq / total for label, freq in label_freq_norm.items()}
+            label2indprob = {label: label2prob[label] / freq for label, freq in label_freq.items()}
+            pheno_weights = np.array([label2indprob.get(pheno, label2indprob[most_frequent_label]) for pheno in phenos])
+            
+            assert abs(np.sum(pheno_weights) - 1) < 1e-5, f"Sum of weights is not 1: {np.sum(pheno_weights)}"
+            probs.append(pheno_weights)
+
+
+        # combine probabilities 
+        _probs = np.array(probs)  # noqa
+        _probs = np.prod(_probs, axis=0)  # noqa
+        # this might underflow, but we will deal with that if it happens
+
+
+        # create sampler
+        sampler = WeightedRandomSampler(_probs, len(_probs))
+        return sampler
+
+
 
 @Registry.datasets.register("individuals_dataset")
 def create_individuals_dataset(
     path: Path,
     split_path: Optional[Path] = None,
     pheno_dir: Optional[Path] = None,
+    oversample_phenotypes: Optional[list[str]] = None,
+    oversample_alpha: float = 1,
 ) -> IndividualsDataset:
     logger.info("Creating dataset")
 
-    return IndividualsDataset(path, split_path=split_path, pheno_dir=pheno_dir)
+    return IndividualsDataset(path, split_path=split_path, pheno_dir=pheno_dir, oversample_phenotypes=oversample_phenotypes, oversample_alpha=oversample_alpha)
