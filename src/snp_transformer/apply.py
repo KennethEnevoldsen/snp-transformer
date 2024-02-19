@@ -33,7 +33,9 @@ def apply(model: TrainableModule, config: ApplyConfigSchema) -> None:
 
     std_logger.info("Applying model to dataset")
     batch_predictions: list[list[IndividualPrediction]] = trainer.predict(model, dataloader)  # type: ignore
-    predictions: list[IndividualPrediction] = [ind for batch in batch_predictions for ind in batch]
+    predictions: list[IndividualPrediction] = [
+        ind for batch in batch_predictions for ind in batch
+    ]
     iids = dataset.get_iids()
 
     assert len(predictions) == len(iids)
