@@ -56,7 +56,7 @@ def _train(model: TrainableModule, config: TrainingConfigSchema):
 
     # create dataloader:
     train_sampler = training_dataset.create_weighted_sampler()
-    if train_sampler is None:
+    if train_sampler is None:  # noqa
         shuffle = True
     else:
         shuffle = None
@@ -70,7 +70,7 @@ def _train(model: TrainableModule, config: TrainingConfigSchema):
         sampler=train_sampler,
     )
     val_sampler = validation_dataset.create_weighted_sampler()
-    if val_sampler is None:
+    if val_sampler is None:  # noqa
         shuffle = False
     else:
         shuffle = None

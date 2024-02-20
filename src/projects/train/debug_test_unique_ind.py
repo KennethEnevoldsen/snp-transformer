@@ -1,3 +1,5 @@
+# see github issue for more
+
 from pathlib import Path
 
 import numpy as np
@@ -23,38 +25,6 @@ for i in individuals:
     print(i.snps.bp[:10])
 
 
-# Output:
-# [25280119, 25450970, 25492296, 25509976, 25510051, 25510058, 25510648, 25510649, 25511008, 25516126]
-# [25280119, 25420344, 25435654, 25450026, 25450970, 25472737, 25492296, 25509976, 25510051, 25510058]
-# [25420344, 25420350, 25426858, 25435758, 25435872, 25450026, 25492296, 25510648, 25554148, 25554180]
-# [25280119, 25420344, 25420350, 25426640, 25426858, 25435872, 25450026, 25450952, 25492296, 25510648]
-# [25280119, 25420344, 25420350, 25426640, 25426768, 25426858, 25435758, 25435872, 25450026, 25450970]
-# [25280119, 25420344, 25426640, 25435758, 25450026, 25450104, 25492296, 25509976, 25510648, 25510649]
-# [25280119, 25420344, 25420350, 25426640, 25426858, 25435758, 25435872, 25450026, 25450970, 25492296]
-# [25280119, 25420344, 25420350, 25426640, 25426858, 25435758, 25435872, 25450026, 25450970, 25492296]
-# [25280119, 25420344, 25426640, 25435758, 25450026, 25472787, 25492296, 25509976, 25510051, 25510058]
-# [25280119, 25420344, 25426640, 25435758, 25450026, 25450970, 25492296, 25509976, 25510051, 25510058]
-# [25280119, 25420344, 25426640, 25435654, 25435758, 25450026, 25450970, 25492296, 25510648, 25510696]
-# [25280119, 25420344, 25420350, 25426640, 25426858, 25435872, 25450026, 25450970, 25492296, 25509976]
-# [25280119, 25420344, 25426640, 25435654, 25435758, 25450026, 25450970, 25492296, 25509976, 25510051]
-# [25280119, 25420344, 25426640, 25435654, 25450026, 25472737, 25492296, 25509976, 25510051, 25510058]
-# [25280119, 25420344, 25426640, 25435654, 25435758, 25450026, 25472765, 25492296, 25510648, 25510696]
-# [25280119, 25420344, 25426640, 25450026, 25450802, 25450970, 25466245, 25472737, 25472787, 25492296]
-# [25280119, 25420344, 25420350, 25426640, 25426858, 25435654, 25435872, 25450026, 25450970, 25492115]
-# [25280119, 25420344, 25435654, 25435758, 25450026, 25492296, 25510648, 25517539, 25554148, 25554180]
-# [25280119, 25420344, 25426640, 25435758, 25450026, 25472787, 25492163, 25492296, 25509976, 25510051]
-# [25280119, 25280123, 25420344, 25426640, 25435758, 25450026, 25450104, 25492296, 25509976, 25510051]
-# [25280119, 25420344, 25426768, 25435758, 25450026, 25492296, 25509976, 25510051, 25510648, 25511008]
-# [25280119, 25420344, 25426640, 25435758, 25450026, 25450952, 25450970, 25492296, 25510648, 25510696]
-# [25280119, 25420344, 25426640, 25426768, 25435758, 25450026, 25450970, 25472787, 25492296, 25509976]
-# [25280119, 25420344, 25426640, 25435654, 25435758, 25450026, 25450970, 25492296, 25509976, 25510051]
-# [25280119, 25420344, 25426768, 25435758, 25450026, 25450952, 25450970, 25492296, 25510648, 25554148]
-# [25280119, 25420344, 25426640, 25426768, 25435654, 25435758, 25450026, 25472787, 25492296, 25510648]
-# [25420344, 25420350, 25426640, 25426858, 25435872, 25450026, 25450970, 25471559, 25492164, 25492296]
-# [25280119, 25420344, 25426640, 25435758, 25450026, 25450970, 25492296, 25509976, 25510051, 25510058]
-# [25280119, 25420344, 25426640, 25426768, 25435758, 25450026, 25450970, 25472787, 25492296, 25509976]
-# [25285026, 25420344, 25450026, 25450952, 25450970, 25471559, 25492296, 25509976, 25510051, 25510058]
-
 # generally repeated snps, but not exact duplicates
 
 # Segments of some invitials seems to be contained within others
@@ -69,36 +39,6 @@ for i in individuals:
     # check all is the same
     print(np.all(np.isin(seg, prev)))
     prev = i.snps.bp[: 10 + 20]  # to account for injections
-
-# [ True False False False  True False  True  True  True  True] - all is same: False
-# [ True False False False False  True  True False False  True] - all is same: False
-# [False  True  True False  True  True  True False  True  True] - all is same: False
-# [ True  True  True  True False  True False  True  True False] - all is same: False
-# [ True  True  True  True  True False  True False  True False] - all is same: False
-# [ True  True False  True False  True False  True False  True] - all is same: False
-# [ True  True  True  True  True  True  True  True  True  True] - all is same: True
-# [ True  True  True  True  True False  True False False False] - all is same: False
-# [ True  True  True  True  True False  True  True  True  True] - all is same: False
-# [ True  True  True False  True  True  True  True  True False] - all is same: False
-# [ True  True False  True False False  True  True  True False] - all is same: False
-# [ True  True  True False False  True  True  True  True  True] - all is same: False
-# [ True  True  True  True  True False  True  True  True  True] - all is same: False
-# [ True  True  True  True False  True False  True  True False] - all is same: False
-# [ True  True  True  True False False False False False  True] - all is same: False
-# [ True  True False  True False False False  True  True False] - all is same: False
-# [ True  True  True False  True  True  True False  True  True] - all is same: False
-# [ True  True False  True  True False False  True False False] - all is same: False
-# [ True False  True  True  True  True False  True  True  True] - all is same: False
-# [ True  True False  True  True  True  True  True  True  True] - all is same: False
-# [ True  True False  True  True False False  True  True False] - all is same: False
-# [ True  True  True False  True  True  True False  True False] - all is same: False
-# [ True  True  True False  True  True  True  True  True  True] - all is same: False
-# [ True  True False  True  True False  True  True  True False] - all is same: False
-# [ True  True False  True False  True  True False  True  True] - all is same: False
-# [ True False  True False False  True False False False  True] - all is same: False
-# [False  True  True False  True  True  True  True  True  True] - all is same: False
-# [ True  True  True False  True  True  True False  True  True] - all is same: False
-# [False  True  True False  True False  True  True  True  True] - all is same: False
 
 
 # There is def no exact duplicates:
@@ -130,7 +70,7 @@ snps = [i.snps.bp[:512] for i in individuals]
 
 
 # define a custom distance function: Just wether A is in B
-def similarity(x, y):
+def similarity(x, y):  # noqa
     y_set = set(y)
     n_is_in = sum([1 for i in x if i in y_set])
     return n_is_in / len(x)
@@ -164,7 +104,7 @@ for i in range(len(snps)):
             n_sim_above_1 += 1
 
 print(f"max_sim: {max_sim}")
-# max_sim: 0.89
+# max_sim: 0.89 # noqa
 print(
     f"n_sim_above_0_5: {n_sim_above_0_5}, n_sim_above_0_7: {n_sim_above_0_7}, n_sim_above_0_8: {n_sim_above_0_8}, n_sim_above_0_9: {n_sim_above_0_9}, n_sim_above_1: {n_sim_above_1}",
 )

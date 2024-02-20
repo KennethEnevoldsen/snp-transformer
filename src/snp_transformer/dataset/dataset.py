@@ -71,11 +71,9 @@ class IndividualsDataset(Dataset):
         else:
             self.iid2pheno = {str(iid): {} for iid in self.fam.index.values}
             logger.warning(f"No phenos folder found in {path.parent}")
-        self.unique_phenos = set(
-            pheno
-            for pheno_dict in self.iid2pheno.values()
-            for pheno in pheno_dict.keys()
-        )
+        self.unique_phenos = {
+            pheno for pheno_dict in self.iid2pheno.values() for pheno in pheno_dict
+        }
 
         # Apply split if it exists
         self.all_iids = [str(iid) for iid in self.fam.index.values]
@@ -198,8 +196,8 @@ class IndividualsDataset(Dataset):
             f.write("\n".join(iids))
 
     def create_weighted_sampler(self) -> Optional[WeightedRandomSampler]:
-        # if self.oversample_alpha == 1:
-        #     return None
+        if self.oversample_alpha == 1:
+            return None
         if self.oversample_phenotypes is None:
             phenotypes = self.unique_phenos
             if len(phenotypes) == 0:

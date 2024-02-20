@@ -365,5 +365,6 @@ def create_classification_from_disk(
 ) -> EncoderForClassification:
     mdl = EncoderForClassification.load_from_checkpoint(
         path,
-    )  #  phenotypes_to_predict=phenotypes_to_predict)
+        phenotypes_to_predict=phenotypes_to_predict,
+    )
     return mdl
