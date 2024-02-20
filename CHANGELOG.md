@@ -2,6 +2,69 @@
 
 
 
+## v0.5.1 (2024-02-20)
+
+### Chore
+
+* chore: remove unused file ([`3540921`](https://github.com/KennethEnevoldsen/snp-transformer/commit/35409217cf44e624dbb403d3cd3b5445112b09b5))
+
+### Fix
+
+* fix: All tests now pass ([`394f85e`](https://github.com/KennethEnevoldsen/snp-transformer/commit/394f85e53e516a5d275cd37d98273566c58c6d29))
+
+* fix: ran ruff and fixed bugs ([`9eaac1d`](https://github.com/KennethEnevoldsen/snp-transformer/commit/9eaac1d9d9a22c9fccfcd3287cbe5ba1d41e6aa7))
+
+### Style
+
+* style: ran linters ([`2bc6e1f`](https://github.com/KennethEnevoldsen/snp-transformer/commit/2bc6e1f33757cf627d87751e8ca45cf25129a4c9))
+
+* style: linting ([`f1ea0bb`](https://github.com/KennethEnevoldsen/snp-transformer/commit/f1ea0bb07541e6a9ddeeea14594f6f04079c6163))
+
+* style: linting ([`cd463c8`](https://github.com/KennethEnevoldsen/snp-transformer/commit/cd463c8ef7553796fa6c5f1042fa9359a5201ada))
+
+* style: linting ([`b67569d`](https://github.com/KennethEnevoldsen/snp-transformer/commit/b67569d888e06f3e8c7baafbff9a79718906bcd2))
+
+### Unknown
+
+* Merge pull request #39 from KennethEnevoldsen/fine-tune-mdl
+
+Fine tune mdl ([`02e9839`](https://github.com/KennethEnevoldsen/snp-transformer/commit/02e98393d23ecd67cdaf54aebdb26700dae34c55))
+
+* Merge branch &#39;fine-tune-mdl&#39; of https://github.com/KennethEnevoldsen/snp-transformer into fine-tune-mdl ([`387ba7d`](https://github.com/KennethEnevoldsen/snp-transformer/commit/387ba7de9657693e4581f257b7e4be27b7daadb0))
+
+* Merge branch &#39;fine-tune-mdl&#39; of https://github.com/KennethEnevoldsen/snp-transformer into fine-tune-mdl ([`a9f6a8d`](https://github.com/KennethEnevoldsen/snp-transformer/commit/a9f6a8da803a843db3a185bb62665050328d23a2))
+
+* Merge branch &#39;fine-tune-mdl&#39; of https://github.com/KennethEnevoldsen/snp-transformer into fine-tune-mdl ([`1dbb6a1`](https://github.com/KennethEnevoldsen/snp-transformer/commit/1dbb6a19e16150f1d8fd3089e1c074d5bf52da08))
+
+* misc ([`c226b56`](https://github.com/KennethEnevoldsen/snp-transformer/commit/c226b5655b0b668a0cf0b4b3e5a1d50c773ab13c))
+
+* Add current changes ([`21b754d`](https://github.com/KennethEnevoldsen/snp-transformer/commit/21b754d2aa2ae9857d53eca3488e3f0815848ae5))
+
+* Merge pull request #35 from KennethEnevoldsen/dependabot/pip/torch-2.2.0
+
+deps:(deps-dev): bump torch from 2.1.2 to 2.2.0 ([`cc7416c`](https://github.com/KennethEnevoldsen/snp-transformer/commit/cc7416c3efc2315763ffe694bb954f165db507b9))
+
+* deps:(deps-dev): bump torch from 2.1.2 to 2.2.0
+
+Bumps [torch](https://github.com/pytorch/pytorch) from 2.1.2 to 2.2.0.
+- [Release notes](https://github.com/pytorch/pytorch/releases)
+- [Changelog](https://github.com/pytorch/pytorch/blob/main/RELEASE.md)
+- [Commits](https://github.com/pytorch/pytorch/compare/v2.1.2...v2.2.0)
+
+---
+updated-dependencies:
+- dependency-name: torch
+  dependency-type: direct:production
+  update-type: version-update:semver-minor
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt; ([`bf9efe4`](https://github.com/KennethEnevoldsen/snp-transformer/commit/bf9efe4f37a6292f72ee65b2256ed642e62237ef))
+
+* Added initial training steps ([`47da8ab`](https://github.com/KennethEnevoldsen/snp-transformer/commit/47da8ab38ad9ad2a98ed4154988ea47c75d6ee32))
+
+* Added pheno_dir as a option to configs. ([`1dfe929`](https://github.com/KennethEnevoldsen/snp-transformer/commit/1dfe92928b90570a272613a0eddf45d5d20cc535))
+
+
 ## v0.5.0 (2024-01-08)
 
 ### Feature
