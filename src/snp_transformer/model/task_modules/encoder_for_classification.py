@@ -2,6 +2,7 @@ import logging
 from copy import copy
 from typing import Literal, Optional, Union
 
+import lightning.pytorch as pl
 import torch
 import wandb
 from snp_transformer.data_objects import Individual
@@ -13,8 +14,6 @@ from ...registry import OptimizerFn, Registry
 from ..embedders import Embedder, InputIds, Vocab
 from .encoder_for_masked_lm import EncoderForMaskedLM
 from .trainable_modules import Targets, TrainableModule
-
-import lightning.pytorch as pl
 
 logger = logging.getLogger(__name__)
 
@@ -250,7 +249,7 @@ class EncoderForClassification(TrainableModule):
     def get_trainer(self) -> Union[pl.Trainer, None]:
         try:
             return self.trainer
-        except RuntimeError: # not attached to a trainer
+        except RuntimeError:  # not attached to a trainer
             return None
 
     def training_step(  # type: ignore
