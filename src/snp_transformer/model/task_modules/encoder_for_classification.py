@@ -1,6 +1,6 @@
 import logging
 from copy import copy
-from typing import Literal, Optional
+from typing import Literal, Optional, Union
 
 import torch
 import wandb
@@ -13,6 +13,8 @@ from ...registry import OptimizerFn, Registry
 from ..embedders import Embedder, InputIds, Vocab
 from .encoder_for_masked_lm import EncoderForMaskedLM
 from .trainable_modules import Targets, TrainableModule
+
+import lightning.pytorch as pl
 
 logger = logging.getLogger(__name__)
 
@@ -238,11 +240,18 @@ class EncoderForClassification(TrainableModule):
                 result[f"Phenotype ({pheno}) Accuracy"] = pheno_acc
 
                 # log the distribution of predicitons:
-                if self.global_step % self.trainer.log_every_n_steps == 0:  # type: ignore
+                trainer = self.get_trainer()
+                if trainer and (self.global_step % trainer.log_every_n_steps == 0):  # type: ignore
                     self.logger.experiment.log({f"Phenotype ({pheno}) Preds ({mode})": wandb.Histogram(pheno_preds.cpu())})  # type: ignore
                     self.logger.experiment.log({f"Phenotype ({pheno}) Targets ({mode})": wandb.Histogram(_targets.cpu())})  # type: ignore
 
         return result
+
+    def get_trainer(self) -> Union[pl.Trainer, None]:
+        try:
+            return self.trainer
+        except RuntimeError: # not attached to a trainer
+            return None
 
     def training_step(  # type: ignore
         self,
