@@ -54,7 +54,7 @@ def test_apply(
     dataset = IndividualsDataset(data_path)
 
     logger = create_wandb_logger(offline=True)
-    trainer_cfg = TrainerConfigSchema(logger=logger, accelerator="cpu")
+    trainer_cfg = TrainerConfigSchema(logger=logger, accelerator="cpu", devices=1)
 
     save_path = tmp_path / "pred_proba.csv"
     apply(

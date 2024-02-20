@@ -1,8 +1,10 @@
 import logging
 from copy import copy
-from typing import Literal, Optional
+from typing import Literal, Optional, Union
 
+import lightning.pytorch as pl
 import torch
+import wandb
 from snp_transformer.data_objects import Individual
 from snp_transformer.dataset import IndividualsDataset
 from torch import nn
@@ -201,7 +203,9 @@ class EncoderForClassification(TrainableModule):
             "Phenotype (all) Accuracy": pheno_acc,
         }
 
-        result.update(self._metrics_pr_phenotype(targets, inputs, logits_pheno))
+        result.update(
+            self._metrics_pr_phenotype(targets, inputs, logits_pheno, mode=mode),
+        )
 
         self.log_step(result, batch_size=inputs.get_batch_size(), mode=mode)
         return result["loss"]
@@ -211,6 +215,7 @@ class EncoderForClassification(TrainableModule):
         targets: Targets,
         inputs: InputIds,
         logits: torch.Tensor,
+        mode: Literal["Training", "Validation"],
     ) -> dict[str, torch.Tensor]:
         """
         computes the metrics (loss, and accuracy) for each phenotype
@@ -233,7 +238,19 @@ class EncoderForClassification(TrainableModule):
                 pheno_acc = self.accuracy_pheno(pheno_preds, _targets)
                 result[f"Phenotype ({pheno}) Accuracy"] = pheno_acc
 
+                # log the distribution of predicitons:
+                trainer = self.get_trainer()
+                if trainer and (self.global_step % trainer.log_every_n_steps == 0):  # type: ignore
+                    self.logger.experiment.log({f"Phenotype ({pheno}) Preds ({mode})": wandb.Histogram(pheno_preds.cpu())})  # type: ignore
+                    self.logger.experiment.log({f"Phenotype ({pheno}) Targets ({mode})": wandb.Histogram(_targets.cpu())})  # type: ignore
+
         return result
+
+    def get_trainer(self) -> Union[pl.Trainer, None]:
+        try:
+            return self.trainer
+        except RuntimeError:  # not attached to a trainer
+            return None
 
     def training_step(  # type: ignore
         self,
@@ -268,6 +285,8 @@ class EncoderForClassification(TrainableModule):
         batch: tuple[InputIds, Targets],
         batch_idx: int,  # noqa: ARG002
     ) -> list[IndividualPrediction]:
+        batch_size = batch[0].get_batch_size()
+
         vocab = self.embedding_module.vocab
 
         x, y = batch
@@ -296,6 +315,8 @@ class EncoderForClassification(TrainableModule):
                 _logits = probs[i, mask, outcome_idx]
                 assert _logits.shape == torch.Size([1])
                 individual_probs[i][pheno] = float(_logits[0])
+
+        assert len(individual_probs) == batch_size
         return individual_probs
 
 
@@ -343,3 +364,15 @@ def create_classification_task_from_masked_lm(
         encoder_for_masked_lm=encoder_for_masked_lm,
         create_optimizer_fn=create_optimizer_fn,
     )
+
+
+@Registry.tasks.register("classification_from_disk")
+def create_classification_from_disk(
+    path: str,
+    phenotypes_to_predict: list[str],
+) -> EncoderForClassification:
+    mdl = EncoderForClassification.load_from_checkpoint(
+        path,
+        phenotypes_to_predict=phenotypes_to_predict,
+    )
+    return mdl
