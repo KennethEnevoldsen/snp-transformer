@@ -3,6 +3,7 @@ from copy import copy
 from typing import Literal, Optional
 
 import torch
+import wandb
 from snp_transformer.data_objects import Individual
 from snp_transformer.dataset import IndividualsDataset
 from torch import nn
@@ -12,7 +13,7 @@ from ...registry import OptimizerFn, Registry
 from ..embedders import Embedder, InputIds, Vocab
 from .encoder_for_masked_lm import EncoderForMaskedLM
 from .trainable_modules import Targets, TrainableModule
-import wandb
+
 logger = logging.getLogger(__name__)
 
 
@@ -201,7 +202,9 @@ class EncoderForClassification(TrainableModule):
             "Phenotype (all) Accuracy": pheno_acc,
         }
 
-        result.update(self._metrics_pr_phenotype(targets, inputs, logits_pheno, mode=mode))
+        result.update(
+            self._metrics_pr_phenotype(targets, inputs, logits_pheno, mode=mode),
+        )
 
         self.log_step(result, batch_size=inputs.get_batch_size(), mode=mode)
         return result["loss"]
@@ -235,10 +238,9 @@ class EncoderForClassification(TrainableModule):
                 result[f"Phenotype ({pheno}) Accuracy"] = pheno_acc
 
                 # log the distribution of predicitons:
-                if self.global_step % self.trainer.log_every_n_steps == 0:    # type: ignore
+                if self.global_step % self.trainer.log_every_n_steps == 0:  # type: ignore
                     self.logger.experiment.log({f"Phenotype ({pheno}) Preds ({mode})": wandb.Histogram(pheno_preds.cpu())})  # type: ignore
                     self.logger.experiment.log({f"Phenotype ({pheno}) Targets ({mode})": wandb.Histogram(_targets.cpu())})  # type: ignore
-
 
         return result
 
@@ -355,10 +357,13 @@ def create_classification_task_from_masked_lm(
         create_optimizer_fn=create_optimizer_fn,
     )
 
+
 @Registry.tasks.register("classification_from_disk")
 def create_classification_from_disk(
     path: str,
     phenotypes_to_predict: list[str],
 ) -> EncoderForClassification:
-    mdl = EncoderForClassification.load_from_checkpoint(path) #  phenotypes_to_predict=phenotypes_to_predict)
+    mdl = EncoderForClassification.load_from_checkpoint(
+        path,
+    )  #  phenotypes_to_predict=phenotypes_to_predict)
     return mdl

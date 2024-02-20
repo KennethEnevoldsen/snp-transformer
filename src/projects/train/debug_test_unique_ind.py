@@ -1,29 +1,29 @@
-
-
 from pathlib import Path
 
+import numpy as np
 from snp_transformer.config.config_schemas import ResolvedConfigSchema
 from snp_transformer.config.utils import load_config, parse_config
-import numpy as np
 
-path = Path("/home/kenneth/github/snp-transformer/src/projects/train/fine_tune_no_pretrain_only_511.cfg")
+path = Path(
+    "/home/kenneth/github/snp-transformer/src/projects/train/fine_tune_no_pretrain_only_511.cfg",
+)
 
 config_dict = load_config(path)
 resolved_cfg: ResolvedConfigSchema = parse_config(config_dict)
 
 
-dataset = resolved_cfg.train.training_dataset # type: ignore
+dataset = resolved_cfg.train.training_dataset  # type: ignore
 
 ds = iter(dataset)
 individuals = [next(ds) for _ in range(30)]
 
 
 # examine difference in the 10 first snps
-for i in individuals: 
+for i in individuals:
     print(i.snps.bp[:10])
 
 
-# Output: 
+# Output:
 # [25280119, 25450970, 25492296, 25509976, 25510051, 25510058, 25510648, 25510649, 25511008, 25516126]
 # [25280119, 25420344, 25435654, 25450026, 25450970, 25472737, 25492296, 25509976, 25510051, 25510058]
 # [25420344, 25420350, 25426858, 25435758, 25435872, 25450026, 25492296, 25510648, 25554148, 25554180]
@@ -65,10 +65,10 @@ for i in individuals:
         print("- first")
         prev = seg
         continue
-    print(np.isin(seg, prev), end = " - all is same: ")
+    print(np.isin(seg, prev), end=" - all is same: ")
     # check all is the same
     print(np.all(np.isin(seg, prev)))
-    prev = i.snps.bp[:10+20] # to account for injections
+    prev = i.snps.bp[: 10 + 20]  # to account for injections
 
 # [ True False False False  True False  True  True  True  True] - all is same: False
 # [ True False False False False  True  True False False  True] - all is same: False
@@ -106,7 +106,7 @@ ds = iter(dataset)
 individuals = [next(ds) for _ in range(40)]
 
 
-prev =   set()
+prev = set()
 for i in individuals:
     seg = tuple(i.snps.bp[:10])
     if prev is None:
@@ -117,13 +117,11 @@ for i in individuals:
         print("in")
 
 # output: no "in" printed
-        
-
 
 
 # What is the closest distance between any two individuals?
 # I will use the first 10 snps for this
-        
+
 
 ds = iter(dataset)
 individuals = [next(ds) for _ in range(39)]
@@ -137,6 +135,7 @@ def similarity(x, y):
     n_is_in = sum([1 for i in x if i in y_set])
     return n_is_in / len(x)
 
+
 max_sim = 0
 n_sim_above_0_5 = 0
 n_sim_above_0_7 = 0
@@ -144,7 +143,7 @@ n_sim_above_0_8 = 0
 n_sim_above_0_9 = 0
 n_sim_above_1 = 0
 for i in range(len(snps)):
-    for j in range(i+1, len(snps)):
+    for j in range(i + 1, len(snps)):
         if i == j:
             continue
         sim = similarity(snps[i], snps[j])
@@ -152,7 +151,7 @@ for i in range(len(snps)):
         if sim > max_sim:
             max_sim = sim
             print(max_sim, i, j)
-        
+
         if sim >= 0.5:
             n_sim_above_0_5 += 1
         if sim >= 0.7:
@@ -166,7 +165,9 @@ for i in range(len(snps)):
 
 print(f"max_sim: {max_sim}")
 # max_sim: 0.89
-print(f"n_sim_above_0_5: {n_sim_above_0_5}, n_sim_above_0_7: {n_sim_above_0_7}, n_sim_above_0_8: {n_sim_above_0_8}, n_sim_above_0_9: {n_sim_above_0_9}, n_sim_above_1: {n_sim_above_1}")
+print(
+    f"n_sim_above_0_5: {n_sim_above_0_5}, n_sim_above_0_7: {n_sim_above_0_7}, n_sim_above_0_8: {n_sim_above_0_8}, n_sim_above_0_9: {n_sim_above_0_9}, n_sim_above_1: {n_sim_above_1}",
+)
 # n_sim_above_0_5: 203, n_sim_above_0_7: 29, n_sim_above_0_8: 3, n_sim_above_0_9: 0, n_sim_above_1: 0
 
 
@@ -182,8 +183,10 @@ for i in range(len(snps)):
     all_snps_except_i = {snp for snps_i in all_snps_except_i for snp in snps_i}
 
     unique_snps = [snp for snp in snps[i] if snp not in all_snps_except_i]
-    
-    print(f"Ind {i} has {len(snps[i])} snps, unique SNPs which no-one else has: {len(unique_snps)}")
+
+    print(
+        f"Ind {i} has {len(snps[i])} snps, unique SNPs which no-one else has: {len(unique_snps)}",
+    )
 
 # Ind 0 has 512 snps, unique SNPs which no-one else has: 6
 # Ind 1 has 512 snps, unique SNPs which no-one else has: 23
@@ -223,4 +226,4 @@ for i in range(len(snps)):
 # Ind 35 has 512 snps, unique SNPs which no-one else has: 10
 # Ind 36 has 512 snps, unique SNPs which no-one else has: 20
 # Ind 37 has 512 snps, unique SNPs which no-one else has: 12
-# Ind 38 has 512 snps, unique SNPs which no-one else has: 4 
+# Ind 38 has 512 snps, unique SNPs which no-one else has: 4

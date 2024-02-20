@@ -32,7 +32,6 @@ def run_from_config(config: Config) -> None:
     # a hack to get the wandb logger to work
     logger._wandb_init["config"] = flat_config
     resolved_cfg.logger["logger"] = logger
-    
 
     model = resolved_cfg.model
 
@@ -55,7 +54,6 @@ def _train(model: TrainableModule, config: TrainingConfigSchema):
     model.filter_dataset(training_dataset)
     model.filter_dataset(validation_dataset)
 
-
     # create dataloader:
     train_sampler = training_dataset.create_weighted_sampler()
     if train_sampler is None:
@@ -76,7 +74,7 @@ def _train(model: TrainableModule, config: TrainingConfigSchema):
         shuffle = False
     else:
         shuffle = None
-        
+
     val_loader = DataLoader(
         validation_dataset,
         batch_size=training_cfg.batch_size,
