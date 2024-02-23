@@ -393,7 +393,7 @@ class SNPEmbedder(Embedder):
         any_key = keys[0]
 
         max_seq_len = max([len(p[any_key]) for p in sequences])
-        if max_seq_len <= self.max_sequence_length:
+        if max_seq_len >= self.max_sequence_length:
             logger.warning(
                 "Sequence longer than max sequence length, truncating to max length",
             )

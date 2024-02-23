@@ -16,3 +16,4 @@ class Registry(registry):
     layers = catalogue.create("snp_transformers", "layers")
     loggers = catalogue.create("snp_transformers", "loggers")
     callbacks = catalogue.create("snp_transformers", "callbacks")
+    lr_schedulers = catalogue.create("snp_transformers", "lr_schedulers")

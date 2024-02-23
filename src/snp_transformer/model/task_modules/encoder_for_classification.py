@@ -14,7 +14,7 @@ from ...registry import OptimizerFn, Registry
 from ..embedders import Embedder, InputIds, Vocab
 from .encoder_for_masked_lm import EncoderForMaskedLM
 from .trainable_modules import Targets, TrainableModule
-
+from ..optimizers import LRSchedulerFn
 logger = logging.getLogger(__name__)
 
 
@@ -34,6 +34,7 @@ class EncoderForClassification(TrainableModule):
         embedding_module: Embedder,
         encoder_module: nn.TransformerEncoder,
         create_optimizer_fn: OptimizerFn,
+        create_scheduler_fn: LRSchedulerFn,
     ):
         super().__init__()
         assert len(phenotypes_to_predict) > 0, "No phenotypes to predict"
@@ -43,6 +44,7 @@ class EncoderForClassification(TrainableModule):
 
         self.loss = nn.CrossEntropyLoss(ignore_index=self.ignore_index)
         self.create_optimizer_fn = create_optimizer_fn
+        self.create_scheduler_fn = create_scheduler_fn
         self.initialize_metrics()
 
     def initialize_metrics(self):
@@ -76,12 +78,14 @@ class EncoderForClassification(TrainableModule):
         phenotypes_to_predict: list[str],
         encoder_for_masked_lm: EncoderForMaskedLM,
         create_optimizer_fn: OptimizerFn,
+        create_scheduler_fn: LRSchedulerFn,
     ) -> "EncoderForClassification":
         mdl = cls(
             phenotypes_to_predict=phenotypes_to_predict,
             embedding_module=encoder_for_masked_lm.embedding_module,
             encoder_module=encoder_for_masked_lm.encoder_module,
             create_optimizer_fn=create_optimizer_fn,
+            create_scheduler_fn=create_scheduler_fn,
         )
         # check that heads are the same shape
         assert (
@@ -334,6 +338,7 @@ def create_classification_task(
     embedding_module: Embedder,
     encoder_module: nn.TransformerEncoder,
     create_optimizer_fn: OptimizerFn,
+    create_scheduler_fn: LRSchedulerFn,
     phenotypes_to_predict: Optional[list[str]] = None,
 ) -> EncoderForClassification:
     if phenotypes_to_predict is None:
@@ -345,6 +350,7 @@ def create_classification_task(
         embedding_module=embedding_module,
         encoder_module=encoder_module,
         create_optimizer_fn=create_optimizer_fn,
+        create_scheduler_fn=create_scheduler_fn,
     )
 
 
@@ -352,6 +358,7 @@ def create_classification_task(
 def create_classification_task_from_masked_lm(
     encoder_for_masked_lm: EncoderForMaskedLM,
     create_optimizer_fn: OptimizerFn,
+    create_scheduler_fn: LRSchedulerFn,
     phenotypes_to_predict: Optional[list[str]] = None,
 ) -> EncoderForClassification:
     if phenotypes_to_predict is None:
@@ -363,6 +370,7 @@ def create_classification_task_from_masked_lm(
         phenotypes_to_predict=pred_pheno,
         encoder_for_masked_lm=encoder_for_masked_lm,
         create_optimizer_fn=create_optimizer_fn,
+        create_scheduler_fn=create_scheduler_fn,
     )
 
 
