@@ -425,7 +425,7 @@ class SNPEmbedder(Embedder):
         individuals: list[Individual],
     ) -> None:
         # could also be estimated from the data but there is no need for that
-        snp2idx = {self.pad_token: 2, self.mask_token: 3, "1": 0, "2": 1}
+        snp2idx = {self.pad_token: 2, self.mask_token: 3, "1": 0, "2": 1, "0": 4, "nan": 5}
 
         domain2idx: dict[str, int] = {
             self.pad_token: 0,

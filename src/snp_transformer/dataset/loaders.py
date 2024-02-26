@@ -203,6 +203,11 @@ def load_sparse(path: Path) -> pl.DataFrame:
     sparse = pl.read_csv(
         path,
         separator=" ",
-        dtypes={"Individual": pl.Int64, "SNP": pl.Int64, "Value": pl.Int64},
+        dtypes={"Individual": pl.Int64, "SNP": pl.Int64, "Value": pl.Utf8},
     )
+    # convert value to int
+    sparse = sparse.with_columns(
+        sparse["Value"].cast(pl.Int64, strict=False).alias("Value")
+    )
+
     return sparse

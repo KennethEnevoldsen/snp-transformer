@@ -7,7 +7,7 @@ import random
 from collections import Counter, defaultdict
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Optional
+from typing import Literal, Optional, Union
 
 import numpy as np
 import polars as pl
@@ -155,7 +155,7 @@ class IndividualsDataset(Dataset):
         ind = self.iid2snp[iid]
         phenos = self.get_pheno(iid)
 
-        snp_values = ind["Value"].to_numpy()
+        snp_values: list[Union[int, Literal["nan"]]] = ["nan" if np.isnan(v) else int(v) for v in ind["Value"].to_numpy()]
         snp_indices = ind["SNP"].to_numpy() - 1  # sparse is 1-indexed
 
         snp_details = self.snp_details.iloc[snp_indices]  # type: ignore

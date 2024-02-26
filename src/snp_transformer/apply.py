@@ -17,7 +17,7 @@ std_logger = logging.getLogger(__name__)
 
 
 def apply(model: TrainableModule, config: ApplyConfigSchema) -> None:
-    assert config.trainer.devices == 1, "Apply only works with a single device"
+    # assert config.trainer.devices == 1, "Apply only works with a single device"
     trainer = pl.Trainer(**config.trainer.to_dict())
     dataset: IndividualsDataset = config.dataset
 
