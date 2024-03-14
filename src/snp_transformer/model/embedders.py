@@ -551,8 +551,10 @@ def create_snp_embedder(
     )
 
     if isinstance(individuals, IndividualsDataset):
-        individuals = individuals.get_individuals()
-    emb.fit(individuals)
+        individuals_ = individuals.get_individuals()
+    else:
+        individuals_ = individuals
+    emb.fit(individuals_)
 
     if checkpoint_path is not None:
         emb.to_disk(checkpoint_path)
