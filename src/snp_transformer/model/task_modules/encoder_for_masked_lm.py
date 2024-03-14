@@ -4,6 +4,7 @@ from typing import Literal, Union
 
 import torch
 from snp_transformer.dataset.dataset import IndividualsDataset
+from snp_transformer.model.optimizers import LRSchedulerFn
 from torch import nn
 from torchmetrics.classification import MulticlassAccuracy
 
@@ -24,6 +25,7 @@ class EncoderForMaskedLM(TrainableModule):
         embedding_module: Embedder,
         encoder_module: nn.TransformerEncoder,
         create_optimizer_fn: OptimizerFn,
+        create_scheduler_fn: LRSchedulerFn,
         mask_phenotype: bool = True,
     ):
         super().__init__()
@@ -33,6 +35,7 @@ class EncoderForMaskedLM(TrainableModule):
 
         self.loss = nn.CrossEntropyLoss(ignore_index=self.ignore_index)
         self.create_optimizer_fn = create_optimizer_fn
+        self.create_scheduler_fn = create_scheduler_fn
         self.initialize_metrics()
 
     def initialize_metrics(self):
@@ -298,6 +301,7 @@ def create_encoder_for_masked_lm(
     embedding_module: Embedder,
     encoder_module: nn.TransformerEncoder,
     create_optimizer_fn: OptimizerFn,
+    create_scheduler_fn: LRSchedulerFn,
     mask_phenotype: bool,
 ) -> EncoderForMaskedLM:
     logger.info("Creating task module for masked lm")
@@ -305,6 +309,7 @@ def create_encoder_for_masked_lm(
         embedding_module=embedding_module,
         encoder_module=encoder_module,
         create_optimizer_fn=create_optimizer_fn,
+        create_scheduler_fn=create_scheduler_fn,
         mask_phenotype=mask_phenotype,
     )
 
