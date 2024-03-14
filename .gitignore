@@ -30,3 +30,4 @@ logs-pretrain/*
 wandb/*
 tests/model_checkpoints/tmp_logs/*
 tests/data/pred_probas.csv
+src/projects/100-snps/analysis/data/*
