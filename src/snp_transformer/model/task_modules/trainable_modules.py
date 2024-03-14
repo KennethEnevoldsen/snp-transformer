@@ -8,9 +8,9 @@ import torch
 from snp_transformer.data_objects import Individual
 from snp_transformer.dataset.dataset import IndividualsDataset
 from snp_transformer.registry import OptimizerFn
-from ..optimizers import LRSchedulerFn, LRSchedulerConfig
 
 from ..embedders import Embedder
+from ..optimizers import LRSchedulerConfig, LRSchedulerFn
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +67,9 @@ class TrainableModule(pl.LightningModule):
     def device(self) -> torch.device:
         return next(self.parameters()).device
 
-    def configure_optimizers(self) -> tuple[list[torch.optim.Optimizer], list[LRSchedulerConfig]]:
+    def configure_optimizers(
+        self,
+    ) -> tuple[list[torch.optim.Optimizer], list[LRSchedulerConfig]]:
         opt = self.create_optimizer_fn(self.parameters())
         scheduler = self.create_scheduler_fn(opt)
         return [opt], [scheduler]

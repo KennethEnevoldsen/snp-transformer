@@ -1,15 +1,20 @@
-from typing import Union, Literal
+from typing import Literal, Union
+
 import pandas as pd
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
+
 
 class SNPs(BaseModel):
     """
     The single nucleotide polymorphisms (SNPs) of an individual.
     """
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-
-    values: list[Union[Literal["nan"], int]] = Field(..., description="List of SNP values")
+    values: list[Union[Literal["nan"], int]] = Field(
+        ...,
+        description="List of SNP values",
+    )
     chromosomes: list[str] = Field(
         ...,
         description="Chromosome ids corresponding to the SNPs",

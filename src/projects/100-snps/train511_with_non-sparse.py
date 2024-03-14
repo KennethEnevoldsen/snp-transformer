@@ -11,5 +11,8 @@ logging.basicConfig(level=logging.INFO)
 
 
 # Paths to run
-path = Path(__file__).parent / "fine_tune_no_pretrain_only_511_learned_pos_encoding_non_sparse.cfg"
+path = (
+    Path(__file__).parent
+    / "fine_tune_no_pretrain_only_511_learned_pos_encoding_non_sparse.cfg"
+)
 run_from_config_path(path)

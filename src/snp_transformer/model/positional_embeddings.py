@@ -171,6 +171,7 @@ class LearnedPositionalEncoding(PositionalEncodingModule):
     Note this is not a very efficient implementation due to it being
     dynamic. However it is reasonable to use it for testing purposes.
     """
+
     def __init__(self, d_model: int, max_len: int, dropout_prob: float):
         super().__init__()
         self.d_model = d_model
@@ -180,11 +181,15 @@ class LearnedPositionalEncoding(PositionalEncodingModule):
         self.dropout = nn.Dropout(p=dropout_prob)
 
     def forward(self, positions: Tensor) -> Tensor:
-        # positions [batch_size, seq_len]
+        # positions [batch_size, seq_len]  # noqa
 
         self.add_positional_encoding_to_mapping(positions)
 
-        positions_mapped = torch.zeros_like(positions, device=positions.device, dtype=torch.long)
+        positions_mapped = torch.zeros_like(
+            positions,
+            device=positions.device,
+            dtype=torch.long,
+        )
         for i, position in enumerate(positions):
             for j, pos in enumerate(position):
                 positions_mapped[i, j] = self.positon2idx[pos.item()]
@@ -193,19 +198,17 @@ class LearnedPositionalEncoding(PositionalEncodingModule):
         pe = self.dropout(pe)
         return pe
 
-
     def add_positional_encoding_to_mapping(self, positions: Tensor):
         for position in positions:
             for pos in position:
-                pos= pos.item()
+                pos = pos.item()  # noqa
                 if pos not in self.positon2idx:
                     self.positon2idx[pos] = len(self.positon2idx)
 
                 if len(self.positon2idx) > self.max_len:
                     raise ValueError(
-                        f"Positional encoding length {len(self.positon2idx)} exceeds maximum length {self.max_len}"
+                        f"Positional encoding length {len(self.positon2idx)} exceeds maximum length {self.max_len}",
                     )
-
 
 
 @Registry.embedders.register("absolute_positional_embedding")
@@ -242,4 +245,8 @@ def create_learned_positional_encoding(
     max_len: int = 200,
     dropout_prob: float = 0.1,
 ) -> LearnedPositionalEncoding:
-    return LearnedPositionalEncoding(d_model=d_model, max_len=max_len, dropout_prob=dropout_prob)
+    return LearnedPositionalEncoding(
+        d_model=d_model,
+        max_len=max_len,
+        dropout_prob=dropout_prob,
+    )

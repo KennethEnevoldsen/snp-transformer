@@ -207,7 +207,7 @@ def load_sparse(path: Path) -> pl.DataFrame:
     )
     # convert value to int
     sparse = sparse.with_columns(
-        sparse["Value"].cast(pl.Int64, strict=False).alias("Value")
+        sparse["Value"].cast(pl.Int64, strict=False).alias("Value"),
     )
 
     return sparse

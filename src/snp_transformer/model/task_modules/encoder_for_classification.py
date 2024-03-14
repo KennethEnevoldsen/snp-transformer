@@ -12,9 +12,10 @@ from torchmetrics.classification import MulticlassAccuracy
 
 from ...registry import OptimizerFn, Registry
 from ..embedders import Embedder, InputIds, Vocab
+from ..optimizers import LRSchedulerFn
 from .encoder_for_masked_lm import EncoderForMaskedLM
 from .trainable_modules import Targets, TrainableModule
-from ..optimizers import LRSchedulerFn
+
 logger = logging.getLogger(__name__)
 
 

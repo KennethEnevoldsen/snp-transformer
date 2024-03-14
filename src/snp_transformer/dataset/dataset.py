@@ -15,12 +15,12 @@ from torch.utils.data import Dataset, WeightedRandomSampler
 
 from snp_transformer.data_objects import Individual, SNPs
 from snp_transformer.dataset.loaders import (
+    convert_bim_to_details,
+    load_bim,
     load_details,
     load_fam,
     load_pheno_folder,
     load_sparse,
-    convert_bim_to_details,
-    load_bim,
 )
 from snp_transformer.registry import Registry
 
@@ -72,7 +72,6 @@ class IndividualsDataset(Dataset):
             else:
                 raise FileNotFoundError(f"{self.details_path} {error}")
 
-
         self.fam = load_fam(self.fam_path)
         sparse = load_sparse(self.psparse_path)
         self.idx2iid = {i: str(iid) for i, iid in enumerate(self.fam.index.values)}
@@ -103,7 +102,7 @@ class IndividualsDataset(Dataset):
         return iid2snp
 
     def filter_individuals(self) -> None:
-        fam_iids =  set(self.idx2iid.values())
+        fam_iids = set(self.idx2iid.values())
         self.valid_iids = self.valid_iids.intersection(fam_iids)
         self.idx2iid = dict(enumerate(self.valid_iids))
 
@@ -155,7 +154,9 @@ class IndividualsDataset(Dataset):
         ind = self.iid2snp[iid]
         phenos = self.get_pheno(iid)
 
-        snp_values: list[Union[int, Literal["nan"]]] = ["nan" if np.isnan(v) else int(v) for v in ind["Value"].to_numpy()]
+        snp_values: list[Union[int, Literal["nan"]]] = [
+            "nan" if np.isnan(v) else int(v) for v in ind["Value"].to_numpy()
+        ]
         snp_indices = ind["SNP"].to_numpy() - 1  # sparse is 1-indexed
 
         snp_details = self.snp_details.iloc[snp_indices]  # type: ignore

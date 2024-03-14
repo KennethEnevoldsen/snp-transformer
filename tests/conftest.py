@@ -66,6 +66,7 @@ def sparse(sparse_path: Path) -> pd.DataFrame:
 def optimizer_fn() -> Callable[[Any], torch.optim.Optimizer]:
     return create_adam(lr=1e-3)
 
+
 @pytest.fixture()
 def scheduler_fn() -> LRSchedulerFn:
     return create_linear_schedule_with_warmup(
