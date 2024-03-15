@@ -2,6 +2,65 @@
 
 
 
+## v0.5.2 (2024-03-15)
+
+### Fix
+
+* fix: added missing argument to tests ([`1466a33`](https://github.com/KennethEnevoldsen/snp-transformer/commit/1466a3353ac9307ba98e288b7c88d85681318022))
+
+* fix: reformatted and ran linters ([`9b76a26`](https://github.com/KennethEnevoldsen/snp-transformer/commit/9b76a269495bfd8047b36f2f643e133a73e78f4d))
+
+* fix: redid test to take into account new changes ([`43ddb51`](https://github.com/KennethEnevoldsen/snp-transformer/commit/43ddb51256439b5dd199ab7b19bf95afbf706c2f))
+
+* fix: Added a bunch of new experiments ([`cb679ae`](https://github.com/KennethEnevoldsen/snp-transformer/commit/cb679aed16b19832304dd50c0e1040148b8e5e9d))
+
+### Style
+
+* style: linting ([`54e9a6f`](https://github.com/KennethEnevoldsen/snp-transformer/commit/54e9a6fddc117a434048daa15b9de9ed846527d2))
+
+* style: formatted ([`0a1e362`](https://github.com/KennethEnevoldsen/snp-transformer/commit/0a1e3620d363cbe1433d8c16d84836356dd1a6c7))
+
+### Unknown
+
+* Merge pull request #41 from KennethEnevoldsen/create-100-snp-model
+
+100 SNP experiments ([`cd34e46`](https://github.com/KennethEnevoldsen/snp-transformer/commit/cd34e4607b431d5d5c5251357ae97526f5e387b2))
+
+* Merge branch &#39;create-100-snp-model&#39; of https://github.com/KennethEnevoldsen/snp-transformer into create-100-snp-model ([`4f2890c`](https://github.com/KennethEnevoldsen/snp-transformer/commit/4f2890c6da7f0434dfdb14e7b0d56a660801640e))
+
+* Added warmup experiments ([`2e8f7e1`](https://github.com/KennethEnevoldsen/snp-transformer/commit/2e8f7e1918e9fbbcf1c6dfdeba6c5e700b0d5591))
+
+* Merge branch &#39;create-100-snp-model&#39; of https://github.com/KennethEnevoldsen/snp-transformer into create-100-snp-model ([`493f0f4`](https://github.com/KennethEnevoldsen/snp-transformer/commit/493f0f442da8ea6145a762c33b3b3f7ba721f489))
+
+* Added analysis ([`34844f6`](https://github.com/KennethEnevoldsen/snp-transformer/commit/34844f62db7f583d951d44806ec324d48ea80e3a))
+
+* Added script for 100snps experiments ([`e4a8847`](https://github.com/KennethEnevoldsen/snp-transformer/commit/e4a8847abd385d0c0904d8acea899f9a68f85c3a))
+
+* experimenting on multiple phenotypes ([`a7eddbe`](https://github.com/KennethEnevoldsen/snp-transformer/commit/a7eddbe8628f97191874b86fed474c1170d5f7d1))
+
+* Merge pull request #40 from KennethEnevoldsen/dependabot/pip/torch-2.2.1
+
+deps:(deps-dev): bump torch from 2.2.0 to 2.2.1 ([`ecbbf97`](https://github.com/KennethEnevoldsen/snp-transformer/commit/ecbbf97be8663186bb50c8b07aa3b0c22a2c64b8))
+
+* deps:(deps-dev): bump torch from 2.2.0 to 2.2.1
+
+Bumps [torch](https://github.com/pytorch/pytorch) from 2.2.0 to 2.2.1.
+- [Release notes](https://github.com/pytorch/pytorch/releases)
+- [Changelog](https://github.com/pytorch/pytorch/blob/main/RELEASE.md)
+- [Commits](https://github.com/pytorch/pytorch/compare/v2.2.0...v2.2.1)
+
+---
+updated-dependencies:
+- dependency-name: torch
+  dependency-type: direct:production
+  update-type: version-update:semver-patch
+...
+
+Signed-off-by: dependabot[bot] &lt;support@github.com&gt; ([`055eb42`](https://github.com/KennethEnevoldsen/snp-transformer/commit/055eb4294e8a068b91f225d3cf25390bc050bc2a))
+
+* ran fine_tune_no_pretrain_only_511.cfg ([`aa9ff8a`](https://github.com/KennethEnevoldsen/snp-transformer/commit/aa9ff8a41851dadce7eff1d4047c81cf7d77dd71))
+
+
 ## v0.5.1 (2024-02-20)
 
 ### Chore
