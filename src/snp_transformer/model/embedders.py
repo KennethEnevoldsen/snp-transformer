@@ -393,7 +393,7 @@ class SNPEmbedder(Embedder):
         any_key = keys[0]
 
         max_seq_len = max([len(p[any_key]) for p in sequences])
-        if max_seq_len <= self.max_sequence_length:
+        if max_seq_len >= self.max_sequence_length:
             logger.warning(
                 "Sequence longer than max sequence length, truncating to max length",
             )
@@ -425,7 +425,14 @@ class SNPEmbedder(Embedder):
         individuals: list[Individual],
     ) -> None:
         # could also be estimated from the data but there is no need for that
-        snp2idx = {self.pad_token: 2, self.mask_token: 3, "1": 0, "2": 1}
+        snp2idx = {
+            self.pad_token: 2,
+            self.mask_token: 3,
+            "1": 0,
+            "2": 1,
+            "0": 4,
+            "nan": 5,
+        }
 
         domain2idx: dict[str, int] = {
             self.pad_token: 0,
@@ -551,8 +558,10 @@ def create_snp_embedder(
     )
 
     if isinstance(individuals, IndividualsDataset):
-        individuals = individuals.get_individuals()
-    emb.fit(individuals)
+        individuals_ = individuals.get_individuals()
+    else:
+        individuals_ = individuals
+    emb.fit(individuals_)
 
     if checkpoint_path is not None:
         emb.to_disk(checkpoint_path)

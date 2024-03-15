@@ -6,7 +6,11 @@ import pytest
 import torch
 from snp_transformer import Individual, IndividualsDataset
 from snp_transformer.dataset.loaders import load_details, load_fam, load_sparse
-from snp_transformer.model.optimizers import create_adam
+from snp_transformer.model.optimizers import (
+    LRSchedulerFn,
+    create_adam,
+    create_linear_schedule_with_warmup,
+)
 
 TEST_DATA_FOLDER = Path(__file__).parent / "data"
 
@@ -61,3 +65,12 @@ def sparse(sparse_path: Path) -> pd.DataFrame:
 @pytest.fixture()
 def optimizer_fn() -> Callable[[Any], torch.optim.Optimizer]:
     return create_adam(lr=1e-3)
+
+
+@pytest.fixture()
+def scheduler_fn() -> LRSchedulerFn:
+    return create_linear_schedule_with_warmup(
+        peak_lr=0.01,
+        num_training_steps=100_000,
+        num_warmup_steps=10_000,
+    )

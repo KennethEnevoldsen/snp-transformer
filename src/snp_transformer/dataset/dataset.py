@@ -7,7 +7,7 @@ import random
 from collections import Counter, defaultdict
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Optional
+from typing import Literal, Optional, Union
 
 import numpy as np
 import polars as pl
@@ -15,6 +15,8 @@ from torch.utils.data import Dataset, WeightedRandomSampler
 
 from snp_transformer.data_objects import Individual, SNPs
 from snp_transformer.dataset.loaders import (
+    convert_bim_to_details,
+    load_bim,
     load_details,
     load_fam,
     load_pheno_folder,
@@ -33,6 +35,7 @@ class IndividualsDataset(Dataset):
         pheno_dir: Optional[Path] = None,
         oversample_phenotypes: Optional[list[str]] = None,
         oversample_alpha: float = 1,
+        use_bim_for_details: bool = True,
     ) -> None:
         """
         Args:
@@ -43,6 +46,8 @@ class IndividualsDataset(Dataset):
             oversample_alpha: Hyperparameter for oversampling phenotypes. This follows the formula p(pheno) ∝ |pheno|^a, where |pheno| is the number
                 of individuals with the phenotype label (0/1) and a is a hyperparameter. a=1 is equivalent to no oversampling and a=0 is equivalent to
                 uniform sampling.
+            use_bim_for_details: If True, use the .bim file in case the .details file does not exist. If False, raise an error if the .details file
+                does not exist.
         """
         self.path = path
         self.fam_path = path.with_suffix(".fam")
@@ -56,10 +61,18 @@ class IndividualsDataset(Dataset):
         error = f"does not exist in {path}, the following files exist: {[p.name for p in path.parent.glob('*')]}"
         assert self.fam_path.exists(), f"{self.fam_path} {error}"
         assert self.psparse_path.exists(), f"{self.psparse_path} {error}"
-        assert self.details_path.exists(), f"{self.details_path} {error}"
+
+        if self.details_path.exists():
+            self.snp_details = load_details(self.details_path)
+        else:
+            if use_bim_for_details:
+                logger.info(f"Converting {self.details_path} to .details")
+                bim = load_bim(path.with_suffix(".bim"))
+                self.snp_details = convert_bim_to_details(bim)
+            else:
+                raise FileNotFoundError(f"{self.details_path} {error}")
 
         self.fam = load_fam(self.fam_path)
-        self.snp_details = load_details(self.details_path)
         sparse = load_sparse(self.psparse_path)
         self.idx2iid = {i: str(iid) for i, iid in enumerate(self.fam.index.values)}
 
@@ -82,12 +95,15 @@ class IndividualsDataset(Dataset):
 
     def _sparse_to_iid2snp(self, sparse: pl.DataFrame) -> dict[str, pl.DataFrame]:
         idx2snp = sparse.partition_by("Individual", as_dict=True)
+        empty_df = pl.DataFrame({"Individual": [], "SNP": [], "Value": []})
         iid2snp: dict[str, pl.DataFrame] = {}
         for idx, iid in self.idx2iid.items():
-            iid2snp[iid] = idx2snp[idx + 1]
+            iid2snp[iid] = idx2snp.get(idx + 1, empty_df)
         return iid2snp
 
     def filter_individuals(self) -> None:
+        fam_iids = set(self.idx2iid.values())
+        self.valid_iids = self.valid_iids.intersection(fam_iids)
         self.idx2iid = dict(enumerate(self.valid_iids))
 
     def filter_phenotypes(self, phenotypes: Iterable[str]) -> None:
@@ -138,7 +154,9 @@ class IndividualsDataset(Dataset):
         ind = self.iid2snp[iid]
         phenos = self.get_pheno(iid)
 
-        snp_values = ind["Value"].to_numpy()
+        snp_values: list[Union[int, Literal["nan"]]] = [
+            "nan" if np.isnan(v) else int(v) for v in ind["Value"].to_numpy()
+        ]
         snp_indices = ind["SNP"].to_numpy() - 1  # sparse is 1-indexed
 
         snp_details = self.snp_details.iloc[snp_indices]  # type: ignore

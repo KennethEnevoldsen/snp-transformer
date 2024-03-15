@@ -10,6 +10,7 @@ from snp_transformer.dataset.dataset import IndividualsDataset
 from snp_transformer.registry import OptimizerFn
 
 from ..embedders import Embedder
+from ..optimizers import LRSchedulerConfig, LRSchedulerFn
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +51,7 @@ class TrainableModule(pl.LightningModule):
 
     embedding_module: Embedder
     create_optimizer_fn: OptimizerFn
+    create_scheduler_fn: LRSchedulerFn
 
     @abstractmethod
     def collate_fn(self, individual: list[Individual]) -> Targets:
@@ -65,5 +67,9 @@ class TrainableModule(pl.LightningModule):
     def device(self) -> torch.device:
         return next(self.parameters()).device
 
-    def configure_optimizers(self) -> torch.optim.Optimizer:
-        return self.create_optimizer_fn(self.parameters())
+    def configure_optimizers(
+        self,
+    ) -> tuple[list[torch.optim.Optimizer], list[LRSchedulerConfig]]:
+        opt = self.create_optimizer_fn(self.parameters())
+        scheduler = self.create_scheduler_fn(opt)
+        return [opt], [scheduler]

@@ -1,6 +1,7 @@
 import pytest
 from snp_transformer import IndividualsDataset
 from snp_transformer.model.embedders import SNPEmbedder
+from snp_transformer.model.optimizers import LRSchedulerFn
 from snp_transformer.model.positional_embeddings import AbsolutePositionalEncoding
 from snp_transformer.model.task_modules.encoder_for_classification import (
     EncoderForClassification,
@@ -27,6 +28,7 @@ def long_training_dataset() -> IndividualsDataset:
 def test_model(
     training_dataset: IndividualsDataset,
     optimizer_fn: OptimizerFn,
+    scheduler_fn: LRSchedulerFn,
 ) -> None:
     # create model:
     d_model = 32
@@ -52,6 +54,7 @@ def test_model(
         encoder_module=encoder,
         create_optimizer_fn=optimizer_fn,
         phenotypes_to_predict=["pheno1"],
+        create_scheduler_fn=scheduler_fn,
     )
 
     # filter dataset to remove individuals without the specified phenotypes:

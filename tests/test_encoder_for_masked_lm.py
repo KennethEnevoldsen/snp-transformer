@@ -1,6 +1,7 @@
 import pytest
 from snp_transformer import IndividualsDataset
 from snp_transformer.model.embedders import SNPEmbedder
+from snp_transformer.model.optimizers import LRSchedulerFn
 from snp_transformer.model.positional_embeddings import AbsolutePositionalEncoding
 from snp_transformer.model.task_modules import EncoderForMaskedLM
 from snp_transformer.registry import OptimizerFn
@@ -25,6 +26,7 @@ def long_training_dataset() -> IndividualsDataset:
 def test_model(
     training_dataset: IndividualsDataset,
     optimizer_fn: OptimizerFn,
+    scheduler_fn: LRSchedulerFn,
 ) -> None:
     # create model:
     d_model = 32
@@ -49,6 +51,7 @@ def test_model(
         embedding_module=emb,
         encoder_module=encoder,
         create_optimizer_fn=optimizer_fn,
+        create_scheduler_fn=scheduler_fn,
     )
 
     # create dataloader:
