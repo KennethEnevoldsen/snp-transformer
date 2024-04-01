@@ -21,7 +21,7 @@ classifiers = [
 requires-python = ">=3.9"
 dependencies = [
   "pydantic>=2.1.1",
-  "torch==2.2.1",
+  "torch==2.2.2",
   "confection>=0.1.1",
   "pandas>=2.0.3",
   "lightning>=2.0.9",
