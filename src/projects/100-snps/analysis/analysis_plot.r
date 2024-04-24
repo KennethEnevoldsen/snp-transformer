@@ -2,10 +2,9 @@ library(ggplot2)
 library(tidyverse)
 library(ggdist)
 library(patchwork)
-# clear the environment
 
 
-read_data <- function(split_train_path, split_test_path, y_hat_path) {
+read_data <- function(split_train_path, split_test_path, y_hat_path, y_path) {
     # Splits
     split_train <- read_csv(split_train_path, col_names = FALSE) %>%
         rename(iid = X1) %>%
@@ -79,7 +78,7 @@ plot_raincloud <- function(data, split, mdl_name_from_file, icd, mdl) { # nolint
             y = "Prediction",
         ) +
         # ticks for y-axis
-        scale_y_continuous(breaks = seq(0, 1, .1)) +
+        scale_y_continuous(breaks = seq(0, 1, .1), limits = c(0, 1)) +
         theme_minimal() +
         theme(
             plot.background = element_rect(fill = "white"),
@@ -115,19 +114,20 @@ create_analysis_plot <- function(icd, prediction, wd_path) {
     mdl_name_from_file <- gsub(".csv", "", prediction)
 
 
-    data <- read_data(split_train_path, split_test_path, y_hat_path)
+    data <- read_data(split_train_path, split_test_path, y_hat_path, y_path)
     mdl_test <- lm(y_hat ~ label, data = data %>% filter(split == "test"))
     p_test <- plot_raincloud(data, "test", mdl_name_from_file, icd, mdl_test)
     mdl_train <- lm(y_hat ~ label, data = data %>% filter(split == "train"))
     p_train <- plot_raincloud(data, "train", mdl_name_from_file, icd, mdl_train)
 
-    plot_name <- paste("data/predictions/", mdl_name_from_file, "_", icd, ".png", sep = "")
+    results_path <- paste(wd_path, "data/predictions/", sep = "/")
+    plot_name <- paste(results_path, mdl_name_from_file, "_", icd, ".png", sep = "")
     ggsave(plot_name, p_test + p_train, width = 40, height = 20, units = "cm")
 }
 
 
 icd <- "511"
-prediction <- "prediction_100snps-fine_tune_no_pretrain_multitask_big_batch_10k-warmup.csv"
+prediction <- "prediction_mhc_eur_511_alpha05.csv"
 project_path <- "/Users/au561649/Github/snp-transformer"
 wd_path <- paste(project_path, "src/projects/100-snps/analysis", sep = "/")
 create_analysis_plot(icd, prediction, wd_path)
