@@ -16,3 +16,4 @@ path = (
     / "fine_tune_no_pretrain_multitask_big_batch_10k-warmup.cfg"
 )
 run_from_config_path(path)
+    
