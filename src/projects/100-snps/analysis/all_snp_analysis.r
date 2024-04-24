@@ -4,7 +4,7 @@ library(tidyverse)
 setwd("src/projects/100-snps/analysis")
 
 
-icd_code <- "499"
+icd_code <- "511"
 icd_path <- paste("data/icd", icd_code, ".pheno", sep = "")
 sparse_path <- paste("data/code", icd_code, "_mhc_eur_full.sparse", sep = "")
 fam_path <- paste("data/code", icd_code, "_mhc_eur_full.fam", sep = "")
@@ -27,7 +27,7 @@ split <- bind_rows(split_test, split_train) %>%
 
 read_icd <- function(path) {
     read_delim(path, col_names = FALSE, delim = " ") %>%
-        rename(iid = X1, label = X3) %>%
+        rename(iid = X1, label = !!icd_code) %>%
         select(iid, label)
 }
 

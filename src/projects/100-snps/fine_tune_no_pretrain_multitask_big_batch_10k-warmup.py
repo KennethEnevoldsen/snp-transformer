@@ -12,7 +12,6 @@ logging.basicConfig(level=logging.INFO)
 
 # Paths to run
 path = (
-    Path(__file__).parent
-    / "fine_tune_no_pretrain_multitask_big_batch_10k-warmup.cfg"
+    Path(__file__).parent / "fine_tune_no_pretrain_multitask_big_batch_10k-warmup.cfg"
 )
 run_from_config_path(path)
