@@ -11,8 +11,5 @@ logging.basicConfig(level=logging.INFO)
 
 
 # Paths to run
-path = (
-    Path(__file__).parent
-    / "fine_tune_no_pretrain_multitask.cfg"
-)
+path = Path(__file__).parent / "fine_tune_no_pretrain_multitask.cfg"
 run_from_config_path(path)
